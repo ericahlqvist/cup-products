@@ -475,12 +475,14 @@ GEN my_Gal_rel (GEN Labs, GEN Lrel, GEN K, GEN sigma, int p) {
     GEN Gal_rel = zerovec(p);
     GEN current_sigma = sigma;
     int i;
+    
     for (i = 1; i < p+1; i++)
     {
         gel(Gal_rel, i) = current_sigma;
         current_sigma = galoisapply(Labs, sigma, current_sigma); 
+        
     }
-    pari_printf("sigma: %Ps\nsigma^2: %Ps\nsigma^3: %Ps\n\n", gel(basistoalg(Labs,gel(Gal_rel, 1)), 2), gel(basistoalg(Labs,gel(Gal_rel, 2)), 2), gel(basistoalg(Labs,gel(Gal_rel, 3)), 2));
+    
     return Gal_rel;
 }
 
@@ -568,7 +570,7 @@ GEN my_reduce_ideal_by_ideals_below (GEN Labs, GEN Lrel, GEN K, GEN ideal) {
 
 //     return prime_representative;
 // }
-
+// Creates a set (vector) of of exponents in bijection with Cl(L) 
 GEN my_get_vect (int n, GEN cyc)
 {
     int b = itos(gel(cyc, n+1));
@@ -601,7 +603,6 @@ GEN my_get_vect (int n, GEN cyc)
         for (i = 0; i<b; ++i) {
             gel(next_vect, i+1) = stoi(i);
         }
-        //pari_printf("%Ps\n", next_vect);
     }
     return next_vect;
 }
@@ -614,17 +615,31 @@ GEN my_get_clgp (GEN K)
     GEN class_number = bnf_get_no(K);
     int clnr = itos(class_number);
     int nr_comp = glength(Kcyc);
-    GEN class_group_exp = my_get_vect( nr_comp - 1, Kcyc );
+    GEN class_group_exp;
+    int n;
+    if (nr_comp > 1) {
+        class_group_exp = my_get_vect( nr_comp - 1, Kcyc );
+    }
+    else {
+        class_group_exp = zerovec(clnr);
+        for (n=0; n<clnr; ++n) {
+            gel(class_group_exp, n+1) = mkvec(stoi(n));
+        }
+    }
+    
     GEN class_group = zerovec(clnr);
     GEN current_I, exponents, pow;
-
-    int n;
+    
+    
     for (n = 1; n < clnr + 1; ++n) {
         exponents = gel(class_group_exp, n);
+        
         int i;
         current_I = idealhnf0(K, gen_1, NULL);
         for ( i = 1; i < nr_comp + 1; ++i ) {
+            
             pow = idealpow(K, gel(Kgen, i), gel(exponents, i));
+            
             current_I = idealmul(K, current_I, pow);
             // printf("ideal norm: ");
             // output(idealnorm(K, current_I));
@@ -632,6 +647,7 @@ GEN my_get_clgp (GEN K)
         }
         gel(class_group, n) = idealred(K, current_I); 
     }
+    
     class_group = gerepilecopy(av, class_group);
     return class_group;
 }
@@ -720,7 +736,7 @@ GEN my_find_p_gens (GEN K, GEN p)
 }
 
 /*
-Given J \in CL(K)_p, find a, I such that div(a)+J+(1-sigma)I 
+Given J \in CL(K)_p, find t, I such that J=div(t)+(1-sigma)I 
 */
 GEN my_find_I (GEN Labs, GEN K, GEN sigma, GEN i_xJ)
 {
@@ -747,13 +763,11 @@ GEN my_find_I (GEN Labs, GEN K, GEN sigma, GEN i_xJ)
 
     else {
         printf(ANSI_COLOR_CYAN "i_x(J) not principal!\n\n" ANSI_COLOR_RESET);
-        pari_printf("%Ps\n\n", test_vec);
         for (n = 1; n < clnr + 1; ++n) {
             current_I = gel(class_group, n);
             Itest = idealmul(Labs, i_xJ, my_1MS_ideal(Labs, sigma, current_I));
             test_vec = bnfisprincipal0(Labs, Itest, 1);
             
-            pari_printf("%Ps\n", gel(test_vec,1));
             if (my_QV_equal0(gel(test_vec, 1)))
             {
                 printf(ANSI_COLOR_GREEN "FOUND!\n\n" ANSI_COLOR_RESET);
@@ -774,4 +788,27 @@ GEN my_find_I (GEN Labs, GEN K, GEN sigma, GEN i_xJ)
     GEN ret = mkvec2(gel(test_vec, 2), idealinv(Labs, current_I));
     ret = gerepilecopy(av, ret);
     return ret;
+}
+
+GEN my_find_I_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN J_vect) {
+    GEN I_vect = zerovec(2);
+    GEN I;
+    int class_number = itos(bnf_get_no(Labs));
+    GEN ext_gens = mkvec2(rnfidealup0(Lrel, gel(J_vect, 1), 1), rnfidealup0(Lrel, gel(J_vect, 2), 1));
+    //pari_printf("%Ps\n", gel(ext_gens, 1));
+    int nr_comp = glength(J_vect);
+    int i;
+    
+    for (i = 1; i < nr_comp+1; ++i)
+    {
+        if (class_number==0) {
+            I = idealhnf(Labs, gen_1);
+        }
+        else {
+            I = my_find_I(Labs, K, sigma, gel(ext_gens,i));
+        }
+        
+        gel(I_vect, i) = gel(I, 2);
+    } 
+    return I_vect;
 }

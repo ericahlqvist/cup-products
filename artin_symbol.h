@@ -113,11 +113,12 @@ GEN my_Artin_symbol (GEN Labs, GEN Lrel, GEN K, GEN I_K, int p, GEN sigma) {
     pari_printf("primes_and_es: %Ps\n\n", primes_and_es_in_factorization);
     GEN prime_vect = gel(primes_and_es_in_factorization,1);
     pari_printf("Prime_vect: %Ps\n\n", prime_vect);
+    
     GEN e_vect = gel(primes_and_es_in_factorization,2);
     int p_Artin_symbol;
     GEN prime, p_exp;
     GEN Gal_rel = my_Gal_rel(Labs, Lrel, K, sigma, p);
-
+    
     int i;
     for (i = 1; i < glength(prime_vect)+1; i++)
     {

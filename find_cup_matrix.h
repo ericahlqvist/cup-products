@@ -1,4 +1,4 @@
-GEN my_cup_matrix (GEN LxAbs, GEN LxRel, GEN LyAbs, GEN LyRel, GEN K, GEN sigma_x, GEN sigma_y, GEN p, GEN J_vect, GEN I_vect, GEN T_x, GEN p_int)
+GEN my_cup_matrix (GEN LxAbs, GEN LxRel, GEN LyAbs, GEN LyRel, GEN K, GEN sigma_x, GEN sigma_y, GEN p, GEN J_vect, GEN I_vect, GEN T_x, int p_int)
 {
     GEN cup_matrix = mkvec2(zerovec(2),zerovec(2));
     GEN NIpJ, I_rel;
