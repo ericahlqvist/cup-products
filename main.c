@@ -11,6 +11,13 @@
 #define ANSI_COLOR_CYAN    "\x1b[36m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
 
+#include "misc_functions.h"
+#include "find_orbit.h"
+#include "ext_and_aut.h"
+#include "find_variables.h"
+#include "find_basis.h"
+#include "artin_symbol.h"
+
 int
 main (int argc, char *argv[])	  
 {
@@ -55,6 +62,17 @@ main (int argc, char *argv[])
 
 
     pari_printf("p_int: %d\n\nmy_int: %d\n\nK_cyc: %Ps\n\nK_basis: %Ps\n\n", p_int, my_int, Kcyc, nf_get_zk(bnf_get_nf(K)));
+
+    GEN K_ext_aut   =   my_ext(K, p_ClFld_pol, my_int, s, p, D_prime_vect, 0);
+    GEN LxAbs       =   gel(K_ext_aut, 1);
+    GEN LxRel       =   gel(K_ext_aut, 2);
+    GEN LyAbs       =   gel(K_ext_aut, 3);
+    GEN LyRel       =   gel(K_ext_aut, 4);
+    GEN sigma_x     =   gel(K_ext_aut, 5);
+    GEN sigma_y     =   gel(K_ext_aut, 6);
+
+    GEN Lx_cyc = bnf_get_cyc(LxAbs);
+    GEN Ly_cyc = bnf_get_cyc(LyAbs);
     
     printf(ANSI_COLOR_GREEN "Done! \n \n" ANSI_COLOR_RESET);
 
