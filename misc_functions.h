@@ -771,7 +771,7 @@ GEN my_find_I (GEN Labs, GEN K, GEN sigma, GEN i_xJ)
         exit(0);
     }
     
-    GEN ret = mkvec2(nfinv(Labs, gel(test_vec, 2)), current_I);
+    GEN ret = mkvec2(gel(test_vec, 2), idealinv(Labs, current_I));
     ret = gerepilecopy(av, ret);
     return ret;
 }

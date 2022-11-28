@@ -17,6 +17,7 @@
 #include "find_variables.h"
 #include "find_basis.h"
 #include "artin_symbol.h"
+#include "find_cup_matrix.h"
 
 int
 main (int argc, char *argv[])	  
@@ -60,7 +61,6 @@ main (int argc, char *argv[])
     Kcyc = bnf_get_cyc(K);
     p_ClFld_pol = bnrclassfield(K, p, 0, DEFAULTPREC);
 
-
     pari_printf("p_int: %d\n\nmy_int: %d\n\nK_cyc: %Ps\n\nK_basis: %Ps\n\n", p_int, my_int, Kcyc, nf_get_zk(bnf_get_nf(K)));
 
     GEN K_ext_aut   =   my_ext(K, p_ClFld_pol, my_int, s, p, D_prime_vect, 0);
@@ -73,7 +73,16 @@ main (int argc, char *argv[])
 
     GEN Lx_cyc = bnf_get_cyc(LxAbs);
     GEN Ly_cyc = bnf_get_cyc(LyAbs);
+
+    GEN J_vect = my_find_p_gens(K, p);
     
+    GEN T_x = rnfisnorminit(K, rnf_get_pol(LxRel), 1);
+    
+    GEN x_basis = my_find_basis_2(LxAbs, LxRel, K, sigma_x, p, J_vect, T_x);
+    GEN I_vect = my_find_I_from_basis(x_basis);
+
+    GEN cup_matrix = my_cup_matrix(LxAbs, LxRel, LyAbs, LyRel, K, sigma_x, sigma_y, p, J_vect, I_vect, T_x, p_int);
+
     printf(ANSI_COLOR_GREEN "Done! \n \n" ANSI_COLOR_RESET);
 
     // Close pari

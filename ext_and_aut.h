@@ -38,9 +38,13 @@ GEN my_ext(GEN base, GEN base_clf, int disc, GEN s, GEN p, GEN D_prime_vect, int
     
     // GEN p1red = q1;
     // GEN p2red = q2;
+    printf("p1red: ");
     output(p1red);
+    printf("\n\n");
+    printf("D_prime_vect: ");
+    output(D_prime_vect);
     
-    GEN LxRel = rnfinit(base, mkvec2(p1red, D_prime_vect));
+    GEN LxRel = rnfinit(base, p1red);
     printf("---> LxRel <--- \n");
     
 
@@ -53,7 +57,7 @@ GEN my_ext(GEN base, GEN base_clf, int disc, GEN s, GEN p, GEN D_prime_vect, int
     output(p2red);
     // p2red = rnfpolredabs(base, p2red, 0);
     // output(p2red);
-    GEN LyRel = rnfinit(base, mkvec2(p2red, D_prime_vect));
+    GEN LyRel = rnfinit(base, p2red);
     printf("\n---> LyRel <--- \n");
     
     
