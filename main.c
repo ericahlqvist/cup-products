@@ -91,14 +91,14 @@ main (int argc, char *argv[])
         exit(0);
     }
 
-    sprintf(file_name, "output/%d_%dmod%d.txt", p_int, Dmod8, mod);
+    sprintf(file_name, "output/%d_%dmod%d.json", p_int, Dmod8, mod);
     printf("%s", file_name);
     printf("\n");
 
     FILE *fptr;
     fptr = fopen(file_name, "a");
 
-    pari_fprintf(fptr, "{\"p\": \"%d\", \"D\": \"%d\", \"K-cyc\": \"%Ps\", \"Lx-cyc\": \"%Ps\", \"Ly-cyc\": \"%Ps\", \"Z-rk\": \"-\", \"ZM\": \"-\"},\n", p_int, my_int, Kcyc, Lx_cyc, Ly_cyc);
+    pari_fprintf(fptr, "{\"p\": \"%d\", \"D\": \"%Ps\", \"K-cyc\": \"%Ps\", \"Lx-cyc\": \"%Ps\", \"Ly-cyc\": \"%Ps\", \"M-rk\": \"-\", \"CM\": \"-\"},\n", p_int, D_prime_vect, Kcyc, Lx_cyc, Ly_cyc);
 
     fclose(fptr);
 
@@ -141,16 +141,16 @@ main (int argc, char *argv[])
     if (my_SQ_MAT_equal0(cup_matrix))
     {
         printf(ANSI_COLOR_GREEN "Rank 0 \n\n" ANSI_COLOR_RESET);
-        pari_fprintf(fptr, " \"M-rk\": \"0\", \"M\": \"%Ps\"},\n", cup_matrix);
+        pari_fprintf(fptr, " \"M-rk\": \"0\", \"CM\": \"%Ps\"},\n", cup_matrix);
     }
     else if (cup_det == 0)
     {
         printf(ANSI_COLOR_YELLOW "Rank 1 \n\n" ANSI_COLOR_RESET);
-        pari_fprintf(fptr, " \"M-rk\": \"1\", \"M\": \"%Ps\"},\n", cup_matrix);
+        pari_fprintf(fptr, " \"M-rk\": \"1\", \"CM\": \"%Ps\"},\n", cup_matrix);
     }
     else {
         printf(ANSI_COLOR_YELLOW "Rank 2 \n\n" ANSI_COLOR_RESET);
-        pari_fprintf(fptr, " \"M-rk\": \"2\", \"M\": \"%Ps\"},\n", cup_matrix);
+        pari_fprintf(fptr, " \"M-rk\": \"2\", \"CM\": \"%Ps\"},\n", cup_matrix);
     }
     
     fclose(fptr);
