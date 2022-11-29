@@ -30,7 +30,7 @@ main (int argc, char *argv[])
     //char swap_str[100];
     
 
-    int p_int, my_int, i;
+    int p_int, my_int;
 
     int min;
     int sec;
@@ -104,19 +104,23 @@ main (int argc, char *argv[])
 
     GEN J_vect = my_find_p_gens(K, p);
     
-    GEN T_x = rnfisnorminit(K, rnf_get_pol(LxRel), 1);
+    // GEN T_x = rnfisnorminit(K, rnf_get_pol(LxRel), 1);
+    // GEN T_y = rnfisnorminit(K, rnf_get_pol(LyRel), 1);
     
-    GEN I_vect = my_find_I_vect(LxAbs, LxRel, K, sigma_x, J_vect);
+    GEN Ix_vect = my_find_I_vect(LxAbs, LxRel, K, sigma_x, J_vect);
+    GEN Iy_vect = my_find_I_vect(LyAbs, LyRel, K, sigma_y, J_vect);
     
-    GEN cup_matrix = my_cup_matrix(LxAbs, LxRel, LyAbs, LyRel, K, sigma_x, sigma_y, p, J_vect, I_vect, T_x, p_int);
+    GEN cup_matrix = my_cup_matrix(LxAbs, LxRel, LyAbs, LyRel, K, sigma_x, sigma_y, p, J_vect, Ix_vect, Iy_vect, p_int);
 
     printf(ANSI_COLOR_YELLOW "Cup Matrix:  \n\n" ANSI_COLOR_RESET);
     pari_printf(ANSI_COLOR_CYAN "%Ps\n\n" ANSI_COLOR_RESET, gel(cup_matrix, 1));
-    pari_printf(ANSI_COLOR_CYAN "%Ps\n" ANSI_COLOR_RESET, gel(cup_matrix, 2));
+    pari_printf(ANSI_COLOR_CYAN "%Ps\n\n" ANSI_COLOR_RESET, gel(cup_matrix, 2));
+    pari_printf(ANSI_COLOR_CYAN "%Ps\n" ANSI_COLOR_RESET, gel(cup_matrix, 3));
     printf("\n\n");
 
-    int cup_det = smodis(gsub(gmul(gmael2(cup_matrix, 1,1), gmael2(cup_matrix, 2,2)), gmul(gmael2(cup_matrix, 1,2), gmael2(cup_matrix, 2,1))), p_int);
-
+    int cup_det_12 = smodis(gsub(gmul(gmael2(cup_matrix, 1,1), gmael2(cup_matrix, 2,2)), gmul(gmael2(cup_matrix, 1,2), gmael2(cup_matrix, 2,1))), p_int);
+    int cup_det_13 = smodis(gsub(gmul(gmael2(cup_matrix, 1,1), gmael2(cup_matrix, 3,2)), gmul(gmael2(cup_matrix, 3,1), gmael2(cup_matrix, 1,2))), p_int);
+    int cup_det_23 = smodis(gsub(gmul(gmael2(cup_matrix, 2,1), gmael2(cup_matrix, 3,2)), gmul(gmael2(cup_matrix, 3,1), gmael2(cup_matrix, 2,2))), p_int);
     
     FILE    *textfile;
     char    *text;
@@ -138,19 +142,19 @@ main (int argc, char *argv[])
     fptr = fopen(file_name, "w");
     fprintf(fptr, "%s", text);
 
-    if (my_SQ_MAT_equal0(cup_matrix))
+    if (my_QV_equal0(gel(cup_matrix, 1)) && my_QV_equal0(gel(cup_matrix, 2)) && my_QV_equal0(gel(cup_matrix, 3)))
     {
         printf(ANSI_COLOR_GREEN "Rank 0 \n\n" ANSI_COLOR_RESET);
         pari_fprintf(fptr, " \"M-rk\": \"0\", \"CM\": \"%Ps\"},\n", cup_matrix);
     }
-    else if (cup_det == 0)
+    else if (cup_det_12==1 || cup_det_13==1 || cup_det_23==1)
     {
-        printf(ANSI_COLOR_YELLOW "Rank 1 \n\n" ANSI_COLOR_RESET);
-        pari_fprintf(fptr, " \"M-rk\": \"1\", \"CM\": \"%Ps\"},\n", cup_matrix);
-    }
-    else {
         printf(ANSI_COLOR_YELLOW "Rank 2 \n\n" ANSI_COLOR_RESET);
         pari_fprintf(fptr, " \"M-rk\": \"2\", \"CM\": \"%Ps\"},\n", cup_matrix);
+    }
+    else {
+        printf(ANSI_COLOR_YELLOW "Rank 1 \n\n" ANSI_COLOR_RESET);
+        pari_fprintf(fptr, " \"M-rk\": \"1\", \"CM\": \"%Ps\"},\n", cup_matrix);
     }
     
     fclose(fptr);

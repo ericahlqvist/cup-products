@@ -43,7 +43,7 @@ else:
 file = open("data/discriminants/"+open_file)
 lines = file.readlines()
 
-for line in lines[0:]:
+for line in lines[0:500]:
     my_str = ''.join(map(str, line))
     command = Command("./main-sta "+p+" "+my_str)
     code = command.run(timeout=300)
