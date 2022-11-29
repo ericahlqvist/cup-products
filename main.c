@@ -74,14 +74,86 @@ main (int argc, char *argv[])
     GEN Lx_cyc = bnf_get_cyc(LxAbs);
     GEN Ly_cyc = bnf_get_cyc(LyAbs);
 
+    char file_name[100];
+    int Dmod8 = -my_int%8;
+    int Dmod16 = -my_int%16;
+    int mod;
+
+    if (Dmod8 == 3 || Dmod8 == 7) {
+        mod = 8;
+    }
+    else if (Dmod16 == 4 || Dmod16 == 8) {
+        mod = 16;
+    }
+    else {
+        printf(ANSI_COLOR_RED "Wrong discriminant\n\n" ANSI_COLOR_RESET);
+        pari_close();
+        exit(0);
+    }
+
+    sprintf(file_name, "output/%d_%dmod%d.txt", p_int, Dmod8, mod);
+    printf("%s", file_name);
+    printf("\n");
+
+    FILE *fptr;
+    fptr = fopen(file_name, "a");
+
+    pari_fprintf(fptr, "{\"p\": \"%d\", \"D\": \"%d\", \"K-cyc\": \"%Ps\", \"Lx-cyc\": \"%Ps\", \"Ly-cyc\": \"%Ps\", \"Z-rk\": \"-\", \"ZM\": \"-\"},\n", p_int, my_int, Kcyc, Lx_cyc, Ly_cyc);
+
+    fclose(fptr);
+
     GEN J_vect = my_find_p_gens(K, p);
     
     GEN T_x = rnfisnorminit(K, rnf_get_pol(LxRel), 1);
     
-    GEN x_basis = my_find_basis_2(LxAbs, LxRel, K, sigma_x, p, J_vect, T_x);
-    GEN I_vect = my_find_I_from_basis(x_basis);
-
+    GEN I_vect = my_find_I_vect(LxAbs, LxRel, K, sigma_x, J_vect);
+    
     GEN cup_matrix = my_cup_matrix(LxAbs, LxRel, LyAbs, LyRel, K, sigma_x, sigma_y, p, J_vect, I_vect, T_x, p_int);
+
+    printf(ANSI_COLOR_YELLOW "Cup Matrix:  \n\n" ANSI_COLOR_RESET);
+    pari_printf(ANSI_COLOR_CYAN "%Ps\n\n" ANSI_COLOR_RESET, gel(cup_matrix, 1));
+    pari_printf(ANSI_COLOR_CYAN "%Ps\n" ANSI_COLOR_RESET, gel(cup_matrix, 2));
+    printf("\n\n");
+
+    int cup_det = smodis(gsub(gmul(gmael2(cup_matrix, 1,1), gmael2(cup_matrix, 2,2)), gmul(gmael2(cup_matrix, 1,2), gmael2(cup_matrix, 2,1))), p_int);
+
+    
+    FILE    *textfile;
+    char    *text;
+    long    numbytes;
+     
+    textfile = fopen(file_name, "r");
+     
+    fseek(textfile, -26, SEEK_END);
+    numbytes = ftell(textfile);
+    fseek(textfile, 0L, SEEK_SET);  
+ 
+    text = (char*)calloc(numbytes, sizeof(char));   
+ 
+    fread(text, sizeof(char), numbytes, textfile);
+    fclose(textfile);
+
+
+
+    fptr = fopen(file_name, "w");
+    fprintf(fptr, "%s", text);
+
+    if (my_SQ_MAT_equal0(cup_matrix))
+    {
+        printf(ANSI_COLOR_GREEN "Rank 0 \n\n" ANSI_COLOR_RESET);
+        pari_fprintf(fptr, " \"M-rk\": \"0\", \"M\": \"%Ps\"},\n", cup_matrix);
+    }
+    else if (cup_det == 0)
+    {
+        printf(ANSI_COLOR_YELLOW "Rank 1 \n\n" ANSI_COLOR_RESET);
+        pari_fprintf(fptr, " \"M-rk\": \"1\", \"M\": \"%Ps\"},\n", cup_matrix);
+    }
+    else {
+        printf(ANSI_COLOR_YELLOW "Rank 2 \n\n" ANSI_COLOR_RESET);
+        pari_fprintf(fptr, " \"M-rk\": \"2\", \"M\": \"%Ps\"},\n", cup_matrix);
+    }
+    
+    fclose(fptr);
 
     printf(ANSI_COLOR_GREEN "Done! \n \n" ANSI_COLOR_RESET);
 
