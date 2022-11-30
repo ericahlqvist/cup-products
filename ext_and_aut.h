@@ -2,7 +2,7 @@
 Generates all extensions of base together with all necessary automorphisms 
 */
 
-GEN my_ext(GEN base, GEN base_clf, int disc, GEN s, GEN p, GEN D_prime_vect, int swap) 
+GEN my_ext_old(GEN base, GEN base_clf, int disc, GEN s, GEN p, GEN D_prime_vect, int swap) 
 {   
     printf("Finding extensions... \n\n");
     GEN x, y;
@@ -101,7 +101,7 @@ GEN my_ext(GEN base, GEN base_clf, int disc, GEN s, GEN p, GEN D_prime_vect, int
             sigma_y = algtobasis(LyAbs, gel(cy, i));
             // sigma_y = galoisapply(LyAbs, sigma_y, sigma_y);
             // printf(ANSI_COLOR_GREEN "sigma_y found %d\n\n" ANSI_COLOR_RESET, i);
-            pari_printf("sigma_y: %Ps, sigma_y^2: %Ps, sigma_y^3: %Ps\n\n", sigma_y, galoisapply(LyAbs, sigma_y, sigma_y), basistoalg(LyAbs, galoisapply(LyAbs, sigma_y, galoisapply(LyAbs, sigma_y, sigma_y))));
+            // pari_printf("sigma_y: %Ps, sigma_y^2: %Ps, sigma_y^3: %Ps\n\n", sigma_y, galoisapply(LyAbs, sigma_y, sigma_y), basistoalg(LyAbs, galoisapply(LyAbs, sigma_y, galoisapply(LyAbs, sigma_y, sigma_y))));
             break;
         }
     }
@@ -122,3 +122,44 @@ GEN my_ext(GEN base, GEN base_clf, int disc, GEN s, GEN p, GEN D_prime_vect, int
     return base_ext;
 }
 
+GEN my_ext(GEN base, GEN base_clf, int disc, GEN s, GEN p, GEN D_prime_vect, int p_rk) 
+{   
+    printf("Finding extensions... \n\n");
+    GEN x, y, p1, q1, p1red, Lrel, Labs, s_lift_x, cx, sigma;
+
+    x = pol_x(fetch_user_var("x"));
+    y = pol_x(fetch_user_var("y"));
+
+    GEN base_ext = cgetg(p_rk, t_VEC);
+    pari_printf("Base_clf: %Ps\n\n", base_clf);
+
+
+    int i, j;
+    for (i=1; i<p_rk+1; ++i) {
+        p1 = gel(base_clf, 1);
+        q1 = gsubstpol(p1, x, y);
+
+        /* Define Lrel/Labs */
+        p1red = rnfpolredbest(base, mkvec2(q1, D_prime_vect), 0);
+        Lrel = rnfinit(base, p1red);
+        Labs = Buchall(rnf_get_polabs(Lrel), nf_FORCE, DEFAULTPREC);
+        pari_printf("L_cyc: %Ps\n\n", bnf_get_cyc(Labs));
+
+        s_lift_x = rnfeltup0(Lrel, s, 1);
+        cx = galoisconj(Labs, NULL);
+
+        for (j = 1; j < glength(cx)+1; ++j)
+        {
+            if ( (!my_QV_equal(algtobasis(Labs,gel(cx, j)), algtobasis(Labs,y))) && my_QV_equal(galoisapply(Labs, gel(cx,j), s_lift_x), s_lift_x)) 
+            {
+                sigma = algtobasis(Labs, gel(cx, j));
+                
+                break;
+            }
+        }
+        printf(ANSI_COLOR_CYAN "---> sigma <--- \n \n" ANSI_COLOR_RESET);
+        gel(base_ext, i) = mkvec3(Labs, Lrel, sigma);
+    }
+
+    return base_ext;
+}

@@ -1,19 +1,34 @@
-GEN my_cup_matrix (GEN LxAbs, GEN LxRel, GEN LyAbs, GEN LyRel, GEN K, GEN sigma_x, GEN sigma_y, GEN p, GEN J_vect, GEN Ix_vect, GEN Iy_vect, int p_int)
+GEN my_cup_matrix (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN J_vect)
 {
-    GEN cup_matrix = mkvec3(zerovec(2),zerovec(2),zerovec(2));
-    GEN NIpJ_x, NIpJ_y, Ix_rel, Iy_rel;
-    int i;
-    for (i=1; i<glength(J_vect)+1; i++) {
-        Ix_rel = rnfidealabstorel(LxRel, gel(Ix_vect, i));
-        Iy_rel = rnfidealabstorel(LyRel, gel(Iy_vect, i));
-        NIpJ_x = idealmul(K, rnfidealnormrel(LxRel, Ix_rel), gel(J_vect, i));
-        NIpJ_y = idealmul(K, rnfidealnormrel(LyRel, Iy_rel), gel(J_vect, i));
+    GEN NIpJ, I_vect, I_rel, Labs, Lrel, sigma, Labs_cup, Lrel_cup, sigma_cup;
+    int nr_col = p_rk^2;
+    GEN cup_matrix = cgetg(nr_col, t_VEC);
+    
+    int i, j, k;
+    // i:th extension, j:th ideal J, evaluate on k:th extension 
+    for (i=1; i<p_rk+1; i++) {
+        
+        Labs_cup = gel(gel(K_ext, i), 1);
+        Lrel_cup = gel(gel(K_ext, i), 2);
+        sigma_cup = gel(gel(K_ext, i), 3);
 
-        gmael2(cup_matrix, 1,i) = stoi(smodis(my_Artin_symbol(LyAbs, LyRel, K, NIpJ_x, p_int, sigma_y), p_int));
+        // I_vect corresp. to i:th extension
+        I_vect = my_find_I_vect(Labs_cup, Lrel_cup, K, sigma_cup, J_vect);
+        
+        for (j=1; j<p_rk+1; ++j) {
+            // evaluate cup on j:th ideal J 
+            I_rel = rnfidealabstorel(Lrel_cup, gel(I_vect, j));
+            NIpJ = idealmul(K, rnfidealnormrel(Lrel_cup, I_rel), gel(J_vect, j));
 
-        gmael2(cup_matrix, 2,i) = stoi(smodis(my_Artin_symbol(LxAbs, LxRel, K, NIpJ_x, p_int, sigma_x), p_int));
-
-        gmael2(cup_matrix, 3,i) = stoi(smodis(my_Artin_symbol(LyAbs, LyRel, K, NIpJ_y, p_int, sigma_y), p_int));
+            for (k=1; k<p_rk+1; ++k) {
+                // take Artin symbol with resp. to k:th extension
+                Labs = gel(gel(K_ext, k), 1);
+                Lrel = gel(gel(K_ext, k), 2);
+                sigma = gel(gel(K_ext, k), 3);
+                gmael2(cup_matrix, i*j,k) = stoi(smodis(my_Artin_symbol(Labs, Lrel, K, NIpJ, p_int, sigma), p_int));
+            }
+        }
+        
     }
     return cup_matrix;
 }    

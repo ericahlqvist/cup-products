@@ -718,14 +718,16 @@ GEN my_reduce_H1_mod (GEN LxAbs, GEN sigma_x, GEN v, GEN elem, GEN p) {
 
 GEN my_find_p_gens (GEN K, GEN p)
 {
-    GEN p_gens = mkvec2(gen_0,gen_0);
-    GEN current_gen;
     GEN my_n = bnf_get_cyc(K);
+    int l = glength(my_n);
+    GEN p_gens = zerovec(l);
+    GEN current_gen;
+    
     // int l = glength(my_n);
     GEN my_gens = bnf_get_gen(K);
     pari_printf("my_gens: %Ps\n\n", my_gens);
     int i;
-    for (i = 1; i < 3; ++i)
+    for (i = 1; i < l+1; ++i)
     {
         // pari_printf("my_n, my_n/p, gen^my_n: %Ps, %Ps, %Ps\n\n", gel(my_n, i), gdiv(gel(my_n, i),p), gel(bnfisprincipal0(K, idealpow(K, gel(my_gens, i), gel(my_n, i)), 1), 1));
         current_gen = idealpow(K,gel(my_gens, i), gdiv(gel(my_n, i),p));
@@ -791,21 +793,23 @@ GEN my_find_I (GEN Labs, GEN K, GEN sigma, GEN i_xJ)
 }
 
 GEN my_find_I_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN J_vect) {
-    GEN I_vect = zerovec(2);
+    int nr_comp = glength(J_vect);
+    GEN I_vect = zerovec(nr_comp);
     GEN I;
     int class_number = itos(bnf_get_no(Labs));
-    GEN ext_gens = mkvec2(rnfidealup0(Lrel, gel(J_vect, 1), 1), rnfidealup0(Lrel, gel(J_vect, 2), 1));
+    GEN ext_gen;
     //pari_printf("%Ps\n", gel(ext_gens, 1));
-    int nr_comp = glength(J_vect);
+    
     int i;
     
     for (i = 1; i < nr_comp+1; ++i)
     {
+        ext_gen = rnfidealup0(Lrel, gel(J_vect, i), 1);
         if (class_number==0) {
             I = idealhnf(Labs, gen_1);
         }
         else {
-            I = my_find_I(Labs, K, sigma, gel(ext_gens,i));
+            I = my_find_I(Labs, K, sigma, ext_gen);
         }
         
         gel(I_vect, i) = gel(I, 2);
