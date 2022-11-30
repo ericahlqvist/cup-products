@@ -1,3 +1,6 @@
+//Defines a matrix over F_2 with index (i*k, j) corresponding to 
+//< x_i\cup x_k, (a_j, J_j)>
+
 GEN my_cup_matrix (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN J_vect)
 {
     GEN NIpJ, I_vect, I_rel, Labs, Lrel, sigma, Labs_cup, Lrel_cup, sigma_cup;

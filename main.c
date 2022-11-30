@@ -71,28 +71,30 @@ main (int argc, char *argv[])
 
     GEN K_ext   =   my_ext(K, p_ClFld_pol, my_int, s, p, D_prime_vect, p_rk);
     //printf("length: %ld\n", glength(K_ext));
-    char file_name[100];
+    // char file_name[100];
 
-    int Dmod8 = -my_int%8;
-    int Dmod16 = -my_int%16;
-    int mod;
+    // int Dmod8 = -my_int%8;
+    // int Dmod16 = -my_int%16;
+    // int mod;
 
-    if (Dmod8 == 3 || Dmod8 == 7) {
-        mod = 8;
-    }
-    else if (Dmod16 == 4 || Dmod16 == 8) {
-        mod = 16;
-    }
-    else {
-        printf(ANSI_COLOR_RED "Wrong discriminant\n\n" ANSI_COLOR_RESET);
-        pari_close();
-        exit(0);
-    }
+    // if (Dmod8 == 3 || Dmod8 == 7) {
+    //     mod = 8;
+    // }
+    // else if (Dmod16 == 4 || Dmod16 == 8) {
+    //     mod = 16;
+    // }
+    // else {
+    //     printf(ANSI_COLOR_RED "Wrong discriminant\n\n" ANSI_COLOR_RESET);
+    //     pari_close();
+    //     exit(0);
+    // }
 
-    sprintf(file_name, "output/%d_%dmod%d.json", p_int, Dmod8, mod);
-    printf("%s", file_name);
-    printf("\n");
+    // sprintf(file_name, "output/%d_%dmod%d.json", p_int, Dmod8, mod);
+    // printf("%s", file_name);
+    // printf("\n");
     
+    //Defines a matrix over F_2 with index (i*k, j) corresponding to 
+    //< x_i\cup x_k, (a_j, J_j)>
     GEN cup_matrix = my_cup_matrix(K_ext, K, p, p_int, p_rk, J_vect);
     
     printf(ANSI_COLOR_YELLOW "Cup Matrix:  \n\n" ANSI_COLOR_RESET);
