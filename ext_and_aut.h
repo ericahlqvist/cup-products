@@ -130,20 +130,21 @@ GEN my_ext(GEN base, GEN base_clf, int disc, GEN s, GEN p, GEN D_prime_vect, int
     x = pol_x(fetch_user_var("x"));
     y = pol_x(fetch_user_var("y"));
 
-    GEN base_ext = cgetg(p_rk, t_VEC);
+    GEN base_ext = zerovec(p_rk);
+    printf("base l: %ld\n", glength(base_ext));
     pari_printf("Base_clf: %Ps\n\n", base_clf);
-
 
     int i, j;
     for (i=1; i<p_rk+1; ++i) {
-        p1 = gel(base_clf, 1);
+        p1 = gel(base_clf, i);
         q1 = gsubstpol(p1, x, y);
 
         /* Define Lrel/Labs */
         p1red = rnfpolredbest(base, mkvec2(q1, D_prime_vect), 0);
         Lrel = rnfinit(base, p1red);
         Labs = Buchall(rnf_get_polabs(Lrel), nf_FORCE, DEFAULTPREC);
-        pari_printf("L_cyc: %Ps\n\n", bnf_get_cyc(Labs));
+        pari_printf("L_cyc[%d]: %Ps\n", i, bnf_get_cyc(Labs));
+        pari_printf("pol: %Ps\n\n", p1red);
 
         s_lift_x = rnfeltup0(Lrel, s, 1);
         cx = galoisconj(Labs, NULL);

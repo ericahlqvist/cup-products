@@ -64,11 +64,13 @@ main (int argc, char *argv[])
     J_vect = my_find_p_gens(K, p);
     p_rk = glength(J_vect);
 
+    printf("p-rank: %d\n\n", p_rk);
+
 
     pari_printf("p_int: %d\n\nmy_int: %d\n\nK_cyc: %Ps\n\nK_basis: %Ps\n\n", p_int, my_int, Kcyc, nf_get_zk(bnf_get_nf(K)));
 
     GEN K_ext   =   my_ext(K, p_ClFld_pol, my_int, s, p, D_prime_vect, p_rk);
-
+    //printf("length: %ld\n", glength(K_ext));
     char file_name[100];
 
     int Dmod8 = -my_int%8;
@@ -92,9 +94,9 @@ main (int argc, char *argv[])
     printf("\n");
     
     GEN cup_matrix = my_cup_matrix(K_ext, K, p, p_int, p_rk, J_vect);
-
+    
     printf(ANSI_COLOR_YELLOW "Cup Matrix:  \n\n" ANSI_COLOR_RESET);
-    for (i=1; i<(p_rk^2+1); ++i) {
+    for (i=1; i<(p_rk*p_rk+1); ++i) {
         pari_printf(ANSI_COLOR_CYAN "%Ps\n\n" ANSI_COLOR_RESET, gel(cup_matrix, i));
     }
     printf("\n\n");
