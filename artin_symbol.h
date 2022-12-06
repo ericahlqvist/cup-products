@@ -10,29 +10,29 @@ GEN my_p_Artin_symbol(GEN Labs, GEN Lrel, GEN K, GEN K_factorization, GEN p, GEN
     GEN factorization = idealfactor(Labs, prime_lift);
     GEN exp;
 
-    printf("Fact of lift: ");
-    output(factorization);
-    printf("\n\n");
+    //printf("Fact of lift: ");
+    //output(factorization);
+    //printf("\n\n");
     if (glength(gel(factorization, 1))==itos(p))
     {
-        printf(ANSI_COLOR_GREEN "Split\n\n" ANSI_COLOR_RESET);
+        //printf(ANSI_COLOR_GREEN "Split\n\n" ANSI_COLOR_RESET);
         p_Artin_symbol = gen_0;
         return p_Artin_symbol;
     }
     else {
         exp = prime_below;
-        pari_printf("Norm p: %Ps\n\nExp: %Ps\n\n", idealnorm(K, prime), exp);
-        printf(ANSI_COLOR_YELLOW "Inert\n\n" ANSI_COLOR_RESET);
+        //pari_printf("Norm p: %Ps\n\nExp: %Ps\n\n", idealnorm(K, prime), exp);
+        //printf(ANSI_COLOR_YELLOW "Inert\n\n" ANSI_COLOR_RESET);
     }
      //idealnorm(K, prime);
-    pari_printf("Norm p: %Ps\n\n", exp);
+    //pari_printf("Norm p: %Ps\n\n", exp);
 
     // pari_printf("K_factorization: %Ps\n\n", K_factorization);
     // pari_printf("Factorization: %Ps\n\n", factorization);
     GEN prime_lift_1 = idealhnf0(Labs, gel(gel(gel(factorization, 1), 1), 1), gel(gel(gel(factorization, 1), 1), 2));
     
-    GEN inertia_index = gel(gel(gel(K_factorization, 1), 1), 4); // Always 1
-    pari_printf("Inertia: %Ps\n\n", inertia_index);
+    //GEN inertia_index = gel(gel(gel(K_factorization, 1), 1), 4); // Always 1
+    //pari_printf("Inertia: %Ps\n\n", inertia_index);
     
     GEN sigma;
     
@@ -102,17 +102,17 @@ GEN my_Artin_symbol (GEN Labs, GEN Lrel, GEN K, GEN I_K, int p, GEN sigma) {
     pari_sp av = avma;
     if (my_QV_equal0(gel(bnfisprincipal0(K, I_K, 1),1)))
     {
-        printf(ANSI_COLOR_YELLOW "Principal\n\n" ANSI_COLOR_RESET);
+        //printf(ANSI_COLOR_YELLOW "Principal\n\n" ANSI_COLOR_RESET);
         return gen_0;
     }
     
     int Artin_symbol = 0;
     GEN factorization = idealfactor(K, I_K);
-    pari_printf("factorization: %Ps\n\n", factorization);
+    //pari_printf("factorization: %Ps\n\n", factorization);
     GEN primes_and_es_in_factorization = my_find_primes_in_factorization(K, factorization);
-    pari_printf("primes_and_es: %Ps\n\n", primes_and_es_in_factorization);
+    //pari_printf("primes_and_es: %Ps\n\n", primes_and_es_in_factorization);
     GEN prime_vect = gel(primes_and_es_in_factorization,1);
-    pari_printf("Prime_vect: %Ps\n\n", prime_vect);
+    //pari_printf("Prime_vect: %Ps\n\n", prime_vect);
     
     GEN e_vect = gel(primes_and_es_in_factorization,2);
     int p_Artin_symbol;
@@ -123,7 +123,7 @@ GEN my_Artin_symbol (GEN Labs, GEN Lrel, GEN K, GEN I_K, int p, GEN sigma) {
     for (i = 1; i < glength(prime_vect)+1; i++)
     {
         prime = idealfactor(K, gel(prime_vect, i));
-        pari_printf("Prime -> p-Artin: %Ps\n\n", prime);
+        //pari_printf("Prime -> p-Artin: %Ps\n\n", prime);
         p_exp = gel(e_vect, i);
         
         if (itos(gel(e_vect, i))%p == 0 || my_QV_equal0(gel(bnfisprincipal0(K, gel(prime_vect, i), 1),1)))
@@ -131,14 +131,14 @@ GEN my_Artin_symbol (GEN Labs, GEN Lrel, GEN K, GEN I_K, int p, GEN sigma) {
             
             p_Artin_symbol = 0;
             // printf(ANSI_COLOR_YELLOW "%ld\n" ANSI_COLOR_RESET, itos(gel(e_vect, i)));
-            printf(ANSI_COLOR_YELLOW "Trivial\n\n" ANSI_COLOR_RESET);
-            printf("p_Artin_symbol: %d\n\n", 0);
+            //printf(ANSI_COLOR_YELLOW "Trivial\n\n" ANSI_COLOR_RESET);
+            //printf("p_Artin_symbol: %d\n\n", 0);
         }
         else {
             // printf(ANSI_COLOR_YELLOW "%ld\n" ANSI_COLOR_RESET, itos(gel(e_vect, i)));
-            printf(ANSI_COLOR_GREEN "Non-trivial\n\n" ANSI_COLOR_RESET);
+            //printf(ANSI_COLOR_GREEN "Non-trivial\n\n" ANSI_COLOR_RESET);
             p_Artin_symbol = itos(my_p_Artin_symbol(Labs, Lrel, K, prime, stoi(p), Gal_rel, p_exp));
-            printf("p_Artin_symbol: %d\n\n", p_Artin_symbol);
+            //printf("p_Artin_symbol: %d\n\n", p_Artin_symbol);
             
         }
         Artin_symbol = (p_Artin_symbol+Artin_symbol);

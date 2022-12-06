@@ -434,9 +434,12 @@ GEN my_find_H90_ideal_single_prime (GEN LyAbs, GEN LyRel, GEN K, GEN primes, GEN
 GEN my_find_H90_ideal (GEN LyAbs, GEN LyRel, GEN K, GEN iJ_div_a2, GEN sigma_y, int p) {
     pari_sp av = avma;
     GEN factorization = idealfactor(LyAbs, iJ_div_a2);
+    
     GEN primes_and_es_in_factorization = my_find_primes_in_factorization(LyAbs, factorization);
+    pari_printf("primes_and_es: %Ps\n\n", primes_and_es_in_factorization);
     // output(primes_and_es_in_factorization);
     GEN prime_vect = gel(primes_and_es_in_factorization,1);
+    //pari_printf("prime_vect: %Ps\n\n", prime_vect);
     GEN primes_under = my_find_primes_under(LyRel, K, prime_vect);
     GEN primes_and_es_by_primes_under = my_sort_primes_and_es(LyRel, K, primes_and_es_in_factorization, primes_under);
     printf("Factorization for H90 done\n\n");
@@ -626,7 +629,8 @@ GEN my_get_clgp (GEN K)
             gel(class_group_exp, n+1) = mkvec(stoi(n));
         }
     }
-    
+    // pari_printf("cyc: %Ps\n\n", Kcyc);
+    // pari_printf("cl_gp_exp: %Ps\n\n", class_group_exp);
     GEN class_group = zerovec(clnr);
     GEN current_I, exponents, pow;
     
@@ -720,7 +724,8 @@ GEN my_find_p_gens (GEN K, GEN p)
 {
     GEN my_n = bnf_get_cyc(K);
     int l = glength(my_n);
-    GEN p_gens = zerovec(l);
+    // adding one index with the trivial ideal for a technical reason
+    GEN p_gens = zerovec(l+1);
     GEN current_gen;
     
     // int l = glength(my_n);
@@ -734,7 +739,22 @@ GEN my_find_p_gens (GEN K, GEN p)
         //pari_printf("current_gen: %Ps\n\n", current_gen);
         gel(p_gens, i) = idealred(K, current_gen);
     }
+    gel(p_gens, l+1) = idealhnf(K, gen_1);
+
     return p_gens;
+}
+
+GEN my_find_Ja_vect(GEN K, GEN J_vect) {
+    int l = glength(J_vect);
+    GEN Ja_vect = zerovec(l);
+    GEN a;
+    int i;
+
+    for (i=1; i<l+1; ++i) {
+        a = nfinv(K, gel(bnfisprincipal0(K, idealpow(K, gel(J_vect, i), gen_2), 1), 2));
+        gel(Ja_vect, i) = mkvec2(a, gel(J_vect, i));
+    }
+    return Ja_vect;
 }
 
 /*
@@ -757,14 +777,14 @@ GEN my_find_I (GEN Labs, GEN K, GEN sigma, GEN i_xJ)
     test_vec = bnfisprincipal0(Labs, i_xJ, 1);
     if (my_QV_equal0(gel(test_vec, 1)))
     {
-        printf(ANSI_COLOR_YELLOW "i_x(J) principal!\n\n" ANSI_COLOR_RESET);
+        //printf(ANSI_COLOR_YELLOW "i_x(J) principal!\n\n" ANSI_COLOR_RESET);
         current_I = idealhnf0(Labs, gen_1, NULL);
         test_found = 1;
     }
     
 
     else {
-        printf(ANSI_COLOR_CYAN "i_x(J) not principal!\n\n" ANSI_COLOR_RESET);
+        //printf(ANSI_COLOR_CYAN "i_x(J) not principal!\n\n" ANSI_COLOR_RESET);
         for (n = 1; n < clnr + 1; ++n) {
             current_I = gel(class_group, n);
             Itest = idealmul(Labs, i_xJ, my_1MS_ideal(Labs, sigma, current_I));
@@ -772,7 +792,7 @@ GEN my_find_I (GEN Labs, GEN K, GEN sigma, GEN i_xJ)
             
             if (my_QV_equal0(gel(test_vec, 1)))
             {
-                printf(ANSI_COLOR_GREEN "FOUND!\n\n" ANSI_COLOR_RESET);
+                //printf(ANSI_COLOR_GREEN "FOUND!\n\n" ANSI_COLOR_RESET);
                 
                 test_found = 1;
                 break;
@@ -792,27 +812,72 @@ GEN my_find_I (GEN Labs, GEN K, GEN sigma, GEN i_xJ)
     return ret;
 }
 
-GEN my_find_I_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN J_vect) {
-    int nr_comp = glength(J_vect);
-    GEN I_vect = zerovec(nr_comp);
+// find I such that J=div(t)+(1-sigma)I and N(t)=-a
+GEN my_find_I_v2 (GEN Labs, GEN Lrel, GEN sigma, GEN K, GEN a, GEN iJ, int p_int) {
+    GEN t, div_t, I, T, div_t_J_inv;
+
+    T = rnfisnorminit(K, rnf_get_pol(Lrel), 1);
+    //tu = bnf_get_tuU(K);
+    t = rnfeltreltoabs(Lrel, gel(rnfisnorm(T, nfinv(K,a), 0),1));
+    
+    div_t = idealhnf0(Labs, t, NULL);
+    div_t_J_inv = idealdiv(Labs, div_t, iJ);
+    
+    if (my_SQ_MAT_equal(div_t_J_inv, idealhnf0(Labs, gen_1, NULL))) {
+        printf("triv\n");
+        I = idealhnf0(Labs, gen_1, NULL);
+        
+    }
+    else {
+        I = my_find_H90_ideal(Labs, Lrel, K, div_t_J_inv, sigma, p_int);
+        printf("non-triv\n");
+    }
+    //pari_printf("I: %Ps\n\n", I);
+    return I;
+}
+
+// find I such that div(t)+(1-sigma)I = 0 and N(t)=-1
+GEN my_find_final_I (GEN Labs, GEN Lrel, GEN sigma, GEN K, int p_int) {
+    GEN t, div_t, I, T;
+
+    T = rnfisnorminit(K, rnf_get_pol(Lrel), 1);
+    //tu = bnf_get_tuU(K);
+    t = rnfeltreltoabs(Lrel, gel(rnfisnorm(T, stoi(-1), 0),1));
+    
+    div_t = idealhnf0(Labs, t, NULL);
+    
+    if (my_SQ_MAT_equal(div_t, idealhnf0(Labs, gen_1, NULL))) {
+        printf("triv\n");
+        I = idealhnf0(Labs, gen_1, NULL);
+        
+    }
+    else {
+        I = my_find_H90_ideal(Labs, Lrel, K, div_t, sigma, p_int);
+        printf("non-triv\n");
+    }
+    
+    return I;
+}
+
+GEN my_find_I_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN J_vect, GEN Ja_vect, int p_int) {
+    int p_rk = glength(J_vect)-1;
+    GEN I_vect = zerovec(p_rk+1);
     GEN I;
-    int class_number = itos(bnf_get_no(Labs));
     GEN ext_gen;
     //pari_printf("%Ps\n", gel(ext_gens, 1));
     
     int i;
     
-    for (i = 1; i < nr_comp+1; ++i)
+    for (i = 1; i < p_rk+1; ++i)
     {
         ext_gen = rnfidealup0(Lrel, gel(J_vect, i), 1);
-        if (class_number==0) {
-            I = idealhnf(Labs, gen_1);
-        }
-        else {
-            I = my_find_I(Labs, K, sigma, ext_gen);
-        }
+        I = my_find_I_v2(Labs, Lrel, sigma, K, gel(gel(Ja_vect, i),1), ext_gen, p_int);
         
-        gel(I_vect, i) = gel(I, 2);
+        gel(I_vect, i) = I;
     } 
+    
+    gel(I_vect, p_rk+1) = my_find_final_I(Labs, Lrel, sigma, K, p_int);
+
     return I_vect;
 }
+

@@ -12,12 +12,12 @@
 #define ANSI_COLOR_RESET   "\x1b[0m"
 
 #include "misc_functions.h"
-#include "find_orbit.h"
+#include "tests.h"
 #include "ext_and_aut.h"
-#include "find_variables.h"
-#include "find_basis.h"
 #include "artin_symbol.h"
 #include "find_cup_matrix.h"
+#include "test_artin.h"
+
 
 int
 main (int argc, char *argv[])	  
@@ -42,7 +42,7 @@ main (int argc, char *argv[])
     
     GEN p = cgeti(DEFAULTPREC);
     GEN s = pol_x(fetch_user_var("s"));
-    GEN K, f, Kcyc, p_ClFld_pol, D_prime_vect, D, J_vect;
+    GEN K, f, Kcyc, p_ClFld_pol, D_prime_vect, D, J_vect, Ja_vect;
 
     p = gp_read_str(argv[1]);
     p_int = atoi(argv[1]);
@@ -58,18 +58,34 @@ main (int argc, char *argv[])
 
     // Define base field K
     K = Buchall(f, nf_FORCE, DEFAULTPREC);
+    //tu = bnf_get_tuU(K);
     Kcyc = bnf_get_cyc(K);
     p_ClFld_pol = bnrclassfield(K, p, 0, DEFAULTPREC);
 
     J_vect = my_find_p_gens(K, p);
-    p_rk = glength(J_vect);
+    pari_printf("J_vect: %Ps\n\n", J_vect);
+    Ja_vect = my_find_Ja_vect(K, J_vect);
+    pari_printf("Ja_vect: %Ps\n\n", Ja_vect);
+    // if (my_is_p_torsion(K,J_vect, p))
+    // {
+    //     printf(ANSI_COLOR_GREEN "p-torsion test passed\n\n" ANSI_COLOR_RESET);
+    // }
+    // else {
+    //     printf(ANSI_COLOR_RED "p-torsion test  failed\n\n" ANSI_COLOR_RESET);
+    // }
+    
 
+    p_rk = glength(J_vect)-1;
     printf("p-rank: %d\n\n", p_rk);
 
 
     pari_printf("p_int: %d\n\nmy_int: %d\n\nK_cyc: %Ps\n\nK_basis: %Ps\n\n", p_int, my_int, Kcyc, nf_get_zk(bnf_get_nf(K)));
 
-    GEN K_ext   =   my_ext(K, p_ClFld_pol, my_int, s, p, D_prime_vect, p_rk);
+    GEN K_ext = my_ext(K, p_ClFld_pol, my_int, s, p, D_prime_vect, p_rk);
+
+    // for (i=1; i<p_rk+1; ++i) {
+    //     my_test_artin_symbol(gel(gel(K_ext, i), 1), gel(gel(K_ext, i), 2), K, p_int, gel(gel(K_ext, i), 3));
+    // }
     //printf("length: %ld\n", glength(K_ext));
     // char file_name[100];
 
@@ -95,11 +111,13 @@ main (int argc, char *argv[])
     
     //Defines a matrix over F_2 with index (i*k, j) corresponding to 
     //< x_i\cup x_k, (a_j, J_j)>
-    GEN cup_matrix = my_cup_matrix(K_ext, K, p, p_int, p_rk, J_vect);
-    
+    GEN cup_matrix = my_cup_matrix(K_ext, K, p, p_int, p_rk, J_vect, Ja_vect);
+    int k;
     printf(ANSI_COLOR_YELLOW "Cup Matrix:  \n\n" ANSI_COLOR_RESET);
-    for (i=1; i<(p_rk*p_rk+1); ++i) {
-        pari_printf(ANSI_COLOR_CYAN "%Ps\n\n" ANSI_COLOR_RESET, gel(cup_matrix, i));
+    for (i=1; i<p_rk+1; ++i) {
+        for (k=1; k<p_rk+1; ++k) {
+            pari_printf(ANSI_COLOR_CYAN "(%d,%d)  :  %Ps\n\n" ANSI_COLOR_RESET, i,k, gel(cup_matrix, (i-1)*p_rk+k));
+        } 
     }
     printf("\n\n");
 

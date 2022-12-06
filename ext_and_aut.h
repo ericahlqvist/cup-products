@@ -154,7 +154,7 @@ GEN my_ext(GEN base, GEN base_clf, int disc, GEN s, GEN p, GEN D_prime_vect, int
             if ( (!my_QV_equal(algtobasis(Labs,gel(cx, j)), algtobasis(Labs,y))) && my_QV_equal(galoisapply(Labs, gel(cx,j), s_lift_x), s_lift_x)) 
             {
                 sigma = algtobasis(Labs, gel(cx, j));
-                
+                pari_printf("sigma: %Ps\n\n", sigma);
                 break;
             }
         }
