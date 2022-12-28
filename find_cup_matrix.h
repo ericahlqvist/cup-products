@@ -20,10 +20,17 @@ GEN my_cup_matrix (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN J_vect, GEN
         sigma_cup = gel(gel(K_ext, i), 3);
 
         // I_vect corresp. to i:th extension
-        I_vect = my_find_I_vect(Labs_cup, Lrel_cup, K, sigma_cup, J_vect, Ja_vect, p_int);
+        if (p_int ==2) {
+            I_vect = my_find_I_vect2(Labs_cup, Lrel_cup, K, sigma_cup, J_vect, Ja_vect, p_int);
+        }
+        else {
+            I_vect = my_find_I_vect(Labs_cup, Lrel_cup, K, sigma_cup, J_vect);
+        }
+        
+        
         pari_printf("I_vect: %Ps\n\n", I_vect);
 
-        // Test that we get a correct I
+        // //Test that we get a correct I
         // if (my_test_H90_ideal(Labs_cup, Lrel_cup, K, sigma_cup, I_vect, J_vect))
         // {
         //     printf(ANSI_COLOR_GREEN "H90 test passed\n\n" ANSI_COLOR_RESET);
@@ -31,10 +38,17 @@ GEN my_cup_matrix (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN J_vect, GEN
         // else {
         //     printf(ANSI_COLOR_RED "H90 test  failed\n\n" ANSI_COLOR_RESET);
         // }
-        //----- test done
-
-        for (j=1; j<p_rk+2; ++j) {
+        // //----- test done
+        int added;
+        if (p_int == 2) {
+            added = 2;
+        }
+        else {
+            added = 1;
+        }
+        for (j=1; j<p_rk+added; ++j) {
             // evaluate cup on j:th basis class (a,J) 
+            
             I_rel = rnfidealabstorel(Lrel_cup, gel(I_vect, j));
             NIpJ = idealmul(K, rnfidealnormrel(Lrel_cup, I_rel), gel(J_vect, j));
             

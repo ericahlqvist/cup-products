@@ -725,7 +725,14 @@ GEN my_find_p_gens (GEN K, GEN p)
     GEN my_n = bnf_get_cyc(K);
     int l = glength(my_n);
     // adding one index with the trivial ideal for a technical reason
-    GEN p_gens = zerovec(l+1);
+    GEN p_gens;
+    int equal2 = (itos(p)==2);
+    if (equal2) {
+        p_gens = zerovec(l+1);
+    }
+    else {
+        p_gens = zerovec(l);
+    }
     GEN current_gen;
     
     // int l = glength(my_n);
@@ -739,7 +746,9 @@ GEN my_find_p_gens (GEN K, GEN p)
         //pari_printf("current_gen: %Ps\n\n", current_gen);
         gel(p_gens, i) = idealred(K, current_gen);
     }
-    gel(p_gens, l+1) = idealhnf(K, gen_1);
+    if (equal2) {
+        gel(p_gens, l+1) = idealhnf(K, gen_1);
+    }
 
     return p_gens;
 }
@@ -859,7 +868,7 @@ GEN my_find_final_I (GEN Labs, GEN Lrel, GEN sigma, GEN K, int p_int) {
     return I;
 }
 
-GEN my_find_I_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN J_vect, GEN Ja_vect, int p_int) {
+GEN my_find_I_vect2 (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN J_vect, GEN Ja_vect, int p_int) {
     int p_rk = glength(J_vect)-1;
     GEN I_vect = zerovec(p_rk+1);
     GEN I;
@@ -877,6 +886,26 @@ GEN my_find_I_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN J_vect, GEN Ja_vec
     } 
     
     gel(I_vect, p_rk+1) = my_find_final_I(Labs, Lrel, sigma, K, p_int);
+
+    return I_vect;
+}
+
+GEN my_find_I_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN J_vect) {
+    int p_rk = glength(J_vect);
+    GEN I_vect = zerovec(p_rk);
+    GEN I;
+    GEN ext_gen;
+    //pari_printf("%Ps\n", gel(ext_gens, 1));
+    
+    int i;
+    
+    for (i = 1; i < p_rk+1; ++i)
+    {
+        ext_gen = rnfidealup0(Lrel, gel(J_vect, i), 1);
+        I = gel(my_find_I(Labs, K, sigma, ext_gen),2);
+        
+        gel(I_vect, i) = I;
+    } 
 
     return I_vect;
 }
