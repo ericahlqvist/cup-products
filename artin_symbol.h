@@ -9,10 +9,10 @@ GEN my_p_Artin_symbol(GEN Labs, GEN Lrel, GEN K, GEN K_factorization, GEN p, GEN
     GEN prime_lift = rnfidealup0(Lrel, prime, 1);
     GEN factorization = idealfactor(Labs, prime_lift);
     GEN exp;
-
-    //printf("Fact of lift: ");
-    //output(factorization);
-    //printf("\n\n");
+    // printf("Rel Deg: %ld\n", rnf_get_degree(Lrel));
+    // printf("Fact of lift: ");
+    // output(factorization);
+    // printf("\n\n");
     if (glength(gel(factorization, 1))==itos(p))
     {
         //printf(ANSI_COLOR_GREEN "Split\n\n" ANSI_COLOR_RESET);
@@ -36,14 +36,14 @@ GEN my_p_Artin_symbol(GEN Labs, GEN Lrel, GEN K, GEN K_factorization, GEN p, GEN
     
     GEN sigma;
     
-    int l = 2*itos(p);
+    int l = nf_get_degree(bnf_get_nf(Labs));
     GEN generator = zerocol(l);
     gel(generator, 2) = gen_1;
     int test = 0;
     GEN test_vec;
     int i;
     GEN elem1, elem2;
-    
+    //pari_printf("ideal factor: %Ps\n\n", gel(gel(idealfactor(Labs, prime_lift_1), 1), 1));
     GEN prinit = nfmodprinit(Labs, gel(gel(idealfactor(Labs, prime_lift_1), 1), 1));
     // printf("prinit: ");
     // output(prinit);
@@ -57,9 +57,10 @@ GEN my_p_Artin_symbol(GEN Labs, GEN Lrel, GEN K, GEN K_factorization, GEN p, GEN
     for (i = 1; i < glength(Gal_rel)+1; i++)
     {
         sigma = gel(Gal_rel, i);
-        
+        //pari_printf("sigma: %Ps\n\nGenerator: %Ps\n", sigma, generator);
         elem1 = galoisapply(Labs, sigma, generator);
         elem2 = nfpow(Labs, generator, exp);
+        
         //prinit = gel(gel(idealfactor(Labs, prime_lift_1), 1), 1);
         //nf_to_Fq_init
         // Page 297 in User's guide to the pari lib
@@ -117,13 +118,14 @@ GEN my_Artin_symbol (GEN Labs, GEN Lrel, GEN K, GEN I_K, int p, GEN sigma) {
     GEN e_vect = gel(primes_and_es_in_factorization,2);
     int p_Artin_symbol;
     GEN prime, p_exp;
+    
     GEN Gal_rel = my_Gal_rel(Labs, Lrel, K, sigma, p);
     
     int i;
     for (i = 1; i < glength(prime_vect)+1; i++)
     {
         prime = idealfactor(K, gel(prime_vect, i));
-        //pari_printf("Prime -> p-Artin: %Ps\n\n", prime);
+        pari_printf("Prime -> p-Artin: %Ps\n\n", prime);
         p_exp = gel(e_vect, i);
         
         if (itos(gel(e_vect, i))%p == 0 || my_QV_equal0(gel(bnfisprincipal0(K, gel(prime_vect, i), 1),1)))

@@ -141,10 +141,13 @@ GEN my_ext(GEN base, GEN base_clf, GEN s, GEN p, int p_rk)
 
         /* Define Lrel/Labs */
         p1red = rnfpolredbest(base, q1, 0);
+        //printf("p1red found\n");
         Lrel = rnfinit(base, p1red);
+        //printf("Lrel found\n");
         Labs = Buchall(rnf_get_polabs(Lrel), nf_FORCE, DEFAULTPREC);
+        //printf("Labs found\n");
         pari_printf("L_cyc[%d]: %Ps\n", i, bnf_get_cyc(Labs));
-        pari_printf("pol: %Ps\n\n", p1red);
+        pari_printf("abs pol: %Ps\n\n", rnf_get_polabs(Lrel));
 
         s_lift_x = rnfeltup0(Lrel, s, 1);
         cx = galoisconj(Labs, NULL);
@@ -160,6 +163,7 @@ GEN my_ext(GEN base, GEN base_clf, GEN s, GEN p, int p_rk)
         }
         printf(ANSI_COLOR_CYAN "---> sigma <--- \n \n" ANSI_COLOR_RESET);
         gel(base_ext, i) = mkvec3(Labs, Lrel, sigma);
+        my_test_artin_symbol (Labs, Lrel, base, itos(p), sigma);
     }
 
     return base_ext;

@@ -13,10 +13,11 @@
 
 #include "misc_functions.h"
 #include "tests.h"
-#include "ext_and_aut2.h"
 #include "artin_symbol.h"
-#include "find_cup_matrix.h"
 #include "test_artin.h"
+#include "ext_and_aut2.h"
+#include "find_cup_matrix.h"
+
 
 
 int
@@ -55,12 +56,17 @@ main (int argc, char *argv[])
     //tu = bnf_get_tuU(K);
     Kcyc = bnf_get_cyc(K);
     p_ClFld_pol = bnrclassfield(K, p, 0, DEFAULTPREC);
+    //pari_printf("Fund units: %Ps\n", bnf_get_fu(K));
+    //pari_printf("Tors units: %Ps\n", bnf_get_tuU(K));
+
+    GEN units_mod_2 = my_find_units_mod_2(K);
+    //pari_printf("Units mod 2: %Ps\n", units_mod_2);
 
     J_vect = my_find_p_gens(K, p);
-    pari_printf("J_vect: %Ps\n\n", J_vect);
+    //pari_printf("J_vect: %Ps\n\n", J_vect);
     if (p_int == 2) {
         Ja_vect = my_find_Ja_vect(K, J_vect);
-        pari_printf("Ja_vect: %Ps\n\n", Ja_vect);
+        //pari_printf("Ja_vect: %Ps\n\n", Ja_vect);
     }
     
     
@@ -73,12 +79,7 @@ main (int argc, char *argv[])
     //     printf(ANSI_COLOR_RED "p-torsion test  failed\n\n" ANSI_COLOR_RESET);
     // }
     
-    if (p_int==2) {
-        p_rk = glength(J_vect)-1;
-    }
-    else {
-        p_rk = glength(J_vect);
-    }
+    p_rk = glength(J_vect);
     
     printf("p-rank: %d\n\n", p_rk);
 
@@ -86,11 +87,11 @@ main (int argc, char *argv[])
     pari_printf("p_int: %d\n\nmy_pol: %Ps\n\nK_cyc: %Ps\n\nK_basis: %Ps\n\n", p_int, f, Kcyc, nf_get_zk(bnf_get_nf(K)));
 
     GEN K_ext = my_ext(K, p_ClFld_pol, s, p, p_rk);
-
+    
     
     //Defines a matrix over F_2 with index (i*k, j) corresponding to 
     //< x_i\cup x_k, (a_j, J_j)>
-    GEN cup_matrix = my_cup_matrix(K_ext, K, p, p_int, p_rk, J_vect, Ja_vect);
+    GEN cup_matrix = my_cup_matrix(K_ext, K, p, p_int, p_rk, J_vect, Ja_vect, units_mod_2);
     int k;
     printf(ANSI_COLOR_YELLOW "Cup Matrix:  \n\n" ANSI_COLOR_RESET);
     for (i=1; i<p_rk+1; ++i) {
@@ -99,30 +100,6 @@ main (int argc, char *argv[])
         } 
     }
     printf("\n\n");
-
-    // int cup_det_12 = smodis(gsub(gmul(gmael2(cup_matrix, 1,1), gmael2(cup_matrix, 2,2)), gmul(gmael2(cup_matrix, 1,2), gmael2(cup_matrix, 2,1))), p_int);
-    // int cup_det_13 = smodis(gsub(gmul(gmael2(cup_matrix, 1,1), gmael2(cup_matrix, 3,2)), gmul(gmael2(cup_matrix, 3,1), gmael2(cup_matrix, 1,2))), p_int);
-    // int cup_det_23 = smodis(gsub(gmul(gmael2(cup_matrix, 2,1), gmael2(cup_matrix, 3,2)), gmul(gmael2(cup_matrix, 3,1), gmael2(cup_matrix, 2,2))), p_int);
-
-    // FILE *fptr;
-    // fptr = fopen(file_name, "w");
-
-    // if (my_QV_equal0(gel(cup_matrix, 1)) && my_QV_equal0(gel(cup_matrix, 2)) && my_QV_equal0(gel(cup_matrix, 3)))
-    // {
-    //     printf(ANSI_COLOR_GREEN "Rank 0 \n\n" ANSI_COLOR_RESET);
-    //     pari_fprintf(fptr, "{\"p\": \"%d\", \"D\": \"%Ps\", \"K-cyc\": \"%Ps\", \"Lx-cyc\": \"%Ps\", \"Ly-cyc\": \"%Ps\", \"M-rk\": \"0\", \"CM\": \"%Ps\"},\n", cup_matrix);
-    // }
-    // else if (cup_det_12==1 || cup_det_13==1 || cup_det_23==1)
-    // {
-    //     printf(ANSI_COLOR_YELLOW "Rank 2 \n\n" ANSI_COLOR_RESET);
-    //     pari_fprintf(fptr, "{\"p\": \"%d\", \"D\": \"%Ps\", \"K-cyc\": \"%Ps\", \"Lx-cyc\": \"%Ps\", \"Ly-cyc\": \"%Ps\", \"M-rk\": \"2\", \"CM\": \"%Ps\"},\n", cup_matrix);
-    // }
-    // else {
-    //     printf(ANSI_COLOR_YELLOW "Rank 1 \n\n" ANSI_COLOR_RESET);
-    //     pari_fprintf(fptr, "{\"p\": \"%d\", \"D\": \"%Ps\", \"K-cyc\": \"%Ps\", \"Lx-cyc\": \"%Ps\", \"Ly-cyc\": \"%Ps\", \"M-rk\": \"1\", \"CM\": \"%Ps\"},\n", cup_matrix);
-    // }
-    
-    // fclose(fptr);
 
     printf(ANSI_COLOR_GREEN "Done! \n \n" ANSI_COLOR_RESET);
 
