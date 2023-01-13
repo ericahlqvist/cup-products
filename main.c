@@ -25,9 +25,6 @@ main (int argc, char *argv[])
     //--------
     clock_t start = clock();
     //--------
-    // char prime_str = argv[1];
-    // char my_det = argv[2];
-    //char swap_str[100];
     
 
     int p_int, my_int, p_rk, i;
@@ -50,7 +47,6 @@ main (int argc, char *argv[])
 
     D = stoi(my_int);
     D_prime_vect = gel(factor(D), 1);
-    
 
     // Define K.pol
     f = gsubgs(gsqr(s), my_int);
@@ -83,31 +79,6 @@ main (int argc, char *argv[])
 
     GEN K_ext = my_ext(K, p_ClFld_pol, my_int, s, p, D_prime_vect, p_rk);
 
-    // for (i=1; i<p_rk+1; ++i) {
-    //     my_test_artin_symbol(gel(gel(K_ext, i), 1), gel(gel(K_ext, i), 2), K, p_int, gel(gel(K_ext, i), 3));
-    // }
-    //printf("length: %ld\n", glength(K_ext));
-    // char file_name[100];
-
-    // int Dmod8 = -my_int%8;
-    // int Dmod16 = -my_int%16;
-    // int mod;
-
-    // if (Dmod8 == 3 || Dmod8 == 7) {
-    //     mod = 8;
-    // }
-    // else if (Dmod16 == 4 || Dmod16 == 8) {
-    //     mod = 16;
-    // }
-    // else {
-    //     printf(ANSI_COLOR_RED "Wrong discriminant\n\n" ANSI_COLOR_RESET);
-    //     pari_close();
-    //     exit(0);
-    // }
-
-    // sprintf(file_name, "output/%d_%dmod%d.json", p_int, Dmod8, mod);
-    // printf("%s", file_name);
-    // printf("\n");
     
     //Defines a matrix over F_2 with index (i*k, j) corresponding to 
     //< x_i\cup x_k, (a_j, J_j)>
