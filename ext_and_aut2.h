@@ -161,6 +161,9 @@ GEN my_ext(GEN base, GEN base_clf, GEN s, GEN p, int p_rk, GEN D_prime_vect)
             }
         }
         printf(ANSI_COLOR_CYAN "---> sigma <--- \n \n" ANSI_COLOR_RESET);
+        
+        //Should throw away some trash here to free memory
+
         gel(base_ext, i) = mkvec3(Labs, Lrel, sigma);
         //my_test_artin_symbol (Labs, Lrel, base, itos(p), sigma);
     }

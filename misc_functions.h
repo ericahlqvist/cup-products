@@ -762,12 +762,12 @@ GEN my_find_Ja_vect(GEN K, GEN J_vect, GEN p) {
     GEN Ja_vect = zerovec(l);
     GEN a;
     int i;
-    printf("Hej\n");
+    
     for (i=1; i<l+1; ++i) {
         a = nfinv(K, gel(bnfisprincipal0(K, idealpow(K, gel(J_vect, i), p), 1), 2));
         gel(Ja_vect, i) = mkvec2(a, gel(J_vect, i));
     }
-    printf("Hå\n");
+    
     return Ja_vect;
 }
 
