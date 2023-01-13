@@ -34,40 +34,46 @@ main (int argc, char *argv[])
     int sec;
     int msec;
     
-    pari_init(4000000000,500000);
+    pari_init(8000000000,500000);
     // printf("Initial adress: %ld\n", avma);
     // pari_sp limit = stack_lim(avma, 1);
     
     GEN p = cgeti(DEFAULTPREC);
     GEN s = pol_x(fetch_user_var("s"));
-    GEN K, f, Kcyc, p_ClFld_pol, J_vect, Ja_vect;
+    GEN K, f, Kcyc, p_ClFld_pol, J_vect, Ja_vect, D, D_prime_vect;
 
     p = gp_read_str(argv[1]);
     p_int = atoi(argv[1]);
     
     f = gp_read_str(argv[2]);
+    D = gp_read_str(argv[3]);
+    D_prime_vect = gel(factor(D), 1);
+
     pari_printf("POL: %Ps\n", f);
 
     // Define K.pol
     printf("\n");
-
+    
     // Define base field K
     K = Buchall(f, nf_FORCE, DEFAULTPREC);
     //tu = bnf_get_tuU(K);
     Kcyc = bnf_get_cyc(K);
+    pari_printf("K cyc: %Ps\n\n", Kcyc);
+    pari_printf("Discriminant: %Ps\n\n", D);
     p_ClFld_pol = bnrclassfield(K, p, 0, DEFAULTPREC);
-    //pari_printf("Fund units: %Ps\n", bnf_get_fu(K));
-    //pari_printf("Tors units: %Ps\n", bnf_get_tuU(K));
+    //pari_printf("p Cl Fld: %Ps\n\n", bnrclassfield(K, p, 2, DEFAULTPREC));
+    pari_printf("Fund units: %Ps\n", bnf_get_fu(K));
+    pari_printf("Tors units: %Ps\n", bnf_get_tuU(K));
 
-    GEN units_mod_2 = my_find_units_mod_2(K);
-    //pari_printf("Units mod 2: %Ps\n", units_mod_2);
+    GEN units_mod_p = my_find_units_mod_p(K, p);
+    printf("Nr of units mod p: %ld\n", glength(units_mod_p));
 
     J_vect = my_find_p_gens(K, p);
     //pari_printf("J_vect: %Ps\n\n", J_vect);
-    if (p_int == 2) {
-        Ja_vect = my_find_Ja_vect(K, J_vect);
-        //pari_printf("Ja_vect: %Ps\n\n", Ja_vect);
-    }
+    
+    Ja_vect = my_find_Ja_vect(K, J_vect, p);
+    //pari_printf("Ja_vect: %Ps\n\n", Ja_vect);
+    
     
     
     
@@ -86,12 +92,12 @@ main (int argc, char *argv[])
 
     pari_printf("p_int: %d\n\nmy_pol: %Ps\n\nK_cyc: %Ps\n\nK_basis: %Ps\n\n", p_int, f, Kcyc, nf_get_zk(bnf_get_nf(K)));
 
-    GEN K_ext = my_ext(K, p_ClFld_pol, s, p, p_rk);
+    GEN K_ext = my_ext(K, p_ClFld_pol, s, p, p_rk, D_prime_vect);
     
     
     //Defines a matrix over F_2 with index (i*k, j) corresponding to 
     //< x_i\cup x_k, (a_j, J_j)>
-    GEN cup_matrix = my_cup_matrix(K_ext, K, p, p_int, p_rk, J_vect, Ja_vect, units_mod_2);
+    GEN cup_matrix = my_cup_matrix(K_ext, K, p, p_int, p_rk, J_vect, Ja_vect, units_mod_p);
     int k;
     printf(ANSI_COLOR_YELLOW "Cup Matrix:  \n\n" ANSI_COLOR_RESET);
     for (i=1; i<p_rk+1; ++i) {

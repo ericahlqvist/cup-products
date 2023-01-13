@@ -22,7 +22,7 @@ GEN my_p_Artin_symbol(GEN Labs, GEN Lrel, GEN K, GEN K_factorization, GEN p, GEN
     else {
         exp = idealnorm(K, prime); //prime_below
         // pari_printf("Norm p: %Ps\n\nExp: %Ps\n\n", idealnorm(K, prime), exp);
-        // printf(ANSI_COLOR_YELLOW "Inert\n\n" ANSI_COLOR_RESET);
+        //printf(ANSI_COLOR_YELLOW "Inert\n\n" ANSI_COLOR_RESET);
     }
      //idealnorm(K, prime);
     //pari_printf("Norm p: %Ps\n\n", exp);

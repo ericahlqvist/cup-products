@@ -122,7 +122,7 @@ GEN my_ext_old(GEN base, GEN base_clf, int disc, GEN s, GEN p, GEN D_prime_vect,
     return base_ext;
 }
 
-GEN my_ext(GEN base, GEN base_clf, GEN s, GEN p, int p_rk) 
+GEN my_ext(GEN base, GEN base_clf, GEN s, GEN p, int p_rk, GEN D_prime_vect) 
 {   
     printf("Finding extensions... \n\n");
     GEN x, y, p1, q1, p1red, Lrel, Labs, s_lift_x, cx, sigma;
@@ -140,14 +140,13 @@ GEN my_ext(GEN base, GEN base_clf, GEN s, GEN p, int p_rk)
         q1 = gsubstpol(p1, x, y);
 
         /* Define Lrel/Labs */
-        p1red = rnfpolredbest(base, q1, 0);
-        //printf("p1red found\n");
+        p1red = rnfpolredbest(base, mkvec2(q1, D_prime_vect), 0);
         Lrel = rnfinit(base, p1red);
         //printf("Lrel found\n");
         Labs = Buchall(rnf_get_polabs(Lrel), nf_FORCE, DEFAULTPREC);
         //printf("Labs found\n");
         pari_printf("L_cyc[%d]: %Ps\n", i, bnf_get_cyc(Labs));
-        pari_printf("abs pol: %Ps\n\n", rnf_get_polabs(Lrel));
+        pari_printf("abs pol: %Ps\n\n", gsubstpol(rnf_get_polabs(Lrel),y, s));
 
         s_lift_x = rnfeltup0(Lrel, s, 1);
         cx = galoisconj(Labs, NULL);

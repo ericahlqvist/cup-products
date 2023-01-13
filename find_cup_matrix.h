@@ -1,7 +1,7 @@
 //Defines a matrix over F_2 with index (i*k, j) corresponding to 
 //< x_i\cup x_k, (a_j, J_j)>
 
-GEN my_cup_matrix (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN J_vect, GEN Ja_vect, GEN units_mod_2)
+GEN my_cup_matrix (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN J_vect, GEN Ja_vect, GEN units_mod_p)
 {
     GEN NIpJ, I_vect, I_rel, Labs, Lrel, sigma, Labs_cup, Lrel_cup, sigma_cup;
     int nr_col = (p_rk*p_rk);
@@ -9,7 +9,7 @@ GEN my_cup_matrix (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN J_vect, GEN
     
     int i, j, k;
     for (i=1; i<(p_rk*p_rk+1); ++i) {
-        gel(cup_matrix, i) = zerovec(p_rk+glength(units_mod_2));
+        gel(cup_matrix, i) = zerovec(p_rk+glength(units_mod_p));
     }
     //pari_printf("cup_mat: %Ps\n\n", cup_matrix);
     // i:th extension, j:th ideal J, evaluate on k:th extension 
@@ -20,12 +20,7 @@ GEN my_cup_matrix (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN J_vect, GEN
         sigma_cup = gel(gel(K_ext, i), 3);
 
         // I_vect corresp. to i:th extension
-        if (p_int ==2) {
-            I_vect = my_find_I_vect2(Labs_cup, Lrel_cup, K, sigma_cup, J_vect, Ja_vect, units_mod_2, p_int);
-        }
-        else {
-            I_vect = my_find_I_vect(Labs_cup, Lrel_cup, K, sigma_cup, J_vect);
-        }
+        I_vect = my_find_I_vect2(Labs_cup, Lrel_cup, K, sigma_cup, J_vect, Ja_vect, units_mod_p, p_int);
         
         
         //pari_printf("I_vect: %Ps\n\n", I_vect);
@@ -39,13 +34,8 @@ GEN my_cup_matrix (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN J_vect, GEN
         //     printf(ANSI_COLOR_RED "H90 test  failed\n\n" ANSI_COLOR_RESET);
         // }
         // //----- test done
-        int added;
-        if (p_int == 2) {
-            added = 1+glength(units_mod_2);
-        }
-        else {
-            added = 1;
-        }
+        int added = 1+glength(units_mod_p);
+        
         for (j=1; j<p_rk+added; ++j) {
             // evaluate cup on j:th basis class (a,J) 
            

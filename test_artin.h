@@ -1,14 +1,13 @@
-int my_test_artin_symbol (GEN Labs, GEN Lrel, GEN K, int p, GEN sigma) {
+void my_test_artin_symbol (GEN Labs, GEN Lrel, GEN K, int p, GEN sigma) {
     
     GEN I = gel(bnf_get_gen(K), 1);
-    GEN elem = zerocol(2);
+    GEN elem = zerocol(nf_get_degree(bnf_get_nf(K)));
     gel(elem, 2) = gen_1;
     GEN I_mod = idealmul(K, idealhnf0(K, elem, NULL), I);
-    GEN elem2 = zerocol(2);
+    GEN elem2 = zerocol(nf_get_degree(bnf_get_nf(K)));
     gel(elem2, 2) = gen_1;
     gel(elem2, 1) = gen_1;
-
-
+    
     if (gequal(my_Artin_symbol(Labs, Lrel, K, I, p, sigma), my_Artin_symbol(Labs, Lrel, K, I_mod, p, sigma)))
     {
         printf(ANSI_COLOR_GREEN "Artin symbol test 1: PASSED\n\n" ANSI_COLOR_RESET);
@@ -18,7 +17,7 @@ int my_test_artin_symbol (GEN Labs, GEN Lrel, GEN K, int p, GEN sigma) {
         pari_close();
         exit(0);
     }
-
+    
     if (gequal(my_Artin_symbol(Labs, Lrel, K, idealpow(K, I, gen_2), p, sigma), my_Artin_symbol(Labs, Lrel, K, idealred(K, idealpow(K, I, gen_2)), p, sigma)))
     {
         printf(ANSI_COLOR_GREEN "Artin symbol test 2: PASSED\n\n" ANSI_COLOR_RESET);
@@ -30,7 +29,7 @@ int my_test_artin_symbol (GEN Labs, GEN Lrel, GEN K, int p, GEN sigma) {
         pari_close();
         exit(0);
     }
-
+    
     if (gequal(my_Artin_symbol(Labs, Lrel, K, idealpow(K, I, gen_2), p, sigma), my_Artin_symbol(Labs, Lrel, K, idealmul(K, idealpow(K, I, gen_2), idealhnf0(K, elem2, NULL)), p, sigma)))
     {
         printf(ANSI_COLOR_GREEN "Artin symbol test 3: PASSED\n\n" ANSI_COLOR_RESET);
@@ -41,13 +40,11 @@ int my_test_artin_symbol (GEN Labs, GEN Lrel, GEN K, int p, GEN sigma) {
         exit(0);
     }
 
-    return 0;
 }
 
-int my_test_artin_symbol_spec (GEN Labs, GEN Lrel, GEN K, int p, GEN I, GEN sigma) {
+void my_test_artin_symbol_spec (GEN Labs, GEN Lrel, GEN K, int p, GEN I, GEN sigma) {
     pari_printf("Artin symbol: %Ps\n\n", my_Artin_symbol(Labs, Lrel, K, I, p, sigma));
 
-    return 0;
 }
 
 void my_test_artin_on_norms (GEN Labs, GEN Lrel, GEN K, int p, GEN sigma) {

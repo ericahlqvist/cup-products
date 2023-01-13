@@ -115,7 +115,7 @@ GEN my_norm (GEN Labs, GEN Lrel, GEN L, GEN elem, GEN sigma, int p) {
     }
     
     GEN norm = algtobasis(L, rnfeltdown(Lrel, rnfeltabstorel(Lrel, new_elem)));
-    // printf("Hoooj\n\n");
+    
     return norm;
 }
 
@@ -436,13 +436,13 @@ GEN my_find_H90_ideal (GEN LyAbs, GEN LyRel, GEN K, GEN iJ_div_a2, GEN sigma_y, 
     GEN factorization = idealfactor(LyAbs, iJ_div_a2);
     
     GEN primes_and_es_in_factorization = my_find_primes_in_factorization(LyAbs, factorization);
-    pari_printf("primes_and_es: %Ps\n\n", primes_and_es_in_factorization);
+    //pari_printf("primes_and_es: %Ps\n\n", primes_and_es_in_factorization);
     // output(primes_and_es_in_factorization);
     GEN prime_vect = gel(primes_and_es_in_factorization,1);
     //pari_printf("prime_vect: %Ps\n\n", prime_vect);
     GEN primes_under = my_find_primes_under(LyRel, K, prime_vect);
     GEN primes_and_es_by_primes_under = my_sort_primes_and_es(LyRel, K, primes_and_es_in_factorization, primes_under);
-    printf("Factorization for H90 done\n\n");
+    //printf("Factorization for H90 done\n\n");
     
 
     GEN H90_ideal = idealhnf0(LyAbs, gen_1, NULL);
@@ -475,6 +475,7 @@ GEN my_factor_I_by_primes_below (GEN Labs, GEN Lrel, GEN K, GEN I) {
 }
 
 GEN my_Gal_rel (GEN Labs, GEN Lrel, GEN K, GEN sigma, int p) {
+    
     GEN Gal_rel = zerovec(p);
     GEN current_sigma = sigma;
     int i;
@@ -485,7 +486,7 @@ GEN my_Gal_rel (GEN Labs, GEN Lrel, GEN K, GEN sigma, int p) {
         current_sigma = galoisapply(Labs, sigma, current_sigma); 
         
     }
-    
+
     return Gal_rel;
 }
 
@@ -720,49 +721,53 @@ GEN my_reduce_H1_mod (GEN LxAbs, GEN sigma_x, GEN v, GEN elem, GEN p) {
     return new_v;
 }
 
+// Works when torsion is 2 power torsion
+GEN my_find_units_mod_p (GEN K, GEN p) {
+    GEN fund_units = bnf_get_fu(K);
+    GEN tors_units = bnf_get_tuU(K);
+    GEN units_mod_p = fund_units;
+
+    if (gequal1(nfpow(K, tors_units, p))) {
+            units_mod_p = shallowconcat(units_mod_p, mkvec(tors_units));
+    }
+    
+    return units_mod_p;
+}
+
 GEN my_find_p_gens (GEN K, GEN p)
 {
     GEN my_n = bnf_get_cyc(K);
     int l = glength(my_n);
-    // adding one index with the trivial ideal for a technical reason
+    
     GEN p_gens;
-    int equal2 = (itos(p)==2);
-    if (equal2) {
-        p_gens = zerovec(l+1);
-    }
-    else {
-        p_gens = zerovec(l);
-    }
+    p_gens = zerovec(l);
     GEN current_gen;
     
-    // int l = glength(my_n);
     GEN my_gens = bnf_get_gen(K);
-    pari_printf("my_gens: %Ps\n\n", my_gens);
+    //pari_printf("my_gens: %Ps\n\n", my_gens);
     int i;
     for (i = 1; i < l+1; ++i)
     {
-        // pari_printf("my_n, my_n/p, gen^my_n: %Ps, %Ps, %Ps\n\n", gel(my_n, i), gdiv(gel(my_n, i),p), gel(bnfisprincipal0(K, idealpow(K, gel(my_gens, i), gel(my_n, i)), 1), 1));
+        //pari_printf("my_n, my_n/p, gen^my_n: %Ps, %Ps, %Ps\n\n", gel(my_n, i), gdiv(gel(my_n, i),p), gel(bnfisprincipal0(K, idealpow(K, gel(my_gens, i), gel(my_n, i)), 1), 1));
         current_gen = idealpow(K,gel(my_gens, i), gdiv(gel(my_n, i),p));
         //pari_printf("current_gen: %Ps\n\n", current_gen);
         gel(p_gens, i) = idealred(K, current_gen);
     }
-    if (equal2) {
-        gel(p_gens, l+1) = idealhnf(K, gen_1);
-    }
-
+    
     return p_gens;
 }
 
-GEN my_find_Ja_vect(GEN K, GEN J_vect) {
+GEN my_find_Ja_vect(GEN K, GEN J_vect, GEN p) {
     int l = glength(J_vect);
     GEN Ja_vect = zerovec(l);
     GEN a;
     int i;
-
+    printf("Hej\n");
     for (i=1; i<l+1; ++i) {
-        a = nfinv(K, gel(bnfisprincipal0(K, idealpow(K, gel(J_vect, i), gen_2), 1), 2));
+        a = nfinv(K, gel(bnfisprincipal0(K, idealpow(K, gel(J_vect, i), p), 1), 2));
         gel(Ja_vect, i) = mkvec2(a, gel(J_vect, i));
     }
+    printf("Hå\n");
     return Ja_vect;
 }
 
@@ -833,46 +838,48 @@ GEN my_find_I_v2 (GEN Labs, GEN Lrel, GEN sigma, GEN K, GEN a, GEN iJ, int p_int
     div_t_J_inv = idealdiv(Labs, div_t, iJ);
     
     if (my_SQ_MAT_equal(div_t_J_inv, idealhnf0(Labs, gen_1, NULL))) {
-        printf("triv\n");
+        //printf("triv\n");
         I = idealhnf0(Labs, gen_1, NULL);
         
     }
     else {
         I = my_find_H90_ideal(Labs, Lrel, K, div_t_J_inv, sigma, p_int);
-        printf("non-triv\n");
+        //printf("non-triv\n");
     }
     //pari_printf("I: %Ps\n\n", I);
     return I;
 }
 
 // find I such that div(t)+(1-sigma)I = 0 and N(t)=-1
-GEN my_find_final_I (GEN Labs, GEN Lrel, GEN sigma, GEN K, int p_int) {
+GEN my_find_final_I (GEN Labs, GEN Lrel, GEN sigma, GEN K, GEN unit, int p_int) {
     GEN t, div_t, I, T;
-
+    //pari_printf("u: %Ps\n", unit);
     T = rnfisnorminit(K, rnf_get_pol(Lrel), 1);
     //tu = bnf_get_tuU(K);
-    t = rnfeltreltoabs(Lrel, gel(rnfisnorm(T, stoi(-1), 0),1));
-    
+    t = rnfeltreltoabs(Lrel, gel(rnfisnorm(T, unit, 0),1));
     div_t = idealhnf0(Labs, t, NULL);
     
     if (my_SQ_MAT_equal(div_t, idealhnf0(Labs, gen_1, NULL))) {
-        printf("triv\n");
+        //printf("triv\n");
         I = idealhnf0(Labs, gen_1, NULL);
         
     }
     else {
         I = my_find_H90_ideal(Labs, Lrel, K, div_t, sigma, p_int);
-        printf("non-triv\n");
+        //printf("non-triv\n");
     }
     
     return I;
 }
 
-GEN my_find_I_vect2 (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN J_vect, GEN Ja_vect, int p_int) {
-    int p_rk = glength(J_vect)-1;
-    GEN I_vect = zerovec(p_rk+1);
+GEN my_find_I_vect2 (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN J_vect, GEN Ja_vect, GEN units_mod_2, int p_int) {
+    
+    int p_rk = glength(J_vect);
+    int u_length = glength(units_mod_2);
+    GEN I_vect = zerovec(p_rk+u_length);
     GEN I;
     GEN ext_gen;
+    
     //pari_printf("%Ps\n", gel(ext_gens, 1));
     
     int i;
@@ -885,8 +892,12 @@ GEN my_find_I_vect2 (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN J_vect, GEN Ja_ve
         gel(I_vect, i) = I;
     } 
     
-    gel(I_vect, p_rk+1) = my_find_final_I(Labs, Lrel, sigma, K, p_int);
-
+    for (i = p_rk+1; i < p_rk+u_length+1; i++)
+    {
+        gel(I_vect, i) = my_find_final_I(Labs, Lrel, sigma, K, gel(units_mod_2, i-p_rk), p_int);
+        
+    }
+    
     return I_vect;
 }
 
