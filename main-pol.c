@@ -40,6 +40,7 @@ main (int argc, char *argv[])
     
     GEN p = cgeti(DEFAULTPREC);
     GEN s = pol_x(fetch_user_var("s"));
+    GEN x = pol_x(fetch_user_var("x"));
     GEN K, f, Kcyc, p_ClFld_pol, J_vect, Ja_vect, D, D_prime_vect;
 
     p = gp_read_str(argv[1]);
@@ -61,9 +62,10 @@ main (int argc, char *argv[])
     pari_printf("K cyc: %Ps\n\n", Kcyc);
     pari_printf("Discriminant: %Ps\n\n", D);
     p_ClFld_pol = bnrclassfield(K, p, 0, DEFAULTPREC);
-    //pari_printf("p Cl Fld: %Ps\n\n", bnrclassfield(K, p, 2, DEFAULTPREC));
-    pari_printf("Fund units: %Ps\n", bnf_get_fu(K));
-    pari_printf("Tors units: %Ps\n", bnf_get_tuU(K));
+    // GEN clf_pol = gsubstpol(bnrclassfield(K, p, 2, DEFAULTPREC), x, s);
+    pari_printf("p Cl Fld: %Ps\n\n", p_ClFld_pol);
+    // pari_printf("Fund units: %Ps\n", bnf_get_fu(K));
+    // pari_printf("Tors units: %Ps\n", bnf_get_tuU(K));
 
     GEN units_mod_p = my_find_units_mod_p(K, p);
     printf("Nr of units mod p: %ld\n", glength(units_mod_p));
