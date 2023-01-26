@@ -1,0 +1,22 @@
+F<g1,g2,g3,g4> := FreeGroup(4);          
+Q, fQ := pQuotient(F, 2, 2 : Print := 1);
+cup_rels := { (a,c)*(b,c)*(b,d)*c^2*(c,d), a^2*(a,c)*(b,c)*(c,d), (a,b)*(a,c)*(a,d)*(b,c)*(b,d)*d^2, (a,b)*(a,c)*b^2*(b,d)*(c,d), (a,b)*(a,c)*(b,c) };
+Q_2 := quo< Q | cup_rels >;
+
+Q;                                       
+GrpPC : Q of order 16384 = 2^14
+PC-Relations:
+    Q.1^2 = Q.11, 
+    Q.2^2 = Q.12, 
+    Q.3^2 = Q.13, 
+    Q.4^2 = Q.14, 
+    Q.2^Q.1 = Q.2 * Q.5, 
+    Q.3^Q.1 = Q.3 * Q.6, 
+    Q.3^Q.2 = Q.3 * Q.7, 
+    Q.4^Q.1 = Q.4 * Q.8, 
+    Q.4^Q.2 = Q.4 * Q.9, 
+    Q.4^Q.3 = Q.4 * Q.10
+a := Q.1;
+b := Q.2;
+c := Q.3;
+d := Q.4;

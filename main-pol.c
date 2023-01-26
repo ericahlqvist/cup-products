@@ -63,7 +63,9 @@ main (int argc, char *argv[])
     pari_printf("Discriminant: %Ps\n\n", D);
     p_ClFld_pol = bnrclassfield(K, p, 0, DEFAULTPREC);
     // GEN clf_pol = gsubstpol(bnrclassfield(K, p, 2, DEFAULTPREC), x, s);
+    GEN clf_pol = bnrclassfield(K, p, 2, DEFAULTPREC);
     pari_printf("p Cl Fld: %Ps\n\n", p_ClFld_pol);
+    pari_printf("abs pol: %Ps\n\n", clf_pol);
     // pari_printf("Fund units: %Ps\n", bnf_get_fu(K));
     // pari_printf("Tors units: %Ps\n", bnf_get_tuU(K));
 
