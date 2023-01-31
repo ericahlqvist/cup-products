@@ -28,7 +28,7 @@ main (int argc, char *argv[])
     //--------
     
 
-    int p_int, p_rk, i;
+    int p_int, p_rk, r_rk, i;
 
     int min;
     int sec;
@@ -90,8 +90,9 @@ main (int argc, char *argv[])
     // }
     
     p_rk = glength(J_vect);
-    
+    r_rk = glength(Ja_vect)+glength(units_mod_p);
     printf("p-rank: %d\n\n", p_rk);
+    printf("r-rank: %d\n\n", r_rk);
 
 
     pari_printf("p_int: %d\n\nmy_pol: %Ps\n\nK_cyc: %Ps\n\nK_basis: %Ps\n\n", p_int, f, Kcyc, nf_get_zk(bnf_get_nf(K)));
@@ -111,6 +112,32 @@ main (int argc, char *argv[])
     }
     printf("\n\n");
 
+    char letters[] = "abcdefghijklmnopqr";
+    printf(ANSI_COLOR_YELLOW "Cup relations:  \n\n" ANSI_COLOR_RESET);
+    int j;
+    printf("{");
+    for (j=1; j<r_rk+1; j++) {
+        for (i=1; i<p_rk+1; ++i) {
+            for (k=i; k<p_rk+1; k++) {
+                if (gequal1(gel(gel(cup_matrix, (i-1)*p_rk+k), j))) {
+                    if (i==k) {
+                        printf("%c^2", letters[i-1]);
+                    }
+                    else {
+                        printf("(%c,%c)", letters[i-1],letters[k-1]);
+                    }
+                }
+            }
+            
+        }
+        if (j==r_rk) {
+            printf("}\n");
+        }
+        else {
+            printf(",\n");
+        }
+    }
+    printf("\n\n");
     printf(ANSI_COLOR_GREEN "Done! \n \n" ANSI_COLOR_RESET);
 
     // Close pari
