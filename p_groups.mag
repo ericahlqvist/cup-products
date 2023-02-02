@@ -4,29 +4,83 @@ a := Q.1;
 b := Q.2;
 c := Q.3;
 d := Q.4;
+Q_2 := quo< Q | cup_rels >;
 
 // 5460:
 cup_rels := { (a,c)*(b,c)*(b,d)*c^2*(c,d), a^2*(a,c)*(b,c)*(c,d), (a,b)*(a,c)*(a,d)*(b,c)*(b,d)*d^2, (a,b)*(a,c)*b^2*(b,d)*(c,d), (a,b)*(a,c)*(b,c) };
 
 // L_1
-cup_rels := {(a,c)*b^2*(b,c)};
+F<g1,g2,g3> := FreeGroup(3);          
+Q, fQ := pQuotient(F, 2, 2 : Print := 1);
+a := Q.1;
+b := Q.2;
+c := Q.3;
+cup_rels := {(b,c)*b^2*(a,c)};
+Q_2_L_1 := quo< Q | cup_rels >;
+Q_2_L_1;
 
 // L_2
-cup_rels := {a^2*(a,b)*(a,c)};
+F<g1,g2,g3> := FreeGroup(3);          
+Q, fQ := pQuotient(F, 2, 2 : Print := 1);
+a := Q.1;
+b := Q.2;
+c := Q.3;
+cup_rels := {(a,c)*(a,b)*a^2};
+Q_2_L_2 := quo< Q | cup_rels >;
+Q_2_L_2;
 
 // L_3
+F<g1,g2,g3> := FreeGroup(3);          
+Q, fQ := pQuotient(F, 2, 2 : Print := 1);
+a := Q.1;
+b := Q.2;
+c := Q.3;
 cup_rels := {a^2*(a,b)*(a,c)};
+Q_2_L_3 := quo< Q | cup_rels >;
+Q_2_L_3;
 
 // L_4
+F<g1,g2,g3,g4> := FreeGroup(4);          
+Q, fQ := pQuotient(F, 2, 2 : Print := 1);
+a := Q.1;
+b := Q.2;
+c := Q.3;
+d := Q.4;
 cup_rels := {(a,b)*(b,d), (c,d), (a,c)*(a,d)*b^2, (a,c)*c^2, (a,b)*(b,c)*(b,d), (b,c)};
+Q_2_L_4 := quo< Q | cup_rels >;
+Q_2_L_4;
 
-Q_2 := quo< Q | cup_rels >;
-NuclearRank(Q_2);
-pMultiplicatorRank(Q_2);
-printf "r(G_L) >= %o\n", pMultiplicatorRank(Q_2)-NuclearRank(Q_2);
+
+NuclearRank(Q_2_L_1);
+pMultiplicatorRank(Q_2_L_1);
+printf "r(G_L) >= %o\n", pMultiplicatorRank(Q_2_L_1)-NuclearRank(Q_2_L_1);
+
+//-------- Conjectured candidates --------
+F<a, b, c, d> := FreeGroup(4);
+rels_1 := {a^2=(d, c), b^2=(d, a)*((d, b), b), c^2=(b, a)*((d, b), b), d^2=(c, a)*(d, a)*(d, b)*(b, a, a)*(c, a, a)*(d, a, a), (b, c)=Id(F)};
+rels_2 := {a^2=(d, c), b^2=(d, a)*((d, b), b), c^2=(b, a)*(b, a, d)*(c, a, a)*((d, b), b), d^2=(c, a)*(d, a)*(d, b)*(b, a, a)*(b, a, d), (b, c)=Id(F)};
+Q<x, y, z, w>, phi :=  quo< F | rels_1 >;
+Q_3, fQ_3 := pQuotient(Q, 2, 3 : Print := 1);
+p_subgroups := LowIndexSubgroups(Q_3, 2);
+Q_t, fQ_t := pQuotient(p_subgroups[15], 2, 2 : Print := 1);
+IsIsomorphic(Q_t, Q_2_L_1);
+
 
 //-------- Searching for Q_3 -----------
+SetVerbose ("GeneratepGroups", 1); 
+Q_3_candidates := Descendants(Q_2);
+// yields 81+1388+8784+35776+72704+32768 = 151501 candidates
 
-
+//------ order 2^15
+Q_3_candidates := Descendants(Q_2 : StepSizes: [6]);
                                     
+//--------- test ----------
 
+S := SmallGroup(256, 541);   
+l := LowIndexSubgroups(S,2);
+#l;
+q_2, fq_2 := pQuotient(l[4], 2, 2 : Print := 1);  
+q_3, fq_3 := pQuotient(S, 2, 3 : Print := 1);   
+j := LowIndexSubgroups(q_3, 2);   
+r_2, fr_2 := pQuotient(j[4], 2, 2 : Print := 1);  
+IsIsomorphic(q_2, r_2);  
