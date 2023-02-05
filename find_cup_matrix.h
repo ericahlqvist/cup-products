@@ -23,7 +23,7 @@ GEN my_cup_matrix (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN J_vect, GEN
         I_vect = my_find_I_vect2(Labs_cup, Lrel_cup, K, sigma_cup, J_vect, Ja_vect, units_mod_p, p_int);
         
         
-        //pari_printf("I_vect: %Ps\n\n", I_vect);
+        printf("I_vect nr: %d\n\n", i);
 
         // //Test that we get a correct I
         // if (my_test_H90_ideal(Labs_cup, Lrel_cup, K, sigma_cup, I_vect, J_vect))
@@ -40,6 +40,7 @@ GEN my_cup_matrix (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN J_vect, GEN
             // evaluate cup on j:th basis class (a,J) 
            
             I_rel = rnfidealabstorel(Lrel_cup, gel(I_vect, j));
+            printf("I, %d to rel\n\n", j);
             if (j <= glength(J_vect)) {
                 NIpJ = idealmul(K, rnfidealnormrel(Lrel_cup, I_rel), gel(J_vect, j));
             }

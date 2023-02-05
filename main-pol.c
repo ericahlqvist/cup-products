@@ -62,13 +62,16 @@ main (int argc, char *argv[])
     pari_printf("K cyc: %Ps\n\n", Kcyc);
     pari_printf("Discriminant: %Ps\n\n", D);
     p_ClFld_pol = bnrclassfield(K, p, 0, DEFAULTPREC);
-    // GEN clf_pol = gsubstpol(bnrclassfield(K, p, 2, DEFAULTPREC), x, s);
-    GEN clf_pol = bnrclassfield(K, p, 2, DEFAULTPREC);
     pari_printf("p Cl Fld: %Ps\n\n", p_ClFld_pol);
-    pari_printf("abs pol: %Ps\n\n", clf_pol);
-    // pari_printf("Fund units: %Ps\n", bnf_get_fu(K));
-    // pari_printf("Tors units: %Ps\n", bnf_get_tuU(K));
+    pari_printf("Fund units: %Ps\n", bnf_get_fu(K));
+    pari_printf("Tors units: %Ps\n\n", bnf_get_tuU(K));
 
+    // GEN clf_pol = gsubstpol(bnrclassfield(K, p, 2, DEFAULTPREC), x, s);
+    // GEN clf_pol = bnrclassfield(K, p, 2, DEFAULTPREC);
+    // pari_printf("abs pol: %Ps\n\n", clf_pol);
+    my_unramified_p_extensions(K, p, D_prime_vect);
+    
+    
     GEN units_mod_p = my_find_units_mod_p(K, p);
     printf("Nr of units mod p: %ld\n", glength(units_mod_p));
 
@@ -90,15 +93,16 @@ main (int argc, char *argv[])
     // }
     
     p_rk = glength(J_vect);
-    r_rk = glength(Ja_vect)+glength(units_mod_p);
     printf("p-rank: %d\n\n", p_rk);
+
+    r_rk = glength(Ja_vect)+glength(units_mod_p);
     printf("r-rank: %d\n\n", r_rk);
 
 
     pari_printf("p_int: %d\n\nmy_pol: %Ps\n\nK_cyc: %Ps\n\nK_basis: %Ps\n\n", p_int, f, Kcyc, nf_get_zk(bnf_get_nf(K)));
 
     GEN K_ext = my_ext(K, p_ClFld_pol, s, p, p_rk, D_prime_vect);
-    
+    printf("Extensions found\n\n");
     
     //Defines a matrix over F_2 with index (i*k, j) corresponding to 
     //< x_i\cup x_k, (a_j, J_j)>
@@ -128,13 +132,12 @@ main (int argc, char *argv[])
                     }
                 }
             }
-            
         }
         if (j==r_rk) {
             printf("}\n");
         }
         else {
-            printf(",\n");
+            printf(", ");
         }
     }
     printf("\n\n");

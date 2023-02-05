@@ -724,11 +724,12 @@ GEN my_reduce_H1_mod (GEN LxAbs, GEN sigma_x, GEN v, GEN elem, GEN p) {
 // Works when torsion is 2 power torsion
 GEN my_find_units_mod_p (GEN K, GEN p) {
     GEN fund_units = bnf_get_fu(K);
-    GEN tors_units = bnf_get_tuU(K);
+    GEN tors_unit = bnf_get_tuU(K);
     GEN units_mod_p = fund_units;
-
-    if (gequal1(nfpow(K, tors_units, p))) {
-            units_mod_p = shallowconcat(units_mod_p, mkvec(tors_units));
+    // pari_printf("A: %Ps\n", gpow(p, stoi(4), DEFAULTPREC));
+    // pari_printf("B: %Ps\n", nfpow(K, tors_unit, gpow(p, stoi(4), DEFAULTPREC)));
+    if (gequal1(nfpow(K, tors_unit, gpow(p, stoi(4), DEFAULTPREC)))) {
+        units_mod_p = shallowconcat(units_mod_p, mkvec(tors_unit));
     }
     
     return units_mod_p;
@@ -755,6 +756,23 @@ GEN my_find_p_gens (GEN K, GEN p)
     }
     
     return p_gens;
+}
+
+void my_unramified_p_extensions(GEN K, GEN p, GEN D_prime_vect) {
+    int i;
+    GEN s = pol_x(fetch_user_var("s"));
+    GEN x = pol_x(fetch_user_var("x"));
+    GEN index = mkvec(p);
+    // GEN R = nfsubfields0(clf_pol,4,1);
+    GEN R = bnrclassfield(K, subgrouplist0(bnf_get_cyc(K), index, 2), 2, DEFAULTPREC);
+    GEN abs_pol;
+    printf("Deg p extensions:\n\n");
+    for (i=1;i<glength(R)+1;i++) {
+        abs_pol = polredabs0(mkvec2(gel(R, i), D_prime_vect), 0);
+        //abs_pol = polredabs(gel(R, i));
+        pari_printf("%Ps, cyc: %Ps\n", gsubstpol(abs_pol, x, s), bnf_get_cyc(Buchall(abs_pol, nf_FORCE, DEFAULTPREC)));
+    }
+    printf("\n");
 }
 
 GEN my_find_Ja_vect(GEN K, GEN J_vect, GEN p) {
