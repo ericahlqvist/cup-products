@@ -165,12 +165,12 @@ DEFINITION:
 
 GEN my_SM1_ideal (GEN L, GEN sigma, GEN I)
 {
-    return idealmul(L, galoisapply(L, sigma, I), idealinv(L, I));
+    return idealred(L, idealmul(L, galoisapply(L, sigma, I), idealinv(L, I)));
 } 
 
 GEN my_1MS_ideal (GEN L, GEN sigma, GEN I) 
 {
-    GEN output = idealmul(L, I, idealinv(L, galoisapply(L, sigma, I)));
+    GEN output = idealred(L, idealmul(L, I, idealinv(L, galoisapply(L, sigma, I))));
     return output;
 } 
 
@@ -650,11 +650,21 @@ GEN my_get_clgp (GEN K)
             // output(idealnorm(K, current_I));
             // printf("\n");
         }
+        printf("%d/%d\n", n, clnr);
         gel(class_group, n) = idealred(K, current_I); 
     }
     
     class_group = gerepilecopy(av, class_group);
     return class_group;
+}
+
+GEN my_get_clgp_p (GEN K, GEN p) {
+    GEN clgp = my_get_clgp(K);
+    int i; 
+    for (i=1;i<glength(clgp)+1;i++) {
+        gel(clgp, i) = idealpow(K, gel(clgp, i), p);
+    }
+    return clgp;
 }
 
 GEN my_is_principal_mod_p (GEN K, GEN I, GEN p) {
@@ -758,19 +768,200 @@ GEN my_find_p_gens (GEN K, GEN p)
     return p_gens;
 }
 
+int my_action_on_clgp (GEN L, GEN sigma, GEN p) {
+    GEN gens = bnf_get_gen(L);
+    GEN clgpxp = my_get_clgp_p(L, p);
+    GEN test_ideal, test_vec;
+
+    GEN unit = idealhnf(L, gen_1);
+    int i;
+    int j;
+    int check = 0;
+    GEN ideal;
+    for (i=1;i<glength(gens)+1;i++) {
+        ideal = my_SM1_ideal(L, sigma, gel(gens, i));
+        for (j=1; j<glength(clgpxp)+1;j++) {
+            test_ideal = idealred(L, idealmul(L, ideal, gel(clgpxp, j)));
+            test_vec = bnfisprincipal0(L, test_ideal, 1);
+            if (my_QV_equal0(gel(test_vec, 1))) {
+                check = 1;
+                break;
+            }
+            // if (my_SQ_MAT_equal(test_ideal, unit)) {
+            //     check = 1;
+            //     break;
+            // }
+        }
+        if (check) {
+            printf(ANSI_COLOR_GREEN "ok\n" ANSI_COLOR_RESET);
+        }
+        else {
+            printf(ANSI_COLOR_RED "-\n" ANSI_COLOR_RESET);
+        }
+        check = 0;
+    }
+    printf("\n\n");
+    return 0;
+}
+
 void my_unramified_p_extensions(GEN K, GEN p, GEN D_prime_vect) {
     int i;
     GEN s = pol_x(fetch_user_var("s"));
     GEN x = pol_x(fetch_user_var("x"));
     GEN index = mkvec(p);
     // GEN R = nfsubfields0(clf_pol,4,1);
+    // pari_printf("subgrouplist: %Ps\n", subgrouplist0(bnf_get_cyc(K), mkvec(gpow(p,gen_2, DEFAULTPREC)), 0));
+
     GEN R = bnrclassfield(K, subgrouplist0(bnf_get_cyc(K), index, 2), 2, DEFAULTPREC);
+    GEN Rsq = bnrclassfield(K, subgrouplist0(bnf_get_cyc(K), mkvec(gpow(p,gen_2, DEFAULTPREC)), 2), 2, DEFAULTPREC);
+    GEN Rcb = bnrclassfield(K, subgrouplist0(bnf_get_cyc(K), mkvec(gpow(p,stoi(3), DEFAULTPREC)), 2), 2, DEFAULTPREC);
     GEN abs_pol;
-    printf("Deg p extensions:\n\n");
+    printf("[p]-extensions:\n\n");
     for (i=1;i<glength(R)+1;i++) {
         abs_pol = polredabs0(mkvec2(gel(R, i), D_prime_vect), 0);
         //abs_pol = polredabs(gel(R, i));
         pari_printf("%Ps, cyc: %Ps\n", gsubstpol(abs_pol, x, s), bnf_get_cyc(Buchall(abs_pol, nf_FORCE, DEFAULTPREC)));
+        
+    }
+    printf("\n");
+    printf("[p,p]-extensions:\n\n");
+    for (i=1;i<glength(Rsq)+1;i++) {
+        abs_pol = polredabs0(mkvec2(gel(Rsq, i), D_prime_vect), 0);
+        //abs_pol = polredabs(gel(R, i));
+        pari_printf("%Ps, cyc: %Ps\n", gsubstpol(abs_pol, x, s), bnf_get_cyc(Buchall(abs_pol, nf_FORCE, DEFAULTPREC)));
+    }
+    printf("\n");
+    printf("[p,p,p]-extensions:\n\n");
+    for (i=1;i<glength(Rcb)+1;i++) {
+        abs_pol = polredabs0(mkvec2(gel(Rcb, i), D_prime_vect), 0);
+        //abs_pol = polredabs(gel(R, i));
+        pari_printf("%Ps, cyc: %Ps\n", gsubstpol(abs_pol, x, s), bnf_get_cyc(Buchall(abs_pol, nf_FORCE, DEFAULTPREC)));
+    }
+    printf("\n");
+}
+
+void my_unramified_p_extensions_with_trivial_action(GEN K, GEN p, GEN D_prime_vect) {
+    GEN x, y, p1, q1, p1red, Lrel, Labs, s_lift_x, cx, sigma;
+
+    x = pol_x(fetch_user_var("x"));
+    y = pol_x(fetch_user_var("y"));
+
+    GEN s = pol_x(fetch_user_var("s"));
+    GEN index = mkvec(p);
+    // GEN R = nfsubfields0(clf_pol,4,1);
+    // pari_printf("subgrouplist: %Ps\n", subgrouplist0(bnf_get_cyc(K), mkvec(gpow(p,gen_2, DEFAULTPREC)), 0));
+
+    GEN R = bnrclassfield(K, subgrouplist0(bnf_get_cyc(K), index, 2), 1, DEFAULTPREC);
+    pari_printf("R: %Ps\n", R);
+    GEN Rsq = bnrclassfield(K, subgrouplist0(bnf_get_cyc(K), mkvec(gpow(p,gen_2, DEFAULTPREC)), 2), 1, DEFAULTPREC);
+    pari_printf("Rsq: %Ps\n", Rsq);
+    GEN Rcb = bnrclassfield(K, subgrouplist0(bnf_get_cyc(K), mkvec(gpow(p,stoi(3), DEFAULTPREC)), 2), 1, DEFAULTPREC);
+    pari_printf("Rcb: %Ps\n", Rcb);
+    GEN abs_pol;
+    printf("[p]-extensions:\n\n");
+    int i, j;
+    for (i=1; i<glength(R)+1; ++i) {
+        p1 = gel(R, i);
+        q1 = gsubstpol(p1, x, y);
+
+        /* Define Lrel/Labs */
+        p1red = rnfpolredbest(K, mkvec2(q1, D_prime_vect), 0);
+        Lrel = rnfinit(K, p1red);
+        //printf("Lrel found\n");
+        Labs = Buchall(polredabs0(mkvec2(rnf_get_polabs(Lrel), D_prime_vect), 0), nf_FORCE, DEFAULTPREC);
+        //printf("Labs found\n");
+        
+        pari_printf("abs pol: %Ps, ", polredabs0(mkvec2(gsubstpol(rnf_get_polabs(Lrel),y, s), D_prime_vect), 0));
+        pari_printf("L_cyc[%d]: %Ps\n", i, bnf_get_cyc(Labs));
+
+        s_lift_x = rnfeltup0(Lrel, s, 1);
+        cx = galoisconj(Labs, NULL);
+
+        for (j = 1; j < glength(cx)+1; ++j)
+        {
+            if ( (!my_QV_equal(algtobasis(Labs,gel(cx, j)), algtobasis(Labs,y))) && my_QV_equal(galoisapply(Labs, gel(cx,j), s_lift_x), s_lift_x)) 
+            {
+                sigma = algtobasis(Labs, gel(cx, j));
+                //pari_printf("sigma: %Ps\n\n", sigma);
+                break;
+            }
+        }
+        //printf(ANSI_COLOR_CYAN "---> sigma <--- \n \n" ANSI_COLOR_RESET);
+        
+        my_action_on_clgp(Labs, sigma, p);
+
+        //Should throw away some trash here to free memory
+        //my_test_artin_symbol (Labs, Lrel, base, itos(p), sigma);
+    }
+    printf("\n");
+    printf("[p,p]-extensions:\n\n");
+    for (i=1; i<glength(Rsq)+1; ++i) {
+        p1 = gel(Rsq, i);
+        q1 = gsubstpol(p1, x, y);
+
+        /* Define Lrel/Labs */
+        p1red = rnfpolredbest(K, mkvec2(q1, D_prime_vect), 0);
+        Lrel = rnfinit(K, p1red);
+        //printf("Lrel found\n");
+        Labs = Buchall(rnf_get_polabs(Lrel), nf_FORCE, DEFAULTPREC);
+        //printf("Labs found\n");
+        
+        pari_printf("abs pol: %Ps, ", gsubstpol(rnf_get_polabs(Lrel),y, s));
+        pari_printf("L_cyc[%d]: %Ps\n", i, bnf_get_cyc(Labs));
+
+        s_lift_x = rnfeltup0(Lrel, s, 1);
+        cx = galoisconj(Labs, NULL);
+
+        for (j = 1; j < glength(cx)+1; ++j)
+        {
+            if ( (!my_QV_equal(algtobasis(Labs,gel(cx, j)), algtobasis(Labs,y))) && my_QV_equal(galoisapply(Labs, gel(cx,j), s_lift_x), s_lift_x)) 
+            {
+                sigma = algtobasis(Labs, gel(cx, j));
+                //pari_printf("sigma: %Ps\n\n", sigma);
+                break;
+            }
+        }
+        //printf(ANSI_COLOR_CYAN "---> sigma <--- \n \n" ANSI_COLOR_RESET);
+        
+        my_action_on_clgp(Labs, sigma, p);
+
+        //Should throw away some trash here to free memory
+        //my_test_artin_symbol (Labs, Lrel, base, itos(p), sigma);
+    }
+    printf("\n");
+    printf("[p,p,p]-extensions:\n\n");
+    for (i=1; i<glength(Rcb)+1; ++i) {
+        p1 = gel(Rcb, i);
+        q1 = gsubstpol(p1, x, y);
+
+        /* Define Lrel/Labs */
+        p1red = rnfpolredbest(K, mkvec2(q1, D_prime_vect), 0);
+        Lrel = rnfinit(K, p1red);
+        //printf("Lrel found\n");
+        Labs = Buchall(rnf_get_polabs(Lrel), nf_FORCE, DEFAULTPREC);
+        //printf("Labs found\n");
+        
+        pari_printf("abs pol: %Ps, ", gsubstpol(rnf_get_polabs(Lrel),y, s));
+        pari_printf("L_cyc[%d]: %Ps\n", i, bnf_get_cyc(Labs));
+
+        s_lift_x = rnfeltup0(Lrel, s, 1);
+        cx = galoisconj(Labs, NULL);
+
+        for (j = 1; j < glength(cx)+1; ++j)
+        {
+            if ( (!my_QV_equal(algtobasis(Labs,gel(cx, j)), algtobasis(Labs,y))) && my_QV_equal(galoisapply(Labs, gel(cx,j), s_lift_x), s_lift_x)) 
+            {
+                sigma = algtobasis(Labs, gel(cx, j));
+                //pari_printf("sigma: %Ps\n\n", sigma);
+                break;
+            }
+        }
+        //printf(ANSI_COLOR_CYAN "---> sigma <--- \n \n" ANSI_COLOR_RESET);
+        
+        my_action_on_clgp(Labs, sigma, p);
+
+        //Should throw away some trash here to free memory
+        //my_test_artin_symbol (Labs, Lrel, base, itos(p), sigma);
     }
     printf("\n");
 }
@@ -792,7 +983,7 @@ GEN my_find_Ja_vect(GEN K, GEN J_vect, GEN p) {
 /*
 Given J \in CL(K)_p, find t, I such that J=div(t)+(1-sigma)I 
 */
-GEN my_find_I (GEN Labs, GEN K, GEN sigma, GEN i_xJ)
+GEN my_find_I (GEN Labs, GEN K, GEN sigma, GEN i_xJ, GEN class_group)
 {
     pari_sp av = avma;
     GEN current_I;
@@ -803,21 +994,23 @@ GEN my_find_I (GEN Labs, GEN K, GEN sigma, GEN i_xJ)
     
     GEN Itest;
     int test_found = 0;
-    GEN class_group = my_get_clgp (Labs);
+    printf("Getting class group of Labs\n");
+    //pari_printf("clgp: %Ps\n", bnf_get_clgp(Labs));
     int n;
-    
+    printf("Testing if i(J) principal\n");
     test_vec = bnfisprincipal0(Labs, i_xJ, 1);
     if (my_QV_equal0(gel(test_vec, 1)))
     {
-        //printf(ANSI_COLOR_YELLOW "i_x(J) principal!\n\n" ANSI_COLOR_RESET);
+        printf(ANSI_COLOR_YELLOW "i_x(J) principal!\n\n" ANSI_COLOR_RESET);
         current_I = idealhnf0(Labs, gen_1, NULL);
         test_found = 1;
     }
     
 
     else {
-        //printf(ANSI_COLOR_CYAN "i_x(J) not principal!\n\n" ANSI_COLOR_RESET);
+        printf(ANSI_COLOR_CYAN "i_x(J) not principal!\n\n" ANSI_COLOR_RESET);
         for (n = 1; n < clnr + 1; ++n) {
+            printf("%d/%d\n", n, clnr);
             current_I = gel(class_group, n);
             Itest = idealmul(Labs, i_xJ, my_1MS_ideal(Labs, sigma, current_I));
             test_vec = bnfisprincipal0(Labs, Itest, 1);
@@ -925,15 +1118,38 @@ GEN my_find_I_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN J_vect) {
     GEN I;
     GEN ext_gen;
     //pari_printf("%Ps\n", gel(ext_gens, 1));
-    
+    GEN class_group = my_get_clgp (Labs);
     int i;
     
     for (i = 1; i < p_rk+1; ++i)
     {
-        ext_gen = rnfidealup0(Lrel, gel(J_vect, i), 1);
-        I = gel(my_find_I(Labs, K, sigma, ext_gen),2);
+        ext_gen = idealred(Labs, rnfidealup0(Lrel, gel(J_vect, i), 1));
+        printf("Lifted J: %d/%d\n", i, p_rk);
+        I = gel(my_find_I(Labs, K, sigma, ext_gen, class_group),2);
         
         gel(I_vect, i) = I;
+    } 
+
+    return I_vect;
+}
+
+GEN my_find_I_vect3 (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN J_vect, GEN units_mod_p, int p_int) {
+    int p_rk = glength(J_vect);
+    int u_length = glength(units_mod_p);
+    GEN I_vect = zerovec(p_rk+u_length);
+    //pari_printf("%Ps\n", gel(ext_gens, 1));
+    GEN I_first = my_find_I_vect(Labs, Lrel, K, sigma, J_vect);
+    printf("First part of I_vect found\n");
+    int i;
+    
+    for (i = 1; i < p_rk+1; ++i)
+    {
+        gel(I_vect, i) = gel(I_first, i);
+    } 
+    for (i = p_rk+1; i < p_rk+u_length+1; ++i)
+    {
+        gel(I_vect, i) = my_find_final_I(Labs, Lrel, sigma, K, gel(units_mod_p, i-p_rk), p_int);
+        printf("Found I %d/%d\n", i, p_rk+u_length);
     } 
 
     return I_vect;

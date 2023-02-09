@@ -1,79 +1,381 @@
-F<g1,g2,g3,g4> := FreeGroup(4);          
-Q, fQ := pQuotient(F, 2, 2 : Print := 1);
+//Server login:
+
+// ssh v1eahlqv@ssh3.maths.ed.ac.uk
+
+// ssh compute64d.maths.ed.ac.uk
+
+-------------------
+F_3<g1,g2,g3> := FreeGroup(3);          
+Q, fQ := pQuotient(F_3, 2, 2 : Print := 1);
 a := Q.1;
 b := Q.2;
 c := Q.3;
-d := Q.4;
-Q_2 := quo< Q | cup_rels >;
 
-// 5460:
-cup_rels := { (a,c)*(b,c)*(b,d)*c^2*(c,d), a^2*(a,c)*(b,c)*(c,d), (a,b)*(a,c)*(a,d)*(b,c)*(b,d)*d^2, (a,b)*(a,c)*b^2*(b,d)*(c,d), (a,b)*(a,c)*(b,c) };
+// [p]-extensions:
 
-// L_1
-F<g1,g2,g3> := FreeGroup(3);          
-Q, fQ := pQuotient(F, 2, 2 : Print := 1);
-a := Q.1;
-b := Q.2;
-c := Q.3;
-cup_rels := {(b,c)*b^2*(a,c)};
+// s^4 - 2*s^3 - 385*s^2 + 386*s + 38614, cyc: [4, 4, 2]
+    // {(a,c)*b^2*(b,c)};
+cup_rels := {(a,c)*b^2*(b,c)};
 Q_2_L_1 := quo< Q | cup_rels >;
 Q_2_L_1;
 
-// L_2
-F<g1,g2,g3> := FreeGroup(3);          
-Q, fQ := pQuotient(F, 2, 2 : Print := 1);
-a := Q.1;
-b := Q.2;
-c := Q.3;
-cup_rels := {(a,c)*(a,b)*a^2};
+// s^4 - 2*s^3 + 85*s^2 - 84*s + 3129, cyc: [4, 4, 2]
+    // {(a,c)*(b,c)*c^2};
+
+cup_rels := {(a,c)*(b,c)*c^2};
 Q_2_L_2 := quo< Q | cup_rels >;
 Q_2_L_2;
 
-// L_3
-F<g1,g2,g3> := FreeGroup(3);          
-Q, fQ := pQuotient(F, 2, 2 : Print := 1);
+IsIsomorphic(Q_2_L_1, Q_2_L_2);
+// s^4 - 2*s^3 + 545*s^2 - 544*s + 75349, cyc: [4, 4, 4]
+    // {(a,b)*(a,c)*(b,c)};
+cup_rels := {(a,b)*(a,c)*(b,c)};
+Q_2_L_3 := quo< Q | cup_rels >;
+Q_2_L_3;
+IsIsomorphic(Q_2_L_2, Q_2_L_3);
+
+// s^4 - 2*s^3 - 125*s^2 + 126*s + 5334, cyc: [4, 4, 2] 
+    // {a^2*(a,b)*(b,c)};
+cup_rels := {a^2*(a,b)*(b,c)};
+Q_2_L_4 := quo< Q | cup_rels >;
+Q_2_L_4;
+IsIsomorphic(Q_2_L_1, Q_2_L_4); // -------------> true <-------------- Q_2_L_1
+
+// s^4 - 2*s^3 + 223*s^2 - 222*s + 13686, cyc: [20, 4, 2] 
+    // {a^2*(a,b)*(a,c)};
+cup_rels := {a^2*(a,b)*(a,c)};
+Q_2_L_9 := quo< Q | cup_rels >;
+Q_2_L_9;
+IsIsomorphic(Q_2_L_2, Q_2_L_9); // -------------> true <-------------- Q_2_L_2
+
+// s^4 - 2*s^3 - 49*s^2 + 50*s + 1990, cyc: [8, 4, 2]
+    // {a^2*(b,c)};
+cup_rels := {a^2*(b,c)};
+Q_2_L_10 := quo< Q | cup_rels >;
+Q_2_L_10;
+IsIsomorphic(Q_2_L_1, Q_2_L_10); // -------------> true <-------------- Q_2_L_1
+
+// s^4 - 2*s^3 + 205*s^2 - 204*s + 11769, cyc: [4, 4, 2, 2]
+    // {(a,d)*(b,d)*(c,d), (a,c)*(a,d)*c^2*(c,d), (a,d)*(b,d)*d^2, (a,b)*(a,c)*(a,d)*(b,c)*(b,d), (a,d)*(c,d)};
+F_4<g1,g2,g3,g4> := FreeGroup(4);          
+Q, fQ := pQuotient(F_4, 2, 2 : Print := 1);
 a := Q.1;
 b := Q.2;
 c := Q.3;
-cup_rels := {a^2*(a,b)*(a,c)};
-Q_2_L_3 := quo< Q | cup_rels >;
-Q_2_L_3;
+d := Q.4;
+cup_rels := {(a,d)*(b,d)*(c,d), (a,c)*(a,d)*c^2*(c,d), (a,d)*(b,d)*d^2, (a,b)*(a,c)*(a,d)*(b,c)*(b,d), (a,d)*(c,d)};
+Q_2_L_5 := quo< Q | cup_rels >;
+Q_2_L_5;
 
-// L_4
+// s^4 + 455*s^2 + 207025, cyc: [4, 2, 2, 2]
+    // {(a,c)*(a,d)*(c,d), (a,b)*(a,c)*(a,d)*(b,c)*(b,d)*d^2, (a,b)*(a,c)*(a,d)*c^2, a^2*(b,c), (a,c)*(a,d)*(b,c)*(b,d)*(c,d)};
+cup_rels := {(a,c)*(a,d)*(c,d), (a,b)*(a,c)*(a,d)*(b,c)*(b,d)*d^2, (a,b)*(a,c)*(a,d)*c^2, a^2*(b,c), (a,c)*(a,d)*(b,c)*(b,d)*(c,d)};
+Q_2_L_6 := quo< Q | cup_rels >;
+Q_2_L_6;
+IsIsomorphic(Q_2_L_5, Q_2_L_6);
+
+// s^4 - 2*s^3 + 11*s^2 - 10*s + 1390, cyc: [4, 4, 2, 2]
+    // {(a,b)*(b,d), (c,d), (a,c)*(a,d)*b^2, (a,c)*c^2, (a,b)*(b,c)*(b,d), (b,c)};
+cup_rels := {(a,b)*(b,d), (c,d), (a,c)*(a,d)*b^2, (a,c)*c^2, (a,b)*(b,c)*(b,d), (b,c)};
+Q_2_L_7 := quo< Q | cup_rels >;
+Q_2_L_7;
+IsIsomorphic(Q_2_L_6, Q_2_L_7);
+
+// s^4 + 683*s^2 + 116281, cyc: [4, 2, 2, 2]
+    // {(a,c)*(a,d)*(b,c)*(b,d), (a,b)*(b,c)*(b,d)*c^2, (a,b)*(a,c)*(a,d)*d^2, a^2*(a,d)*(b,d)*(c,d), (a,c)*(a,d), (b,c)*(b,d)};
+cup_rels := {(a,c)*(a,d)*(b,c)*(b,d), (a,b)*(b,c)*(b,d)*c^2, (a,b)*(a,c)*(a,d)*d^2, a^2*(a,d)*(b,d)*(c,d), (a,c)*(a,d), (b,c)*(b,d)};
+Q_2_L_8 := quo< Q | cup_rels >;
+Q_2_L_8;
+IsIsomorphic(Q_2_L_7, Q_2_L_8);
+
+// s^4 - 2*s^3 - 25*s^2 + 26*s + 1534, cyc: [4, 4, 2]
+    // {a^2*(a,b)*(b,c)}; -------------Already exists ---> Q_2_L_1   
+// s^4 - 2*s^3 + 17*s^2 - 16*s + 1429, cyc: [4, 4, 2]
+    // {(a,c)*b^2*(b,c)}; -------------Already exists ---> Q_2_L_1
+// s^4 - 2*s^3 - 59*s^2 + 60*s + 2265, cyc: [4, 4, 2]
+    // {a^2*(a,b)*(b,c)}; -------------Already exists ---> Q_2_L_1
+// s^4 - 2*s^3 + 121*s^2 - 120*s + 4965, cyc: [8, 4, 2]
+    // {(a,c)*b^2*(b,c)}; -------------Already exists ---> Q_2_L_1
+// s^4 - 2*s^3 - 173*s^2 + 174*s + 8934, cyc: [4, 4, 2]
+    // {a^2*(a,b)*(a,c)}; -------------Already exists ---> Q_2_L_2
+
+// CONCLUSION: Unique iso classes:  Q_2_L_1, Q_2_L_2, Q_2_L_3, Q_2_L_5, Q_2_L_6, Q_2_L_7, Q_2_L_8; ---> 7 classes
+Q_2_index_2 := [Q_2_L_1, Q_2_L_2, Q_2_L_3];
+Q_2_number_of_gps := [7, 3, 1];
+
+
+
+for i in [1..#Q_2_index_2] do 
+    if IsIsomorphic(Q_2_index_2[i],Q_2_L_10) then
+        printf "Index: %3o\n", i;
+    end if;
+end for;
+
+
+
+// [p,p]-extensions:
+
+// s^8 - 4*s^7 - 180*s^6 + 554*s^5 + 13193*s^4 - 27314*s^3 - 462008*s^2 + 475758*s + 6504709, cyc: [4, 4, 2, 2]
+// s^8 - 4*s^7 - 260*s^6 + 794*s^5 + 26553*s^4 - 54434*s^3 - 1258928*s^2 + 1286278*s + 23333389, cyc: [4, 4, 2, 2]
+// s^8 + 6*s^6 + 587*s^4 + 7194*s^2 + 83521, cyc: [16, 4, 2, 2]
+// s^8 + 66*s^6 + 1037*s^4 + 3744*s^2 + 676, cyc: [8, 4, 2, 2]
+// s^8 - 4*s^7 - 84*s^6 + 266*s^5 + 3497*s^4 - 7442*s^3 - 75944*s^2 + 79710*s + 757429, cyc: [4, 4, 2, 2]
+// s^8 + 227*s^6 + 38533*s^4 + 2950092*s^2 + 168896016, cyc: [20, 2, 2, 2, 2]
+// s^8 - 2*s^7 - 131*s^6 + 208*s^5 + 6993*s^4 - 6364*s^3 - 174884*s^2 + 51224*s + 1852036, cyc: [8, 4, 4, 2]
+// s^8 - 34*s^6 + 529*s^4 + 1380*s^2 + 14400, cyc: [40, 4, 2, 2]
+// s^8 - 30*s^6 + 407*s^4 + 2730*s^2 + 8281, cyc: [4, 4, 2, 2]
+// s^8 - 4*s^7 + 88*s^6 - 250*s^5 + 3261*s^4 - 6110*s^3 + 50842*s^2 - 47828*s + 442516, cyc: [4, 4, 2, 2]
+// s^8 - 2*s^7 + 49*s^6 - 2*s^5 + 2043*s^4 - 1774*s^3 + 5446*s^2 + 3404*s + 5476, cyc: [8, 4, 2, 2]
+
+// s^8 + 54*s^6 + 617*s^4 + 2436*s^2 + 3136, cyc: [4, 4, 4, 2]
+F_4<g1,g2,g3,g4> := FreeGroup(4);          
+Q, fQ := pQuotient(F_4, 2, 2 : Print := 1);
+a := Q.1;
+b := Q.2;
+c := Q.3;
+d := Q.4;
+cup_rels := {(c,d), (b,c), (a,c)*(a,d)*b^2, (a,b)*(a,c)*(a,d), (b,d)};
+Q_2_1 := quo< Q | cup_rels >;
+Q_2_1;
+// s^8 - 66*s^6 + 1499*s^4 - 8070*s^2 + 42025, cyc: [4, 4, 2, 2]
+// s^8 + 74*s^6 + 2797*s^4 + 58296*s^2 + 509796, cyc: [20, 4, 4, 2]
+// s^8 + 66*s^6 + 2357*s^4 + 47304*s^2 + 401956, cyc: [8, 8, 2, 2, 2]
+// s^8 - 70*s^6 + 1717*s^4 - 11760*s^2 + 60516, cyc: [20, 4, 2, 2]
+// s^8 - 2*s^7 - 145*s^6 + 228*s^5 + 8648*s^4 - 8022*s^3 - 247957*s^2 + 83476*s + 2905009, cyc: [4, 4, 2, 2]
+// s^8 - 26*s^6 + 577*s^4 + 156*s^2 + 41616, cyc: [4, 4, 2, 2]
+
+// s^8 - 2*s^7 - 41*s^6 - 2*s^5 + 1908*s^4 - 1864*s^3 + 631*s^2 - 1276*s + 841, cyc: [4, 4, 2, 2]
+// (iso:? s^8 - 4*s^7 + 16*s^6 - 34*s^5 + 777*s^4 - 1502*s^3 - 13394*s^2 + 14140*s + 125524)
+F_4<g1,g2,g3,g4> := FreeGroup(4);          
+Q, fQ := pQuotient(F_4, 2, 2 : Print := 1);
+a := Q.1;
+b := Q.2;
+c := Q.3;
+d := Q.4;
+cup_rels := {(b,c)*(b,d), (a,d)*(b,d)*c^2, (b,c)*d^2, (a,c)*(a,d), (c,d)};
+Q_2_2 := quo< Q | cup_rels >;
+Q_2_2;
+
+Q_2_index_4 := [Q_2_1, Q_2_2];
+IsIsomorphic(Q_2_1, Q_2_2);
+
+// s^8 + 10*s^6 + 397*s^4 + 7320*s^2 + 34596, cyc: [40, 4, 2, 2]
+// s^8 - 2*s^7 + 259*s^6 - 392*s^5 + 25428*s^4 - 24574*s^3 + 1116631*s^2 - 488296*s + 18696421, cyc: [8, 4, 2, 2]
+// s^8 - 14*s^6 + 277*s^4 + 3864*s^2 + 12996, cyc: [16, 4, 2, 2]
+// s^8 + 26*s^6 + 877*s^4 + 14664*s^2 + 125316, cyc: [16, 4, 2, 2]
+// s^8 + 46*s^6 + 1369*s^4 + 24780*s^2 + 176400, cyc: [80, 4, 2, 2]
+// s^8 - 4*s^7 + 4*s^6 + 2*s^5 + 681*s^4 - 1370*s^3 - 1364*s^2 + 2050*s + 116965, cyc: [8, 4, 2, 2]
+// s^8 - 2*s^7 + 23*s^6 + 186*s^5 + 1208*s^4 - 372*s^3 + 5951*s^2 - 1820*s + 6685, cyc: [4, 4, 2, 2]
+// s^8 - 2*s^7 - 21*s^6 + 70*s^5 + 1544*s^4 - 8824*s^3 + 17155*s^2 - 13836*s + 8269, cyc: [8, 8, 2, 2]
+
+// s^8 - 4*s^7 - 36*s^6 + 122*s^5 + 1241*s^4 - 2690*s^3 - 19424*s^2 + 20790*s + 213565, cyc: [4, 4, 4, 2]
+F_4<g1,g2,g3,g4> := FreeGroup(4);          
+Q, fQ := pQuotient(F_4, 2, 2 : Print := 1);
+a := Q.1;
+b := Q.2;
+c := Q.3;
+d := Q.4;
+cup_rels := ;
+Q_2_3 := quo< Q | cup_rels >;
+Q_2_3;
+
+// s^8 + 74*s^6 + 1429*s^4 + 7680*s^2 + 900, cyc: [4, 4, 2, 2]
+// s^8 - 26*s^6 + 379*s^4 + 2730*s^2 + 11025, cyc: [4, 4, 2, 2, 2]
+// s^8 - 2*s^7 - 359*s^6 + 544*s^5 + 49053*s^4 - 48592*s^3 - 3022196*s^2 + 1423424*s + 70902196, cyc: [8, 4, 2, 2]
+// s^8 - 98*s^6 + 3313*s^4 - 39228*s^2 + 207936, cyc: [20, 4, 2, 2]
+// s^8 - 4*s^7 - 68*s^6 + 218*s^5 + 2553*s^4 - 5474*s^3 - 50576*s^2 + 53350*s + 493165, cyc: [4, 4, 2, 2]
+// s^8 - 2*s^7 - 15*s^6 + 178*s^5 + 1361*s^4 - 1390*s^3 + 3079*s^2 + 7614*s + 3574, cyc: [16, 4, 2, 2]
+// s^8 - 2*s^7 + 35*s^6 - 272*s^5 + 2936*s^4 - 5090*s^3 + 29179*s^2 - 124236*s + 273849, cyc: [8, 4, 2, 2]
+
+[p,p,p]-extensions:
+
+// s^16 - 96*s^14 + 3668*s^12 - 71574*s^10 + 763708*s^8 - 4412748*s^6 + 13515417*s^4 - 16125588*s^2 + 8088336, cyc: [16, 4, 2, 2, 2]
+// s^16 + 24*s^14 + 1128*s^12 + 15506*s^10 + 292128*s^8 + 2673912*s^6 + 10148497*s^4 + 15431112*s^2 + 8088336, cyc: [40, 4, 4, 2, 2]
+// s^16 + 28*s^14 + 392*s^12 + 1818*s^10 - 2632*s^8 - 31416*s^6 - 9127*s^4 + 105196*s^2 + 132496, cyc: [4, 4, 4, 2, 2]
+// s^16 - 4*s^15 - 24*s^14 + 84*s^13 + 392*s^12 - 1456*s^11 - 138*s^10 - 128*s^9 - 5448*s^8 + 92396*s^7 + 33768*s^6 - 129584*s^5 + 827345*s^4 - 2039196*s^3 + 3864528*s^2 - 3483464*s + 1761124, cyc: [40, 4, 4, 2, 2]
+// s^16 + 46*s^14 + 827*s^12 + 8994*s^10 + 55241*s^8 + 55920*s^6 + 2785400*s^4 - 332000*s^2 + 10000, cyc: [16, 4, 4, 2, 2]
+// s^16 - 4*s^14 + 176*s^12 + 162*s^10 + 9944*s^8 + 41856*s^6 + 293729*s^4 + 1168220*s^2 + 3168400, cyc: [80, 8, 2, 2, 2, 2]
+// s^16 + 80*s^14 + 2318*s^12 + 30696*s^10 + 197159*s^8 + 606504*s^6 + 809006*s^4 + 385424*s^2 + 6241, cyc: [8, 8, 4, 2, 2]
+// s^16 + 136*s^14 + 7916*s^12 + 254706*s^10 + 4927124*s^8 + 58961484*s^6 + 434786753*s^4 + 1856370460*s^2 + 3600480016, cyc: [40, 8, 2, 2, 2]
+// s^16 + 72*s^14 + 1842*s^12 + 21332*s^10 + 124563*s^8 + 381516*s^6 + 592498*s^4 + 408684*s^2 + 95481, cyc: [4, 4, 2, 2, 2, 2]
+// s^16 - 188*s^14 + 15188*s^12 - 688350*s^10 + 19133156*s^8 - 333792540*s^6 + 3567373553*s^4 - 21332222672*s^2 + 54651218176, cyc: [40, 4, 2, 2, 2]
+// s^16 + 46*s^14 + 1607*s^12 + 20694*s^10 + 196421*s^8 + 683040*s^6 + 1798700*s^4 + 136000*s^2 + 10000, cyc: [8, 8, 4, 2, 2, 2]
+// s^16 + 20*s^14 + 302*s^12 + 492*s^10 - 3031*s^8 - 46488*s^6 + 91664*s^4 - 166912*s^2 + 1048576, cyc: [80, 4, 2, 2, 2]
+// s^16 - 2*s^15 + 97*s^14 - 192*s^13 + 4383*s^12 - 6880*s^11 + 115230*s^10 - 118004*s^9 + 1917147*s^8 - 850350*s^7 + 21046381*s^6 + 2307524*s^5 + 155078761*s^4 + 73618800*s^3 + 724657980*s^2 + 319611600*s + 1721564100, cyc: [16, 4, 2, 2, 2]
+// s^16 + 132*s^12 + 1162*s^10 + 10044*s^8 + 273252*s^6 + 2088889*s^4 + 5712588*s^2 + 8088336, cyc: [80, 4, 4, 2, 2]
+// s^16 + 8*s^14 + 764*s^12 + 2994*s^10 + 140084*s^8 + 547548*s^6 + 620801*s^4 + 136700*s^2 + 10000, cyc: [16, 8, 2, 2, 2]
+
+// 5460:
 F<g1,g2,g3,g4> := FreeGroup(4);          
+Q_K, fQ_K := pQuotient(F, 2, 2 : Print := 1);
+a := Q_K.1;
+b := Q_K.2;
+c := Q_K.3;
+d := Q_K.4;
+cup_rels_K := { (a,c)*(b,c)*(b,d)*c^2*(c,d), a^2*(a,c)*(b,c)*(c,d), (a,b)*(a,c)*(a,d)*(b,c)*(b,d)*d^2, (a,b)*(a,c)*b^2*(b,d)*(c,d), (a,b)*(a,c)*(b,c) };
+Q_2_K := quo< Q_K | cup_rels_K >;
+Q_2_K;
+
+
+// s^8 - 98*s^6 + 3313*s^4 - 39228*s^2 + 207936
+F<g1,g2,g3,g4> := FreeGroup(4); 
 Q, fQ := pQuotient(F, 2, 2 : Print := 1);
 a := Q.1;
 b := Q.2;
 c := Q.3;
 d := Q.4;
-cup_rels := {(a,b)*(b,d), (c,d), (a,c)*(a,d)*b^2, (a,c)*c^2, (a,b)*(b,c)*(b,d), (b,c)};
-Q_2_L_4 := quo< Q | cup_rels >;
-Q_2_L_4;
+cup_rels := {(a,b)*(b,c)*(b,d)*(c,d), (b,d)*(c,d), (a,b)*(a,d)*b^2*(b,c)*(c,d), (a,d)*(b,c)*(b,d)*(c,d)*d^2, (a,b)*(a,d)*(b,c)*(b,d)*(c,d), (b,d)};
+Q_2 := quo< Q | cup_rels >;
+Q_2;
 
+// Biggest
+F<g1,g2,g3,g4> := FreeGroup(4); 
+Q, fQ := pQuotient(F, 2, 2 : Print := 1);
+a := Q.1;
+b := Q.2;
+c := Q.3;
+d := Q.4;
+cup_rels := {(b,c)*(b,d), (a,b)*(a,d)*(b,d), (a,b)*(b,c)*(b,d)*(c,d)*d^2, (a,d)*b^2*(b,c)*(b,d), (a,b)*(a,d)*(b,c)*(b,d)*(c,d), (b,c)*(c,d), (a,b)*(a,d)*(b,c)*(c,d), (b,d)};
+Q_2 := quo< Q | cup_rels >;
+Q_2;
 
-NuclearRank(Q_2_L_1);
-pMultiplicatorRank(Q_2_L_1);
-printf "r(G_L) >= %o\n", pMultiplicatorRank(Q_2_L_1)-NuclearRank(Q_2_L_1);
+// my_pol: s^8 + 66*s^6 + 2357*s^4 + 47304*s^2 + 401956
+// K_cyc: [8, 8, 2, 2, 2]
+F<g1,g2,g3,g4,g5> := FreeGroup(5); 
+Q, fQ := pQuotient(F, 2, 2 : Print := 1);
+a := Q.1;
+b := Q.2;
+c := Q.3;
+d := Q.4;
+e := Q.5;
+cup_rels := {(a,b)*(a,c)*(b,e)*(c,d)*(c,e)*(d,e), (c,d)*(c,e), (a,b)*(a,c)*(a,e)*(b,d)*(c,d)*d^2, (a,b)*(b,e)*(c,d)*(c,e)*(d,e)*e^2, (a,c)*c^2*(c,d)*(c,e)*(d,e), (a,d)*(b,c)*(c,e)*(d,e), (a,e)*(b,c)*(c,e), (a,b)*(a,c)*(a,d)*(a,e)*(b,e)*(c,e)*(d,e), (c,d)*(c,e)};
+Q_2 := quo< Q | cup_rels >;
+Q_2;
+
+// POL: s^16 + 46*s^14 + 1607*s^12 + 20694*s^10 + 196421*s^8 + 683040*s^6 + 1798700*s^4 + 136000*s^2 + 10000
+// K cyc: [8, 8, 4, 2, 2, 2]
+F<g1,g2,g3,g4,g5,g6> := FreeGroup(6); 
+Q, fQ := pQuotient(F, 2, 2 : Print := 1);
+a := Q.1;
+b := Q.2;
+c := Q.3;
+d := Q.4;
+e := Q.5;
+f := Q.6;
+
+// An inderesting index 4 (elementary) subgroup
+// my_pol: s^8 + 66*s^6 + 2357*s^4 + 47304*s^2 + 401956
+// K_cyc: [8, 8, 2, 2, 2]
+F<g1,g2,g3,g4,g5> := FreeGroup(5); 
+Q, fQ := pQuotient(F, 2, 2 : Print := 1);
+a := Q.1;
+b := Q.2;
+c := Q.3;
+d := Q.4;
+e := Q.5;
+cup_rels := {(a,b)*(a,c)*(b,e)*(c,d)*(c,e)*(d,e), (c,d)*(c,e), (a,b)*(a,c)*(a,e)*(b,d)*(c,d)*d^2, (a,b)*(b,e)*(c,d)*(c,e)*(d,e)*e^2, (a,c)*c^2*(c,d)*(c,e)*(d,e), (a,d)*(b,c)*(c,e)*(d,e), (a,e)*(b,c)*(c,e), (a,b)*(a,c)*(a,d)*(a,e)*(b,e)*(c,e)*(d,e)};
+Q_2 := quo< Q | cup_rels >;
+Q_2;
+
+// An inderesting index 8 (elementary) subgroup
+// POL: s^16 + 72*s^14 + 1842*s^12 + 21332*s^10 + 124563*s^8 + 381516*s^6 + 592498*s^4 + 408684*s^2 + 95481
+// K cyc: [4, 4, 2, 2, 2, 2]
+F<g1,g2,g3,g4,g5,g6> := FreeGroup(6); 
+Q, fQ := pQuotient(F, 2, 2 : Print := 1);
+a := Q.1;
+b := Q.2;
+c := Q.3;
+d := Q.4;
+e := Q.5;
+f := Q.6;
+cup_rels := {(a,b)*(a,d)*(a,e)*(a,f)*(b,e)*(c,d)*(c,f)*(d,e)*(e,f), (a,c)*(a,d)*(b,d)*(c,d)*(c,e), (b,c)*(b,d)*(b,e)*(b,f)*(c,e)*(c,f)*(d,e)*e^2, (b,d)*(c,e)*d^2*(d,e)*(d,f), (b,c)*(b,d)*c^2*(c,d)*(c,e)*(c,f)*(d,f), a^2*(a,b)*(a,c)*(a,d)*(a,e)*(b,c)*(b,d)*(b,f)*(c,d), (a,d)*(b,e)*(c,e)*(c,f)*(d,f)*(e,f), (c,d), (b,c)*(b,d)*(c,e)*(c,f)*(d,e)*(d,f), (a,b)*(a,e)*(a,f)*(b,c)*(b,d)*(b,e)*(c,d)*(c,e)*(c,f)*(d,e)*(d,f)*(e,f), (a,b)*(a,c)*(a,e)*(a,f)*(b,e)*(c,e)*(c,f)*(d,f)*(e,f), (a,d)*(b,e)*(c,e)*(c,f)*(d,f)*(e,f)};
+Q_2 := quo< Q | cup_rels >;
+Q_2;
+
+// GrpPC : Q_2 of order 256 = 2^8
+// PC-Relations:
+//     Q_2.1^2 = Q_2.6, 
+//     Q_2.2^2 = Q_2.8, 
+//     Q_2.3^2 = Q_2.7, 
+//     Q_2.4^2 = Q_2.8, 
+//     Q_2.2^Q_2.1 = Q_2.2 * Q_2.8, 
+//     Q_2.3^Q_2.1 = Q_2.3 * Q_2.5, 
+//     Q_2.4^Q_2.1 = Q_2.4 * Q_2.8
+// > NuclearRank(Q_2);
+// 6
+// > pMultiplicatorRank(Q_2);
+// 12
+// > printf "r(G_L) >= %o\n", pMultiplicatorRank(Q_2)-NuclearRank(Q_2);
+// r(G_L) >= 6
+// > 
+
+// my_pol: s^16 + 56*s^14 - 52*s^13 + 1218*s^12 - 1404*s^11 + 11796*s^10 - 9256*s^9 + 64557*s^8 - 11388*s^7 + 202468*s^6 - 138684*s^5 + 889400*s^4 - 91936*s^3 + 210520*s^2 - 450944*s + 594304
+// K_cyc: [4, 4, 4, 4]
+
+NuclearRank(Q_2);
+pMultiplicatorRank(Q_2);
+printf "r(G_L) >= %o\n", pMultiplicatorRank(Q_2)-NuclearRank(Q_2);
 
 //-------- Conjectured candidates --------
 F<a, b, c, d> := FreeGroup(4);
 rels_1 := {a^2=(d, c), b^2=(d, a)*((d, b), b), c^2=(b, a)*((d, b), b), d^2=(c, a)*(d, a)*(d, b)*(b, a, a)*(c, a, a)*(d, a, a), (b, c)=Id(F)};
 rels_2 := {a^2=(d, c), b^2=(d, a)*((d, b), b), c^2=(b, a)*(b, a, d)*(c, a, a)*((d, b), b), d^2=(c, a)*(d, a)*(d, b)*(b, a, a)*(b, a, d), (b, c)=Id(F)};
-Q<x, y, z, w>, phi :=  quo< F | rels_1 >;
-Q_3, fQ_3 := pQuotient(Q, 2, 3 : Print := 1);
-p_subgroups := LowIndexSubgroups(Q_3, 2);
-Q_t, fQ_t := pQuotient(p_subgroups[15], 2, 2 : Print := 1);
-IsIsomorphic(Q_t, Q_2_L_1);
+Q1<x, y, z, w>, phi :=  quo< F | rels_1 >;
+Q2<x, y, z, w>, phi :=  quo< F | rels_2 >;
+Q_31, fQ_31 := pQuotient(Q1, 2, 3 : Print := 1);
+Q_32, fQ_32 := pQuotient(Q2, 2, 3 : Print := 1);
+IsIsomorphic(Q_31, Q_32);
+
+p_subgroups_1 := LowIndexSubgroups(Q_31, 8);
+p_subgroups_2 := LowIndexSubgroups(Q_32, 8);
+# pQuotient(p_subgroups_1[234], 2,2);
+
+Q_3_conj := [Q_31, Q_32];
+p_subgroups := LowIndexSubgroups(Q_3_candidates[6], 8);
+for i in [1..#p_subgroups] do 
+    printf "gp %3o: %o\n", i, Order(pQuotient(p_subgroups[i], 2, 2));
+end for;
+
+for i in [1..#p_subgroups_2] do 
+    printf "gp %3o: %o\n", i, Order(pQuotient(p_subgroups_2[i], 2, 2));
+end for;
+
+for i in [1..#p_subgroups_1] do 
+    if not IsIsomorphic(p_subgroups_1[i],p_subgroups_2[i]) then
+        printf "Index: %3o\n", i;
+    end if;
+end for;
+
+IsIsomorphic(p_subgroups_1[81],p_subgroups_2[80]);
+pClass(p_subgroups_1[2]);
+
+Q_t1, fQ_t1 := pQuotient(p_subgroups_1[4], 2, 2);
+Q_t2, fQ_t2 := pQuotient(p_subgroups_2[16], 2, 2 : Print := 1);
+
+Q_t1;
+IsIsomorphic(Q_t1, Q_2);
 
 
 //-------- Searching for Q_3 -----------
 SetVerbose ("GeneratepGroups", 1); 
-Q_3_candidates := Descendants(Q_2);
-// yields 81+1388+8784+35776+72704+32768 = 151501 candidates
+Q_3_candidates_all := Descendants(Q_2_K);
+#Q_3_candidates_all; // 81+1388+8784+35776+72704+32768 = 151501 
 
 //------ order 2^15
-Q_3_candidates := Descendants(Q_2 : StepSizes: [6]);
-                                    
+Q_3_candidates := Descendants(Q_2_K : StepSizes := [6]);
+#Q_3_candidates; // 32768
+
+Q_3_candidates_all_F1 := [];
+for i in [1..#Q_3_candidates_all] do 
+    if pMultiplicatorRank(Q_3_candidates_all[i])-NuclearRank(Q_3_candidates_all[i]) eq 5 then 
+        Q_3_candidates_all_F1 := Append(Q_3_candidates_all_F1, Q_3_candidates_all[i]);
+    end if;
+    if i mod 100 eq 0 then 
+        printf "%3o\n", i;
+    end if;
+end for;
+
+#Q_3_candidates_all_F1; // Q_3_candidates_all_F1 = Q_3_candidates, i.e., all descendants of order 2^15 
 //--------- test ----------
 
 S := SmallGroup(256, 541);   
@@ -81,6 +383,175 @@ l := LowIndexSubgroups(S,2);
 #l;
 q_2, fq_2 := pQuotient(l[4], 2, 2 : Print := 1);  
 q_3, fq_3 := pQuotient(S, 2, 3 : Print := 1);   
-j := LowIndexSubgroups(q_3, 2);   
-r_2, fr_2 := pQuotient(j[4], 2, 2 : Print := 1);  
+test := LowIndexSubgroups(Q_3_candidates[6000], 2); 
+for i in [1..#test] do 
+    r_2, fr_2 := pQuotient(test[i], 2, 2);  
+    Order(r_2);
+end for;  
+
 IsIsomorphic(q_2, r_2);  
+
+//---- Sort by Q_3 ----------
+list := [1,2,3];
+lis := list[1..2];
+
+Q_3_sorted := []; 
+for i in [1..#Q_3_candidates] do 
+    p_subgroups := LowIndexSubgroups(Q_3_candidates[i], 8);
+    for j in [1..#p_subgroups] do 
+        Q_t, fQ_t := pQuotient(p_subgroups[j], 2, 2);
+        // if Order(Q_t) eq 2^12 then
+        if IsIsomorphic(Q_t, pQuotient(p_subgroups_1[234], 2, 2)) then
+            Q_3_sorted := Append(Q_3_sorted, Q_3_candidates[i]);
+            printf "Added group %3o at index %3o\n", i, j;
+            break;
+        end if;
+    end for;
+    printf "%3o\n", i;
+end for;
+#Q_3_sorted;
+
+Q_3_sorted := []; 
+for i in [1..#Q_3_conj] do 
+    p_subgroups := LowIndexSubgroups(Q_3_conj[i], 8);
+    for j in [1..#p_subgroups] do 
+        Q_t, fQ_t := pQuotient(p_subgroups[j], 2, 2);
+        if Order(Q_t) eq 2^12 then
+            Q_3_sorted := Append(Q_3_sorted, Q_3_conj[i]);
+            printf "Added group %3o for index %3o\n", i, j;
+            break;
+        end if;
+    end for;
+    printf "%3o\n", i;
+end for;
+
+// 17000 checked
+Q_3_sorted := []; 
+for i in [17000..#Q_3_candidates] do 
+    p_subgroups := LowIndexSubgroups(Q_3_candidates[i], 4);
+    for j in [1..#p_subgroups] do 
+        Q_t, fQ_t := pQuotient(p_subgroups[j], 2, 2);
+        if IsIsomorphic(Q_t,Q_2) then
+            Q_3_sorted := Append(Q_3_sorted, Q_3_candidates[i]);
+            printf "Added group %3o", i;
+            break;
+        end if;
+    end for;
+    printf "%3o\n", i;
+end for;
+#Q_3_sorted;
+
+
+
+
+
+//------------------------------------------------------
+//---- Sort by Q_2 -------------------------------------------
+//-------------------------------------------------------------------
+
+Q_3_sorted := []; 
+for i in [1..#Q_3_candidates] do 
+    p_subgroups := LowIndexSubgroups(Q_3_candidates[i], 2);
+    for k in [1..#Q_2_index_2] do
+        check_nr := 0;
+        check_tot := 1;
+        for j in [1..#p_subgroups] do 
+            Q_t, fQ_t := pQuotient(p_subgroups[j], 2, 2);
+            if IsIsomorphic(Q_t,Q_2_index_2[k]) then
+                check_nr := check_nr+1;
+            end if;
+        end for;
+        if not check_nr eq Q_2_number_of_gps[k] then 
+            printf "index missing: %3o, nr of gps: %3o\n", k, check_nr;
+            check_tot := 0;
+            break;
+        end if;
+    end for;
+    if check_tot eq 1 then 
+        printf "Added group %3o\n", i;
+        Q_3_sorted := Append(Q_3_sorted, Q_3_candidates[i]);
+    end if;
+    printf "%3o\n", i;
+end for;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+check := 0;
+Q_3_sorted := []; 
+for i in [1..#Q_3_candidates] do 
+    p_subgroups := LowIndexSubgroups(Q_3_candidates[i], 4);
+    for k in [1..#Q_2_index_2] do
+        check := 0;
+        for j in [1..#p_subgroups] do 
+            Q_t, fQ_t := pQuotient(p_subgroups[j], 2, 2);
+            if IsIsomorphic(Q_t,Q_2_index_2[k]) then
+                check := 1;
+                break;
+            end if;
+        end for;
+        if not check eq 1 then 
+            printf "index missing: %3o\n", k;
+            break;
+        end if;
+    end for;
+    if check eq 1 then 
+        printf "Added group %3o\n", i;
+        Q_3_sorted := Append(Q_3_sorted, Q_3_candidates[i]);
+    end if;
+    check := 0;
+    printf "%3o\n", i;
+end for;
+Type([1..3]);
+
+#Q_3_sorted;
+Q_3_conj;
+
+list := [];
+
+for i in [1..3] do 
+    list := Append(list, i);
+end for;
+list;
+
+Q_2_index_4 := [Q_2];
+check := 0;
+Q_3_sorted := []; 
+for i in [1..#Q_3_conj] do 
+    p_subgroups := LowIndexSubgroups(Q_3_conj[i], 4);
+    for k in [1..#Q_2_index_4] do
+        check := 0;
+        for j in [1..#p_subgroups] do 
+            Q_t, fQ_t := pQuotient(p_subgroups[j], 2, 2);
+            if IsIsomorphic(Q_t,Q_2_index_4[k]) then
+                check := 1;
+                break;
+            end if;
+        end for;
+        if not check eq 1 then 
+            printf "index missing: %3o\n", k;
+            break;
+        end if;
+    end for;
+    if check eq 1 then 
+        printf "Added group %3o\n", i;
+        Q_3_sorted := Append(Q_3_sorted, Q_3_conj[i]);
+    end if;
+    check := 0;
+    printf "%3o\n", i;
+end for;
+
+p_subgroups_1[234];
+
