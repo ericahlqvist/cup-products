@@ -1063,6 +1063,7 @@ GEN my_find_I_v2 (GEN Labs, GEN Lrel, GEN sigma, GEN K, GEN a, GEN iJ, int p_int
 
 // find I such that div(t)+(1-sigma)I = 0 and N(t)=-1
 GEN my_find_final_I (GEN Labs, GEN Lrel, GEN sigma, GEN K, GEN unit, int p_int) {
+    pari_sp av = avma;
     GEN t, div_t, I, T;
     //pari_printf("u: %Ps\n", unit);
     T = rnfisnorminit(K, rnf_get_pol(Lrel), 1);
@@ -1080,7 +1081,8 @@ GEN my_find_final_I (GEN Labs, GEN Lrel, GEN sigma, GEN K, GEN unit, int p_int) 
         //printf("non-triv\n");
     }
     
-    return I;
+    GEN ret = gerepilecopy(av, I);
+    return ret;
 }
 
 GEN my_find_I_vect2 (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN J_vect, GEN Ja_vect, GEN units_mod_2, int p_int) {
