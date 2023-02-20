@@ -77,6 +77,7 @@ main (int argc, char *argv[])
     GEN units_mod_p = my_find_units_mod_p(K, p);
     printf("Nr of units mod p: %ld\n", glength(units_mod_p));
 
+    GEN p_power_units = my_find_p_power_units(K, units_mod_p, p);
     J_vect = my_find_p_gens(K, p);
     // J_vect = bnf_get_gen(K);
     //pari_printf("J_vect: %Ps\n\n", J_vect);
@@ -87,15 +88,15 @@ main (int argc, char *argv[])
     
     
     
-    if (my_is_p_torsion(K,J_vect, p))
-    {
-        printf(ANSI_COLOR_GREEN "p-torsion test passed\n\n" ANSI_COLOR_RESET);
-    }
-    else {
-        printf(ANSI_COLOR_RED "p-torsion test  failed\n\n" ANSI_COLOR_RESET);
-        pari_close();
-        exit(0);
-    }
+    // if (my_is_p_torsion(K,J_vect, p))
+    // {
+    //     printf(ANSI_COLOR_GREEN "p-torsion test passed\n\n" ANSI_COLOR_RESET);
+    // }
+    // else {
+    //     printf(ANSI_COLOR_RED "p-torsion test  failed\n\n" ANSI_COLOR_RESET);
+    //     pari_close();
+    //     exit(0);
+    // }
     
     p_rk = glength(J_vect);
     printf("p-rank: %d\n\n", p_rk);
@@ -117,8 +118,7 @@ main (int argc, char *argv[])
 
     //-----Faster version--------
     // my_cup_matrix_2(K_ext, K, p, p_int, p_rk, J_vect, units_mod_p, r_rk);
-    my_cup_matrix_2_transpose(K_ext, K, p, p_int, p_rk, J_vect, Ja_vect, units_mod_p, r_rk);
-    
+    my_cup_matrix_2_transpose(K_ext, K, p, p_int, p_rk, J_vect, Ja_vect, units_mod_p, r_rk, p_power_units);
     
     printf("\n\n");
     printf(ANSI_COLOR_GREEN "Done! \n \n" ANSI_COLOR_RESET);

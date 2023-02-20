@@ -989,6 +989,60 @@ void my_unramified_p_extensions_with_trivial_action(GEN K, GEN p, GEN D_prime_ve
     printf("\n");
 }
 
+GEN my_find_p_power_units(GEN K, GEN unit_group, GEN p) {
+    
+    if (glength(unit_group)<2) {
+        return mkvec(algtobasis(K, gen_1));
+    }
+
+    int cyc_order = glength(unit_group)-1;
+    if (cyc_order == 1) {
+        return mkvec2(algtobasis(K, gen_1), algtobasis(K, nfpow(K, gel(unit_group, 1), p)));
+    }
+
+    int order = pow(2,cyc_order);
+    //printf("order: %d\ncyc_order: %d\n", order, cyc_order);
+    GEN cyc = zerovec(cyc_order);
+    GEN p_power_units = zerovec(order);
+    GEN current_power, pow, exp;
+
+    int i;
+    int j;
+    for (i=1;i<cyc_order+1;++i) {
+        gel(cyc,i) = gen_2;
+    }
+    GEN exponents = my_get_vect(cyc_order-1, cyc);
+    //pari_printf("%Ps\n", exponents);
+    for (i=1;i<order+1;++i) {
+        exp = gel(exponents, i); 
+        current_power = algtobasis(K, gen_1);
+        
+        for (j=1;j<cyc_order+1;++j) {
+            
+            pow = nfpow(K, gel(unit_group, j), gel(exp, j));
+            
+            current_power = nfmul(K, current_power, pow);
+        }
+        gel(p_power_units, i) = algtobasis(K, current_power);
+    }
+
+
+    //pari_printf("power units: %Ps\n", p_power_units);
+    return p_power_units;
+}
+
+int my_is_in_power_units(GEN K, GEN a, GEN p_power_units) {
+    int i; 
+    int answer = 0;
+    for (i=1;i<glength(p_power_units)+1;++i) {
+        if (my_QV_equal(a, gel(p_power_units, i))) {
+            answer = 1;
+            break;
+        }
+    }
+    return answer;
+}
+
 // Returns vector of tuples (a,J) with div(a)+pJ = 0.
 GEN my_find_Ja_vect(GEN K, GEN J_vect, GEN p) {
     int l = glength(J_vect);
@@ -1062,11 +1116,11 @@ GEN my_find_I (GEN Labs, GEN K, GEN sigma, GEN i_xJ, GEN class_group)
     return ret;
 }
 
-GEN my_find_I_new (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN a, GEN i_xJ, GEN class_group)
+GEN my_find_I_new (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN a, GEN i_xJ, GEN class_group, GEN p_power_units)
 {
     pari_sp av = avma;
     GEN current_I;
-    GEN test_vec, t, t_rel;
+    GEN test_vec, t;
 
     GEN class_number = bnf_get_no(Labs);
     int clnr = itos(class_number);
@@ -1079,32 +1133,23 @@ GEN my_find_I_new (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN a, GEN i_xJ, GEN cl
     printf("Testing if i(J) principal\n");
     test_vec = bnfisprincipal0(Labs, i_xJ, 1);
     
-    // if (my_QV_equal0(gel(test_vec, 1)))
-    // {
-    //     printf(ANSI_COLOR_YELLOW "i_x(J) principal!\n\n" ANSI_COLOR_RESET);
-    //     current_I = idealhnf0(Labs, gen_1, NULL);
-    //     test_found = 1;
-    // }
-    
-
-    
-    //printf(ANSI_COLOR_CYAN "i_x(J) not principal!\n\n" ANSI_COLOR_RESET);
     for (n = 1; n < clnr + 1; ++n) {
         printf("%d/%d\n", n, clnr);
         current_I = gel(class_group, n);
         Itest = idealdiv(Labs, i_xJ, my_1MS_ideal(Labs, sigma, current_I));
         test_vec = bnfisprincipal0(Labs, Itest, 1);
-        printf("Hej\n");
         
         t = gel(test_vec, 2);
-        t_rel = rnfeltabstorel(Lrel, t);
-        pari_printf("HAj %Ps\n", nfmul(K,rnfeltnorm(Lrel, t_rel),a));
-        if (my_QV_equal0(gel(test_vec, 1)) && my_QV_equal1(algtobasis(K, nfmul(K,rnfeltnorm(Lrel, t_rel),a))))
+        
+        if (my_QV_equal0(gel(test_vec, 1)))
         {
-            printf(ANSI_COLOR_GREEN "FOUND!\n\n" ANSI_COLOR_RESET);
+            // This needs to be modified in order to take into account "mod p"
             
-            test_found = 1;
-            break;
+            if (my_is_in_power_units(K, algtobasis(K, nfmul(K,rnfeltnorm(Lrel, rnfeltabstorel(Lrel, t)),a)), p_power_units)) {
+                test_found = 1;
+                break;
+            }
+            
         } 
 
     }
@@ -1221,7 +1266,7 @@ GEN my_find_I_vect2 (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN J_vect, GEN Ja_ve
     return I_vect;
 }
 
-GEN my_find_I_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect) {
+GEN my_find_I_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p_power_units) {
     pari_sp av = avma;
     int p_rk = glength(Ja_vect);
     GEN I_vect = zerovec(p_rk);
@@ -1241,7 +1286,7 @@ GEN my_find_I_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect) {
         //ext_gen = idealred(Labs, rnfidealup0(Lrel, gel(J_vect, i), 1));
         ext_gen = rnfidealup0(Lrel, gel(gel(Ja_vect, i),2), 1);
         printf("Lifted J: %d/%d\n", i, p_rk);
-        I = gel(my_find_I_new(Labs, Lrel, K, sigma, gel(gel(Ja_vect, i),1), ext_gen, class_group),2);
+        I = gel(my_find_I_new(Labs, Lrel, K, sigma, gel(gel(Ja_vect, i),1), ext_gen, class_group, p_power_units),2);
         
         gel(I_vect, i) = I;
     } 
@@ -1249,12 +1294,12 @@ GEN my_find_I_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect) {
     return I_vect;
 }
 
-GEN my_find_I_vect3 (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN units_mod_p, int p_int) {
+GEN my_find_I_vect3 (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN units_mod_p, int p_int, GEN p_power_units) {
     int p_rk = glength(Ja_vect);
     int u_length = glength(units_mod_p);
     GEN I_vect = zerovec(p_rk+u_length);
     //pari_printf("%Ps\n", gel(ext_gens, 1));
-    GEN I_first = my_find_I_vect(Labs, Lrel, K, sigma, Ja_vect);
+    GEN I_first = my_find_I_vect(Labs, Lrel, K, sigma, Ja_vect, p_power_units);
     printf("First part of I_vect found\n");
     int i;
     

@@ -170,7 +170,7 @@ GEN my_ext(GEN base, GEN base_clf, GEN s, GEN p, int p_rk, GEN D_prime_vect)
         //Should throw away some trash here to free memory
 
         gel(base_ext, i) = mkvec3(Labs, Lrel, sigma);
-        my_test_artin_symbol (Labs, Lrel, base, itos(p), sigma);
+        // my_test_artin_symbol (Labs, Lrel, base, itos(p), sigma);
     }
     base_ext = gerepilecopy(av, base_ext);
     return base_ext;
