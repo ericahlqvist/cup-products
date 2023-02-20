@@ -19,17 +19,22 @@ int my_is_p_torsion (GEN K, GEN J_vect, GEN p) {
 }
 
 int my_test_H90_ideal (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN I_vect, GEN J_vect) {
-    int p_rk = glength(J_vect)-1;
-    GEN ext_gen, test_ideal, test_vec, is_pr;
+    int p_rk = glength(J_vect);
+    GEN iJ, test_ideal, test_vec, is_pr;
     int is_principal = 1;
     //pari_printf("%Ps\n", gel(ext_gens, 1));
     
     int i;
     
-    for (i = 1; i < p_rk+1; ++i)
+    for (i = 1; i < glength(I_vect)+1; ++i)
     {
-        ext_gen = rnfidealup0(Lrel, gel(J_vect, i), 1);
-        test_ideal = idealmul(Labs, my_1MS_ideal(Labs, sigma, gel(I_vect, i)), idealinv(Labs, ext_gen));
+        if (i<=p_rk) {
+            iJ = rnfidealup0(Lrel, gel(J_vect, i), 1);
+            test_ideal = idealdiv(Labs, iJ, my_1MS_ideal(Labs, sigma, gel(I_vect, i)));
+        }
+        else {
+            test_ideal = my_SM1_ideal(Labs, sigma, gel(I_vect, i));
+        }
         is_pr = bnfisprincipal0(Labs, test_ideal, 1);
         test_vec = gel(is_pr, 1);
         if (!my_QV_equal0(test_vec))

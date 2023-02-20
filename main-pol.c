@@ -17,6 +17,7 @@
 #include "test_artin.h"
 #include "ext_and_aut2.h"
 #include "find_cup_matrix.h"
+#include "find_cup_matrix2.h"
 
 
 
@@ -28,19 +29,19 @@ main (int argc, char *argv[])
     //--------
     
 
-    int p_int, p_rk, r_rk, i;
+    int p_int, p_rk, r_rk;
 
     int min;
     int sec;
     int msec;
     
-    pari_init(8000000000,500000);
+    pari_init(10000000000,500000);
     // printf("Initial adress: %ld\n", avma);
     // pari_sp limit = stack_lim(avma, 1);
     
     GEN p = cgeti(DEFAULTPREC);
     GEN s = pol_x(fetch_user_var("s"));
-    GEN x = pol_x(fetch_user_var("x"));
+    // GEN x = pol_x(fetch_user_var("x"));
     GEN K, f, Kcyc, p_ClFld_pol, J_vect, Ja_vect, D, D_prime_vect;
 
     p = gp_read_str(argv[1]);
@@ -62,20 +63,22 @@ main (int argc, char *argv[])
     pari_printf("K cyc: %Ps\n\n", Kcyc);
     pari_printf("Discriminant: %Ps\n\n", D);
     p_ClFld_pol = bnrclassfield(K, p, 0, DEFAULTPREC);
-    pari_printf("p Cl Fld: %Ps\n\n", p_ClFld_pol);
+    // pari_printf("p Cl Fld: %Ps\n\n", p_ClFld_pol);
     pari_printf("Fund units: %Ps\n", bnf_get_fu(K));
     pari_printf("Tors units: %Ps\n\n", bnf_get_tuU(K));
 
-    // GEN clf_pol = gsubstpol(bnrclassfield(K, p, 2, DEFAULTPREC), x, s);
-    // GEN clf_pol = bnrclassfield(K, p, 2, DEFAULTPREC);
+    // GEN clf_pol = gsubstpol(polredabs0(mkvec2(bnrclassfield(K, p, 2, DEFAULTPREC), D_prime_vect),0), x, s);
+    // // GEN clf_pol = bnrclassfield(K, p, 2, DEFAULTPREC);
     // pari_printf("abs pol: %Ps\n\n", clf_pol);
-    my_unramified_p_extensions(K, p, D_prime_vect);
+    // my_unramified_p_extensions(K, p, D_prime_vect);
+    // my_unramified_p_extensions_with_trivial_action(K, p, D_prime_vect);
     
     
     GEN units_mod_p = my_find_units_mod_p(K, p);
     printf("Nr of units mod p: %ld\n", glength(units_mod_p));
 
     J_vect = my_find_p_gens(K, p);
+    // J_vect = bnf_get_gen(K);
     //pari_printf("J_vect: %Ps\n\n", J_vect);
     
     Ja_vect = my_find_Ja_vect(K, J_vect, p);
@@ -84,13 +87,15 @@ main (int argc, char *argv[])
     
     
     
-    // if (my_is_p_torsion(K,J_vect, p))
-    // {
-    //     printf(ANSI_COLOR_GREEN "p-torsion test passed\n\n" ANSI_COLOR_RESET);
-    // }
-    // else {
-    //     printf(ANSI_COLOR_RED "p-torsion test  failed\n\n" ANSI_COLOR_RESET);
-    // }
+    if (my_is_p_torsion(K,J_vect, p))
+    {
+        printf(ANSI_COLOR_GREEN "p-torsion test passed\n\n" ANSI_COLOR_RESET);
+    }
+    else {
+        printf(ANSI_COLOR_RED "p-torsion test  failed\n\n" ANSI_COLOR_RESET);
+        pari_close();
+        exit(0);
+    }
     
     p_rk = glength(J_vect);
     printf("p-rank: %d\n\n", p_rk);
@@ -99,47 +104,22 @@ main (int argc, char *argv[])
     printf("r-rank: %d\n\n", r_rk);
 
 
-    pari_printf("p_int: %d\n\nmy_pol: %Ps\n\nK_cyc: %Ps\n\nK_basis: %Ps\n\n", p_int, f, Kcyc, nf_get_zk(bnf_get_nf(K)));
+    pari_printf("p_int: %d\n\nmy_pol: %Ps\n\nK_cyc: %Ps\n\n", p_int, f, Kcyc);
 
     GEN K_ext = my_ext(K, p_ClFld_pol, s, p, p_rk, D_prime_vect);
     printf("Extensions found\n\n");
     
     //Defines a matrix over F_2 with index (i*k, j) corresponding to 
     //< x_i\cup x_k, (a_j, J_j)>
-    GEN cup_matrix = my_cup_matrix(K_ext, K, p, p_int, p_rk, J_vect, Ja_vect, units_mod_p);
-    int k;
-    printf(ANSI_COLOR_YELLOW "Cup Matrix:  \n\n" ANSI_COLOR_RESET);
-    for (i=1; i<p_rk+1; ++i) {
-        for (k=1; k<p_rk+1; ++k) {
-            pari_printf(ANSI_COLOR_CYAN "(%d,%d)  :  %Ps\n\n" ANSI_COLOR_RESET, i,k, gel(cup_matrix, (i-1)*p_rk+k));
-        } 
-    }
-    printf("\n\n");
 
-    char letters[] = "abcdefghijklmnopqr";
-    printf(ANSI_COLOR_YELLOW "Cup relations:  \n\n" ANSI_COLOR_RESET);
-    int j;
-    printf("{");
-    for (j=1; j<r_rk+1; j++) {
-        for (i=1; i<p_rk+1; ++i) {
-            for (k=i; k<p_rk+1; k++) {
-                if (gequal1(gel(gel(cup_matrix, (i-1)*p_rk+k), j))) {
-                    if (i==k) {
-                        printf("%c^2", letters[i-1]);
-                    }
-                    else {
-                        printf("(%c,%c)", letters[i-1],letters[k-1]);
-                    }
-                }
-            }
-        }
-        if (j==r_rk) {
-            printf("}\n");
-        }
-        else {
-            printf(", ");
-        }
-    }
+    // my_cup_matrix(K_ext, K, p, p_int, p_rk, J_vect, Ja_vect, units_mod_p, r_rk);
+    // my_cup_matrix_transpose(K_ext, K, p, p_int, p_rk, J_vect, Ja_vect, units_mod_p, r_rk);
+
+    //-----Faster version--------
+    // my_cup_matrix_2(K_ext, K, p, p_int, p_rk, J_vect, units_mod_p, r_rk);
+    my_cup_matrix_2_transpose(K_ext, K, p, p_int, p_rk, J_vect, Ja_vect, units_mod_p, r_rk);
+    
+    
     printf("\n\n");
     printf(ANSI_COLOR_GREEN "Done! \n \n" ANSI_COLOR_RESET);
 

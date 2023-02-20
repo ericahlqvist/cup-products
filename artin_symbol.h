@@ -2,7 +2,7 @@ GEN my_p_Artin_symbol(GEN Labs, GEN Lrel, GEN K, GEN K_factorization, GEN p, GEN
     pari_sp av = avma;
     GEN p_Artin_symbol;
     // Find prime below to determine size of residue field
-    GEN prime_below = gel(gel(gel(K_factorization, 1), 1), 1);
+    //GEN prime_below = gel(gel(gel(K_factorization, 1), 1), 1);
     // Define the prime from factorization
     GEN prime = idealhnf0(K, gel(gel(gel(K_factorization, 1), 1), 1), gel(gel(gel(K_factorization, 1), 1), 2));
     // Lift the prime
@@ -20,8 +20,14 @@ GEN my_p_Artin_symbol(GEN Labs, GEN Lrel, GEN K, GEN K_factorization, GEN p, GEN
         return p_Artin_symbol;
     }
     else {
-        exp = idealnorm(K, prime); //prime_below
-        // pari_printf("Norm p: %Ps\n\nExp: %Ps\n\n", idealnorm(K, prime), exp);
+        exp = idealnorm(K, prime); 
+        //exp = prime_below;
+        // if (!equalii(idealnorm(K, prime), prime_below)) {
+        //     pari_printf("Norm p: %Ps\n\nExp: %Ps\n\n", idealnorm(K, prime), prime_below);
+        //     pari_close();
+        //     exit(0);
+        // }
+        
         //printf(ANSI_COLOR_YELLOW "Inert\n\n" ANSI_COLOR_RESET);
     }
      //idealnorm(K, prime);

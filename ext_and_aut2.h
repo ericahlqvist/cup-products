@@ -4,6 +4,7 @@ Generates all extensions of base together with all necessary automorphisms
 
 GEN my_ext_old(GEN base, GEN base_clf, int disc, GEN s, GEN p, GEN D_prime_vect, int swap) 
 {   
+    
     printf("Finding extensions... \n\n");
     GEN x, y;
 
@@ -124,6 +125,7 @@ GEN my_ext_old(GEN base, GEN base_clf, int disc, GEN s, GEN p, GEN D_prime_vect,
 
 GEN my_ext(GEN base, GEN base_clf, GEN s, GEN p, int p_rk, GEN D_prime_vect) 
 {   
+    pari_sp av = avma;
     printf("Finding extensions... \n\n");
     GEN x, y, p1, q1, p1red, Lrel, Labs, s_lift_x, cx, sigma;
 
@@ -131,11 +133,11 @@ GEN my_ext(GEN base, GEN base_clf, GEN s, GEN p, int p_rk, GEN D_prime_vect)
     y = pol_x(fetch_user_var("y"));
 
     GEN base_ext = zerovec(p_rk);
-    printf("base l: %ld\n", glength(base_ext));
-    pari_printf("Base_clf: %Ps\n\n", base_clf);
+    // printf("base l: %ld\n", glength(base_ext));
+    // pari_printf("Base_clf: %Ps\n\n", base_clf);
 
     int i, j;
-    for (i=1; i<p_rk+1; ++i) {
+    for (i=p_rk; i>0; --i) {
         p1 = gel(base_clf, i);
         q1 = gsubstpol(p1, x, y);
 
@@ -163,12 +165,13 @@ GEN my_ext(GEN base, GEN base_clf, GEN s, GEN p, int p_rk, GEN D_prime_vect)
         printf(ANSI_COLOR_CYAN "---> sigma <--- \n \n" ANSI_COLOR_RESET);
         
         // my_action_on_clgp(Labs, sigma, p);
-
+        // my_test_artin_on_norms(Labs, Lrel, base, itos(p), sigma);
+        
         //Should throw away some trash here to free memory
 
         gel(base_ext, i) = mkvec3(Labs, Lrel, sigma);
-        //my_test_artin_symbol (Labs, Lrel, base, itos(p), sigma);
+        my_test_artin_symbol (Labs, Lrel, base, itos(p), sigma);
     }
-
+    base_ext = gerepilecopy(av, base_ext);
     return base_ext;
 }
