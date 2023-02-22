@@ -1,0 +1,91 @@
+//Server login:
+// ssh v1eahlqv@ssh1.maths.ed.ac.uk
+// ssh v1eahlqv@ssh3.maths.ed.ac.uk
+
+// ssh compute64d.maths.ed.ac.uk
+
+// 5460:
+F<g1,g2,g3,g4> := FreeGroup(4);          
+Q_K, fQ_K := pQuotient(F, 2, 2 : Print := 1);
+a := Q_K.1;
+b := Q_K.2;
+c := Q_K.3;
+d := Q_K.4;
+cup_rels_K := {(a,b)*(a,c)*(b,c), a^2*(a,c)*b^2*(b,d), (a,c)*b^2*c^2, a^2*(a,b)*(c,d), a^2*(a,c)*(a,d)*b^2*d^2};
+
+Q_2_K := quo< Q_K | cup_rels_K >;
+
+
+// Some extensions
+
+F_4<g1,g2,g3,g4> := FreeGroup(4);          
+Q, fQ := pQuotient(F_4, 2, 2 : Print := 1);
+a := Q.1;
+b := Q.2;
+c := Q.3;
+d := Q.4;
+cup_rels := {(a,d)*(b,d)*(c,d), (a,c)*(a,d)*c^2*(c,d), (a,d)*(b,d)*d^2, (a,b)*(a,c)*(a,d)*(b,c)*(b,d), (a,d)*(c,d)};
+Q_2_L_5 := quo< Q | cup_rels >;
+Q_2_L_5;
+
+// s^4 + 455*s^2 + 207025, cyc: [4, 2, 2, 2]
+    // {(a,c)*(a,d)*(c,d), (a,b)*(a,c)*(a,d)*(b,c)*(b,d)*d^2, (a,b)*(a,c)*(a,d)*c^2, a^2*(b,c), (a,c)*(a,d)*(b,c)*(b,d)*(c,d)};
+cup_rels := {(a,c)*(a,d)*(c,d), (a,b)*(a,c)*(a,d)*(b,c)*(b,d)*d^2, (a,b)*(a,c)*(a,d)*c^2, a^2*(b,c), (a,c)*(a,d)*(b,c)*(b,d)*(c,d)};
+
+//cup_rels_alt := {(c,d), (a,b)*(a,c)*(a,d)*(b,c)*(b,d)*(c,d)*d^2, (a,b)*c^2, a^2*(b,c)*(c,d), (a,c)*(a,d)*(b,c)*(b,d)*(c,d)};
+Q_2_L_6 := quo< Q | cup_rels>;
+Q_2_L_6;
+IsIsomorphic(Q_2_alt, Q_2_L_6);
+
+// s^4 - 2*s^3 + 11*s^2 - 10*s + 1390, cyc: [4, 4, 2, 2]
+    // {(a,b)*(b,d), (c,d), (a,c)*(a,d)*b^2, (a,c)*c^2, (a,b)*(b,c)*(b,d), (b,c)};
+cup_rels := {(a,b)*(b,d), (c,d), (a,c)*(a,d)*b^2, (a,c)*c^2, (a,b)*(b,c)*(b,d), (b,c)};
+Q_2_L_7 := quo< Q | cup_rels >;
+Q_2_L_7;
+IsIsomorphic(Q_2_L_6, Q_2_L_7);
+
+// s^4 + 683*s^2 + 116281, cyc: [4, 2, 2, 2]
+    // {(a,c)*(a,d)*(b,c)*(b,d), (a,b)*(b,c)*(b,d)*c^2, (a,b)*(a,c)*(a,d)*d^2, a^2*(a,d)*(b,d)*(c,d), (a,c)*(a,d), (b,c)*(b,d)};
+cup_rels := {(a,c)*(a,d)*(b,c)*(b,d), (a,b)*(b,c)*(b,d)*c^2, (a,b)*(a,c)*(a,d)*d^2, a^2*(a,d)*(b,d)*(c,d), (a,c)*(a,d), (b,c)*(b,d)};
+Q_2_L_8 := quo< Q | cup_rels >;
+Q_2_L_8;
+IsIsomorphic(Q_2_L_7, Q_2_L_8);
+
+Q_2_index_2 := [Q_2_L_5, Q_2_L_6, Q_2_L_7, Q_2_L_8];
+Q_2_number_of_gps := [1, 1, 1, 1];
+
+
+Q_3_candidates := eval Read("Q_3_candidates");
+
+//------------------------------------------------------
+//---- Sort by Q_2 -------------------------------------------
+//-------------------------------------------------------------------
+
+Q_3_sorted := eval Read("Q_3_sorted");
+//1000
+for i in [501..1000] do 
+    p_subgroups := LowIndexSubgroups(Q_3_candidates[i], 2);
+    for k in [1..#Q_2_index_2] do
+        check_nr := 0;
+        check_tot := 1;
+        for j in [1..#p_subgroups] do 
+            Q_t, fQ_t := pQuotient(p_subgroups[j], 2, 2);
+            if IsIsomorphic(Q_t,Q_2_index_2[k]) then
+                check_nr := check_nr+1;
+            end if;
+        end for;
+        if not check_nr eq Q_2_number_of_gps[k] then 
+            printf "index missing: %3o, nr of gps: %3o\n", k, check_nr;
+            check_tot := 0;
+            break;
+        end if;
+    end for;
+    if check_tot eq 1 then 
+        printf "Added group %3o\n", i;
+        Q_3_sorted := Append(Q_3_sorted, Q_3_candidates[i]);
+    end if;
+    printf "%3o\n", i;
+end for;
+#Q_3_sorted;
+PrintFileMagma("Q_3_sorted", Q_3_sorted : Overwrite := true);
+

@@ -764,7 +764,13 @@ GEN my_find_units_mod_p (GEN K, GEN p) {
     if (gequal1(nfpow(K, tors_unit, gpow(p, stoi(4), DEFAULTPREC)))) {
         units_mod_p = shallowconcat(units_mod_p, mkvec(tors_unit));
     }
-    
+    int i;
+    printf("Units:\n\n");
+    for (i=1;i<glength(units_mod_p)+1;++i) {
+        pari_printf("u %d: %Ps\n", i, algtobasis(K, gel(units_mod_p, i)));
+        pari_printf("u^-1 %d: %Ps\n", i, nfinv(K, algtobasis(K, gel(units_mod_p, i))));
+    }
+    printf("\n");
     return units_mod_p;
 }
 
@@ -989,46 +995,79 @@ void my_unramified_p_extensions_with_trivial_action(GEN K, GEN p, GEN D_prime_ve
     printf("\n");
 }
 
-GEN my_find_p_power_units(GEN K, GEN unit_group, GEN p) {
+GEN my_find_p_power_tors_units(GEN K, GEN p) {
     
-    if (glength(unit_group)<2) {
+    if (itos(p)!=2) {
         return mkvec(algtobasis(K, gen_1));
     }
 
-    int cyc_order = glength(unit_group)-1;
+    else {
+        return mkvec4(algtobasis(K, gen_1), algtobasis(K, nfpow(K, bnf_get_tuU(K), p)), algtobasis(K, nfpow(K, bnf_get_tuU(K), gmul(p,p))), algtobasis(K, nfpow(K, bnf_get_tuU(K), gmul(p,gmul(p,p)))));
+    }
+}
+
+GEN my_find_p_power_units(GEN K, GEN unit_group, GEN p) {
+    // This function must be improved to return more ("small") powers
+    if (glength(unit_group)==0) {
+        return mkvec(algtobasis(K, gen_1));
+    }
+
+    if (glength(unit_group)==1) {
+        return mkvec2(algtobasis(K, gen_1), algtobasis(K, nfpow(K, gel(unit_group, 1), p)));
+    }
+
+    int cyc_order = glength(unit_group);
     if (cyc_order == 1) {
         return mkvec2(algtobasis(K, gen_1), algtobasis(K, nfpow(K, gel(unit_group, 1), p)));
     }
 
-    int order = pow(2,cyc_order);
+    int order = pow(3,cyc_order);
     //printf("order: %d\ncyc_order: %d\n", order, cyc_order);
     GEN cyc = zerovec(cyc_order);
     GEN p_power_units = zerovec(order);
-    GEN current_power, pow, exp;
+    GEN current_power, power, exp;
 
     int i;
     int j;
     for (i=1;i<cyc_order+1;++i) {
-        gel(cyc,i) = gen_2;
+        gel(cyc,i) = stoi(3);
     }
     GEN exponents = my_get_vect(cyc_order-1, cyc);
-    //pari_printf("%Ps\n", exponents);
+    pari_printf("%Ps\n", exponents);
     for (i=1;i<order+1;++i) {
         exp = gel(exponents, i); 
         current_power = algtobasis(K, gen_1);
         
         for (j=1;j<cyc_order+1;++j) {
+            if (itos(gel(exp, j))==2) {
+                power = nfpow(K, gel(unit_group, j), gel(exp, j));
+            }
+            else {
+                power = nfpow(K, gel(unit_group, j), gneg(gmul(gen_2,gel(exp, j))));
+            }
             
-            pow = nfpow(K, gel(unit_group, j), gel(exp, j));
-            
-            current_power = nfmul(K, current_power, pow);
+            current_power = nfmul(K, current_power, power);
         }
         gel(p_power_units, i) = algtobasis(K, current_power);
     }
 
-
-    //pari_printf("power units: %Ps\n", p_power_units);
+    for (i=1;i<glength(p_power_units)+1;++i) {
+        pari_printf("power units %d: %Ps\n", i, gel(p_power_units, i));
+    }
+    
     return p_power_units;
+}
+
+int my_is_in_tors_power_units(GEN K, GEN a, GEN p_power_units) {
+    int i; 
+    int answer = 0;
+    for (i=1;i<glength(p_power_units)+1;++i) {
+        if (my_QV_equal(a, gel(p_power_units, i))) {
+            answer = 1;
+            break;
+        }
+    }
+    return answer;
 }
 
 int my_is_in_power_units(GEN K, GEN a, GEN p_power_units) {
@@ -1144,7 +1183,7 @@ GEN my_find_I_new (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN a, GEN i_xJ, GEN cl
         if (my_QV_equal0(gel(test_vec, 1)))
         {
             // This needs to be modified in order to take into account "mod p"
-            
+            pari_printf(ANSI_COLOR_GREEN "Principal: %Ps\n"  ANSI_COLOR_RESET, algtobasis(K, nfmul(K,rnfeltnorm(Lrel, rnfeltabstorel(Lrel, t)),a)));
             if (my_is_in_power_units(K, algtobasis(K, nfmul(K,rnfeltnorm(Lrel, rnfeltabstorel(Lrel, t)),a)), p_power_units)) {
                 test_found = 1;
                 break;
