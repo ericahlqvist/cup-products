@@ -1232,14 +1232,18 @@ GEN my_find_I_new (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN a, GEN i_xJ, GEN cl
 
     }
     
-    
+    GEN ret;
     if (!test_found)
     {
         printf(ANSI_COLOR_RED "No I found in my_find_I\n\n" ANSI_COLOR_RESET);
-        exit(0);
+        
+        ret = mkvec2(gen_0,gen_0);
+        ret = gerepilecopy(av, ret);
+       
+        return ret;
     }
     
-    GEN ret = mkvec2(gel(test_vec, 2), current_I);
+    ret = mkvec2(gel(test_vec, 2), current_I);
     ret = gerepilecopy(av, ret);
     return ret;
 }
@@ -1344,7 +1348,7 @@ GEN my_find_I_vect2 (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN J_vect, GEN Ja_ve
     return I_vect;
 }
 
-GEN my_find_I_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p_power_units) {
+GEN my_find_I_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p_power_units, int p_int) {
     pari_sp av = avma;
     int p_rk = glength(Ja_vect);
     GEN I_vect = zerovec(p_rk);
@@ -1364,9 +1368,18 @@ GEN my_find_I_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p_pow
         //ext_gen = idealred(Labs, rnfidealup0(Lrel, gel(J_vect, i), 1));
         ext_gen = rnfidealup0(Lrel, gel(gel(Ja_vect, i),2), 1);
         printf("Lifted J: %d/%d\n", i, p_rk);
+
         I = gel(my_find_I_new(Labs, Lrel, K, sigma, gel(gel(Ja_vect, i),1), ext_gen, class_group, p_power_units),2);
+        pari_printf("I: %Ps\n", I);
+        if (gequal0(I)) {
+            
+            I = my_find_I_v2(Labs, Lrel, sigma, K, gel(gel(Ja_vect, i),1), ext_gen, p_int);
+            gel(I_vect, i) = I;
+        }
+        else {
+            gel(I_vect, i) = I;
+        }
         
-        gel(I_vect, i) = I;
     } 
     I_vect = gerepilecopy(av, I_vect);
     return I_vect;
@@ -1377,7 +1390,7 @@ GEN my_find_I_vect3 (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN unit
     int u_length = glength(units_mod_p);
     GEN I_vect = zerovec(p_rk+u_length);
     //pari_printf("%Ps\n", gel(ext_gens, 1));
-    GEN I_first = my_find_I_vect(Labs, Lrel, K, sigma, Ja_vect, p_power_units);
+    GEN I_first = my_find_I_vect(Labs, Lrel, K, sigma, Ja_vect, p_power_units, p_int);
     printf("First part of I_vect found\n");
     int i;
     
