@@ -1097,6 +1097,8 @@ GEN my_find_Ja_vect(GEN K, GEN J_vect, GEN p) {
     return Ja_vect;
 }
 
+
+
 /*
 Given J \in CL(K)_p, find t, I such that J=div(t)+(1-sigma)I 
 */
@@ -1153,6 +1155,43 @@ GEN my_find_I (GEN Labs, GEN K, GEN sigma, GEN i_xJ, GEN class_group)
     GEN ret = mkvec2(gel(test_vec, 2), current_I);
     ret = gerepilecopy(av, ret);
     return ret;
+}
+
+GEN my_find_a_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN J_vect, int p_int) {
+    pari_sp av = avma;
+    GEN a, t, ext_gen;
+    int p_rk = glength(J_vect);
+    GEN class_group = my_get_clgp (Labs);
+    GEN a_vect = zerovec(p_rk);
+    int i;
+    
+    for (i = 1; i < p_rk+1; ++i)
+    {
+        
+        ext_gen = rnfidealup0(Lrel, gel(J_vect, i), 1);
+        t = gel(my_find_I(Labs, K, sigma, ext_gen, class_group),1);
+        a = algtobasis(K, nfinv(K, rnfeltnorm(Lrel, rnfeltabstorel(Lrel, t))));
+        gel(a_vect, i) = a;
+    } 
+    a_vect = gerepilecopy(av, a_vect);
+    return a_vect;
+}
+
+// Returns vector of tuples (a,J) with div(a)+pJ = 0.
+GEN my_find_Ja_vect_modified(GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN J_vect, GEN units, GEN p) {
+    pari_sp av = avma;
+    int l = glength(J_vect);
+    GEN Ja_vect = zerovec(l);
+    
+    int i;
+    GEN a_vect = my_find_a_vect (Labs, Lrel, K, sigma, J_vect, itos(p));
+    for (i=1; i<l+1; ++i) {
+        
+        gel(Ja_vect, i) = mkvec2(gel(a_vect, i), gel(J_vect, i));
+    }
+
+    Ja_vect = gerepilecopy(av, Ja_vect);
+    return Ja_vect;
 }
 
 GEN my_find_I_new (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN a, GEN i_xJ, GEN class_group, GEN p_power_units)
