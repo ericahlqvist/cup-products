@@ -137,7 +137,7 @@ GEN my_ext(GEN base, GEN base_clf, GEN s, GEN p, int p_rk, GEN D_prime_vect)
     // pari_printf("Base_clf: %Ps\n\n", base_clf);
 
     int i, j;
-    for (i=p_rk; i>0; --i) {
+    for (i=1; i<p_rk+1; ++i) {
         p1 = gel(base_clf, i);
         q1 = gsubstpol(p1, x, y);
 

@@ -756,21 +756,29 @@ GEN my_reduce_H1_mod (GEN LxAbs, GEN sigma_x, GEN v, GEN elem, GEN p) {
 
 // Works when torsion is 2 power torsion
 GEN my_find_units_mod_p (GEN K, GEN p) {
+    int i;
     GEN fund_units = bnf_get_fu(K);
     GEN tors_unit = bnf_get_tuU(K);
+    
+
     GEN units_mod_p = fund_units;
     // pari_printf("A: %Ps\n", gpow(p, stoi(4), DEFAULTPREC));
     // pari_printf("B: %Ps\n", nfpow(K, tors_unit, gpow(p, stoi(4), DEFAULTPREC)));
     if (gequal1(nfpow(K, tors_unit, gpow(p, stoi(4), DEFAULTPREC)))) {
         units_mod_p = shallowconcat(units_mod_p, mkvec(tors_unit));
     }
-    int i;
+    
     printf("Units:\n\n");
     for (i=1;i<glength(units_mod_p)+1;++i) {
         pari_printf("u %d: %Ps\n", i, algtobasis(K, gel(units_mod_p, i)));
         pari_printf("u^-1 %d: %Ps\n", i, nfinv(K, algtobasis(K, gel(units_mod_p, i))));
     }
     printf("\n");
+
+    // ad-hoc modification
+    // gel(units_mod_p, 2) = nfmul(K, gel(units_mod_p, 1), gel(units_mod_p, 4));
+    // gel(units_mod_p, 3) = nfdiv(K, gel(units_mod_p, 1), gel(units_mod_p, 4));
+
     return units_mod_p;
 }
 
@@ -842,31 +850,32 @@ void my_unramified_p_extensions(GEN K, GEN p, GEN D_prime_vect) {
     // pari_printf("subgrouplist: %Ps\n", subgrouplist0(bnf_get_cyc(K), mkvec(gpow(p,gen_2, DEFAULTPREC)), 0));
 
     GEN R = bnrclassfield(K, subgrouplist0(bnf_get_cyc(K), index, 2), 2, DEFAULTPREC);
-    GEN Rsq = bnrclassfield(K, subgrouplist0(bnf_get_cyc(K), mkvec(gpow(p,gen_2, DEFAULTPREC)), 2), 2, DEFAULTPREC);
-    GEN Rcb = bnrclassfield(K, subgrouplist0(bnf_get_cyc(K), mkvec(gpow(p,stoi(3), DEFAULTPREC)), 2), 2, DEFAULTPREC);
+    //GEN Rsq = bnrclassfield(K, subgrouplist0(bnf_get_cyc(K), mkvec(gpow(p,gen_2, DEFAULTPREC)), 2), 2, DEFAULTPREC);
+    //GEN Rcb = bnrclassfield(K, subgrouplist0(bnf_get_cyc(K), mkvec(gpow(p,stoi(3), DEFAULTPREC)), 2), 2, DEFAULTPREC);
     GEN abs_pol;
     printf("[p]-extensions:\n\n");
     for (i=1;i<glength(R)+1;i++) {
+        //printf("i: %d\n", i);
         abs_pol = polredabs0(mkvec2(gel(R, i), D_prime_vect), 0);
         //abs_pol = polredabs(gel(R, i));
         pari_printf("%Ps, cyc: %Ps\n", gsubstpol(abs_pol, x, s), bnf_get_cyc(Buchall(abs_pol, nf_FORCE, DEFAULTPREC)));
         
     }
     printf("\n");
-    printf("[p,p]-extensions:\n\n");
-    for (i=1;i<glength(Rsq)+1;i++) {
-        abs_pol = polredabs0(mkvec2(gel(Rsq, i), D_prime_vect), 0);
-        //abs_pol = polredabs(gel(R, i));
-        pari_printf("%Ps, cyc: %Ps\n", gsubstpol(abs_pol, x, s), bnf_get_cyc(Buchall(abs_pol, nf_FORCE, DEFAULTPREC)));
-    }
-    printf("\n");
-    printf("[p,p,p]-extensions:\n\n");
-    for (i=1;i<glength(Rcb)+1;i++) {
-        abs_pol = polredabs0(mkvec2(gel(Rcb, i), D_prime_vect), 0);
-        //abs_pol = polredabs(gel(R, i));
-        pari_printf("%Ps, cyc: %Ps\n", gsubstpol(abs_pol, x, s), bnf_get_cyc(Buchall(abs_pol, nf_FORCE, DEFAULTPREC)));
-    }
-    printf("\n");
+    // printf("[p,p]-extensions:\n\n");
+    // for (i=1;i<glength(Rsq)+1;i++) {
+    //     abs_pol = polredabs0(mkvec2(gel(Rsq, i), D_prime_vect), 0);
+    //     //abs_pol = polredabs(gel(R, i));
+    //     pari_printf("%Ps, cyc: %Ps\n", gsubstpol(abs_pol, x, s), bnf_get_cyc(Buchall(abs_pol, nf_FORCE, DEFAULTPREC)));
+    // }
+    // printf("\n");
+    // printf("[p,p,p]-extensions:\n\n");
+    // for (i=1;i<glength(Rcb)+1;i++) {
+    //     abs_pol = polredabs0(mkvec2(gel(Rcb, i), D_prime_vect), 0);
+    //     //abs_pol = polredabs(gel(R, i));
+    //     pari_printf("%Ps, cyc: %Ps\n", gsubstpol(abs_pol, x, s), bnf_get_cyc(Buchall(abs_pol, nf_FORCE, DEFAULTPREC)));
+    // }
+    // printf("\n");
 }
 
 void my_unramified_p_extensions_with_trivial_action(GEN K, GEN p, GEN D_prime_vect) {
@@ -1194,7 +1203,23 @@ GEN my_find_Ja_vect_modified(GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN J_vect, G
     return Ja_vect;
 }
 
-GEN my_find_I_new (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN a, GEN i_xJ, GEN class_group, GEN p_power_units)
+int my_is_p_power (GEN vect, int p_int) {
+    int l = glength(vect);
+    int check_zero = 1;
+    int check_p = 1;
+    int i;
+    for (i=1;i<l+1;++i) {
+        if (!(itos(gel(vect, i))%p_int==0)) {
+            check_p = 0;
+        }
+    } 
+    if (check_zero) {
+        return 0;
+    }
+    return check_p;
+}
+
+GEN my_find_I_new (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN a, GEN i_xJ, GEN class_group, GEN p_power_units, int p_int)
 {
     pari_sp av = avma;
     GEN current_I;
@@ -1223,6 +1248,10 @@ GEN my_find_I_new (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN a, GEN i_xJ, GEN cl
         {
             // This needs to be modified in order to take into account "mod p"
             pari_printf(ANSI_COLOR_GREEN "Principal: %Ps\n"  ANSI_COLOR_RESET, algtobasis(K, nfmul(K,rnfeltnorm(Lrel, rnfeltabstorel(Lrel, t)),a)));
+            // if (my_is_p_power(bnfisunit(K, algtobasis(K, nfmul(K,rnfeltnorm(Lrel, rnfeltabstorel(Lrel, t)),a))), p_int)) {
+            //     test_found = 1;
+            //     break;
+            // }
             if (my_is_in_power_units(K, algtobasis(K, nfmul(K,rnfeltnorm(Lrel, rnfeltabstorel(Lrel, t)),a)), p_power_units)) {
                 test_found = 1;
                 break;
@@ -1290,7 +1319,7 @@ GEN my_find_final_I (GEN Labs, GEN Lrel, GEN sigma, GEN K, GEN unit, int p_int) 
         
     }
     else {
-        I = my_find_H90_ideal(Labs, Lrel, K, div_t, sigma, p_int);
+        I = idealred(Labs, my_find_H90_ideal(Labs, Lrel, K, div_t, sigma, p_int));
         //printf("non-triv\n");
     }
     
@@ -1298,26 +1327,70 @@ GEN my_find_final_I (GEN Labs, GEN Lrel, GEN sigma, GEN K, GEN unit, int p_int) 
     return ret;
 }
 
+int my_is_in_vect(GEN a, GEN vect) {
+    int check = 0;
+    int i;
+    for (i=1;i<glength(vect)+1;++i) {
+        if (my_QV_equal(a, gel(vect, i))) {
+            check = 1;
+            break;
+        }
+    }
+    return check;
+}
 
 // Under construction
-// GEN my_find_final_I_vect(GEN Labs, GEN Lrel, GEN sigma, GEN K, GEN class_group) {
-//     pari_sp av = avma;
-//     GEN I_final = cgetg(0, t_VEC), ker_1MS, t_set = cgetg(0, t_VEC), test_vec, I;
-//     int i;
-//     for (i=1;i<glength(class_group)+1;++i) {
-//         I = gel(class_group, i);
-//         test_vec = bnfisprincipal0(Labs, my_1MS_ideal(Labs, sigma, I), 1);
-//         if (my_QV_equal0(gel(test_vec, 1))) {
-//             I_final = shallowconcat(I_final, mkvec(I));
-//             t_set = shallowconcat(t_set, mkvec(gel(test_vec, 2)));
-//         }
-//     }
-//     // -------------
-//     // Add code
-//     // -------------
-//     GEN ret = gerepilecopy(av, I_final);
-//     return ret;
-//}
+GEN my_find_final_I_vect(GEN Labs, GEN Lrel, GEN sigma, GEN K, GEN class_group, GEN p_power_units, GEN units_mod_p) {
+    pari_sp av = avma;
+    int l = glength(units_mod_p);
+    int pow_l = glength(p_power_units);
+    int cl_nr = glength(class_group);
+    GEN I_final = zerovec(l), test_vec, I, t_inv, a, unit, test_units = zerovec(pow_l);
+    int check;
+    
+    int i;
+    int j;
+    for (i=1;i<l+1;++i) {
+        check = 0;
+        unit = algtobasis(K, gel(units_mod_p, i));
+        
+        for (j=1;j<pow_l+1;++j) {
+            gel(test_units, j) = algtobasis(K, nfmul(K, unit, gel(p_power_units, j)));
+        }
+        
+        for (j=1;j<cl_nr+1;++j) {
+            printf("%d/%d\n", j, cl_nr);
+            I = gel(class_group, j);
+            test_vec = bnfisprincipal0(Labs, my_1MS_ideal(Labs, sigma, I), 1);
+            if (my_QV_equal0(gel(test_vec, 1))) {
+                
+                t_inv = gel(test_vec, 2);
+                a = algtobasis(K, rnfeltnorm(Lrel, rnfeltabstorel(Lrel, t_inv)));
+                pari_printf(ANSI_COLOR_GREEN "Principal: %Ps\n"  ANSI_COLOR_RESET, bnfisunit(K, a));
+                
+                if (my_is_in_vect(a, test_units)) {
+                    
+                    gel(I_final, i) = I;
+                    printf(ANSI_COLOR_GREEN "Found I_final[%d]: \n" ANSI_COLOR_RESET, i);
+                    check = 1;
+                    break;
+                }
+                else if (my_is_in_vect(algtobasis(K, nfinv(K, a)), test_units)) {
+                    gel(I_final, i) = idealred(Labs, idealinv(Labs, I));
+                    printf(ANSI_COLOR_GREEN "Found I_final[%d]: \n" ANSI_COLOR_RESET, i);
+                    check = 1;
+                    break;
+                }
+            }
+        }
+        if (!check) {
+            printf(ANSI_COLOR_RED "Did not find I_final[%d]: \n" ANSI_COLOR_RESET, i);
+        }
+    }
+    
+    GEN ret = gerepilecopy(av, I_final);
+    return ret;
+}
 
 GEN my_find_I_vect2 (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN J_vect, GEN Ja_vect, GEN units_mod_2, int p_int) {
     
@@ -1348,14 +1421,14 @@ GEN my_find_I_vect2 (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN J_vect, GEN Ja_ve
     return I_vect;
 }
 
-GEN my_find_I_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p_power_units, int p_int) {
+GEN my_find_I_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN class_group, GEN p_power_units, int p_int) {
     pari_sp av = avma;
     int p_rk = glength(Ja_vect);
     GEN I_vect = zerovec(p_rk);
     GEN I;
     GEN ext_gen;
     //pari_printf("%Ps\n", gel(ext_gens, 1));
-    GEN class_group = my_get_clgp (Labs);
+    
     // if (!(glength(class_group)==itos(bnf_get_no(Labs)))) {
     //     printf(ANSI_COLOR_RED "Wrong class group (my_find_I_vect)\n\n" ANSI_COLOR_RESET);
     //     pari_close();
@@ -1369,7 +1442,7 @@ GEN my_find_I_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p_pow
         ext_gen = rnfidealup0(Lrel, gel(gel(Ja_vect, i),2), 1);
         printf("Lifted J: %d/%d\n", i, p_rk);
 
-        I = gel(my_find_I_new(Labs, Lrel, K, sigma, gel(gel(Ja_vect, i),1), ext_gen, class_group, p_power_units),2);
+        I = gel(my_find_I_new(Labs, Lrel, K, sigma, gel(gel(Ja_vect, i),1), ext_gen, class_group, p_power_units, p_int),2);
         pari_printf("I: %Ps\n", I);
         if (gequal0(I)) {
             
@@ -1390,7 +1463,8 @@ GEN my_find_I_vect3 (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN unit
     int u_length = glength(units_mod_p);
     GEN I_vect = zerovec(p_rk+u_length);
     //pari_printf("%Ps\n", gel(ext_gens, 1));
-    GEN I_first = my_find_I_vect(Labs, Lrel, K, sigma, Ja_vect, p_power_units, p_int);
+    GEN class_group = my_get_clgp (Labs);
+    GEN I_first = my_find_I_vect(Labs, Lrel, K, sigma, Ja_vect, class_group, p_power_units, p_int);
     printf("First part of I_vect found\n");
     int i;
     
@@ -1398,10 +1472,17 @@ GEN my_find_I_vect3 (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN unit
     {
         gel(I_vect, i) = gel(I_first, i);
     } 
+    GEN I_final = my_find_final_I_vect(Labs, Lrel, sigma, K, class_group, p_power_units, units_mod_p);
     for (i = p_rk+1; i < p_rk+u_length+1; ++i)
     {
-        gel(I_vect, i) = my_find_final_I(Labs, Lrel, sigma, K, gel(units_mod_p, i-p_rk), p_int);
-        printf("Found I %d/%d\n", i, p_rk+u_length);
+        if (gequal0(gel(I_final, i-p_rk))) {
+            gel(I_vect, i) = my_find_final_I(Labs, Lrel, sigma, K, gel(units_mod_p, i-p_rk), p_int);
+            printf("Found I %d/%d\n", i, p_rk+u_length);
+        }
+        else {
+            gel(I_vect, i) = gel(I_final, i-p_rk);
+        }
+        
     } 
 
     return I_vect;

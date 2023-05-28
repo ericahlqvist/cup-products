@@ -69,9 +69,10 @@ main (int argc, char *argv[])
     // pari_printf("Tors unit 2: %Ps\n\n", nfpow(K, bnf_get_tuU(K), gen_2));
     // pari_printf("Tors unit 3: %Ps\n\n", nfpow(K, bnf_get_tuU(K), stoi(3)));
 
-    // GEN clf_pol = gsubstpol(polredabs0(mkvec2(bnrclassfield(K, p, 2, DEFAULTPREC), D_prime_vect),0), x, s);
-    // // GEN clf_pol = bnrclassfield(K, p, 2, DEFAULTPREC);
-    // pari_printf("abs pol: %Ps\n\n", clf_pol);
+    // GEN clf_pol = polredabs0(mkvec2(bnrclassfield(K, p, 2, DEFAULTPREC), D_prime_vect),0);
+    // // // GEN clf_pol = bnrclassfield(K, p, 2, DEFAULTPREC);
+    // GEN LAB = Buchall(clf_pol, nf_FORCE, DEFAULTPREC);
+    // pari_printf("L cyc: %Ps\n\n", bnf_get_cyc(LAB));
     // my_unramified_p_extensions(K, p, D_prime_vect);
     // my_unramified_p_extensions_with_trivial_action(K, p, D_prime_vect);
     
@@ -98,7 +99,9 @@ main (int argc, char *argv[])
     GEN K_ext = my_ext(K, p_ClFld_pol, s, p, p_rk, D_prime_vect);
     printf("Extensions found\n\n");
     
-    Ja_vect = my_find_Ja_vect_modified(gel(gel(K_ext, 1), 1), gel(gel(K_ext, 1), 2), K, gel(gel(K_ext, 1), 3), J_vect, units_mod_p, p);
+    // For Ja_vect, choose an extension gel(K_ext, 3) with big class group. Might need to be change once known.
+    int ext_nr = 1;
+    Ja_vect = my_find_Ja_vect_modified(gel(gel(K_ext, ext_nr), 1), gel(gel(K_ext, ext_nr), 2), K, gel(gel(K_ext, ext_nr), 3), J_vect, units_mod_p, p);
 
     GEN p_power_units = my_find_p_power_units(K, units_mod_p, p);
     
