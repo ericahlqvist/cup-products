@@ -28,7 +28,7 @@ main (int argc, char *argv[])
     clock_t start = clock();
     //--------
     
-    
+
     int p_int, p_rk, r_rk;
 
     int min;
@@ -50,10 +50,10 @@ main (int argc, char *argv[])
     f = gp_read_str(argv[2]);
     
 
-    pari_printf("POL: %Ps\n", f);
+    // pari_printf("POL: %Ps\n", f);
 
-    // Define K.pol
-    printf("\n");
+    // // Define K.pol
+    // printf("\n");
     
     // Define base field K
     K = Buchall(f, nf_FORCE, DEFAULTPREC);
@@ -75,9 +75,29 @@ main (int argc, char *argv[])
 
     pari_printf("K cyc: %Ps\n\n", Kcyc);
     pari_printf("Discriminant: %Ps\n\n", D);
+    p_rk = 0;
+    int i;
+    for (i = 1; i < glength(Kcyc)+1; i++)
+    {
+        if (itos(gel(Kcyc, i))%p_int==0) {
+            p_rk++;
+        } 
+    }
+    printf("p-rank: %d\n\n", p_rk);
+    if (p_rk<2)
+    {
+        printf("p-rank less than 2 --> finite tower\n\n");
+        
+        pari_close();
+        exit(0);
+    }
+
+    J_vect = my_find_p_gens(K, p);
+    
+
     p_ClFld_pol = bnrclassfield(K, p, 0, DEFAULTPREC);
     // pari_printf("p Cl Fld: %Ps\n\n", p_ClFld_pol);
-    // pari_printf("Fund units: %Ps\n", bnf_get_fu(K));
+    pari_printf("Fund units: %ld\n", glength(bnf_get_fu(K)));
     // pari_printf("Tors unit: %Ps\n\n", algtobasis(K, bnf_get_tuU(K)));
     // pari_printf("Tors unit 2: %Ps\n\n", nfpow(K, bnf_get_tuU(K), gen_2));
     // pari_printf("Tors unit 3: %Ps\n\n", nfpow(K, bnf_get_tuU(K), stoi(3)));
@@ -89,40 +109,31 @@ main (int argc, char *argv[])
     // my_unramified_p_extensions(K, p, D_prime_vect);
     // my_unramified_p_extensions_with_trivial_action(K, p, D_prime_vect);
     
-    J_vect = my_find_p_gens(K, p);
-    p_rk = glength(J_vect);
-    printf("p-rank: %d\n\n", p_rk);
-
-    if (p_rk<2)
-    {
-        printf("p-rank less than 2 --> finite tower\n\n");
-        
-        pari_close();
-        exit(0);
-    }
+    
     // J_vect = bnf_get_gen(K);
     //pari_printf("J_vect: %Ps\n\n", J_vect);
     
     GEN units_mod_p = my_find_units_mod_p(K, p);
-    printf("Nr of units mod p: %ld\n", glength(units_mod_p));
+    //printf("Nr of units mod p: %ld\n", glength(units_mod_p));
 
     r_rk = glength(J_vect)+glength(units_mod_p);
-    printf("r-rank: %d\n\n", r_rk);
+    //printf("r-rank: %d\n\n", r_rk);
 
     // Ja_vect = my_find_Ja_vect(K, J_vect, p);
     
     //pari_printf("Ja_vect: %Ps\n\n", Ja_vect);
     
+    //printf("p-rank: %d\n\n", p_rk);
 
 
 
-    pari_printf("p_int: %d\n\nmy_pol: %Ps\n\nK_cyc: %Ps\n\n", p_int, f, Kcyc);
+    //pari_printf("p_int: %d\n\nmy_pol: %Ps\n\nK_cyc: %Ps\n\n", p_int, f, Kcyc);
 
     GEN K_ext = my_ext(K, p_ClFld_pol, s, p, p_rk, D_prime_vect);
-    printf("Extensions found\n\n");
+    //printf("Extensions found\n\n");
     
     // For Ja_vect, choose an extension gel(K_ext, 3) with big class group. Might need to be change once known.
-    int ext_nr = 1;
+    int ext_nr = 2;
     Ja_vect = my_find_Ja_vect_modified(gel(gel(K_ext, ext_nr), 1), gel(gel(K_ext, ext_nr), 2), K, gel(gel(K_ext, ext_nr), 3), J_vect, units_mod_p, p);
 
     //GEN p_power_units = my_find_p_power_units(K, units_mod_p, p);
@@ -148,11 +159,11 @@ main (int argc, char *argv[])
 
     //-----Faster version--------
     // my_cup_matrix_2(K_ext, K, p, p_int, p_rk, J_vect, units_mod_p, r_rk);
-    my_cup_matrix_2_transpose(K_ext, K, p, p_int, p_rk, J_vect, Ja_vect, units_mod_p, r_rk, p_power_units);
+    my_cup_matrix_2_transpose_script(K_ext, K, p, p_int, p_rk, J_vect, Ja_vect, units_mod_p, r_rk, p_power_units);
     
     printf("\n\n");
     printf(ANSI_COLOR_GREEN "Done! \n \n" ANSI_COLOR_RESET);
-
+    
     // Close pari
     pari_close();
 

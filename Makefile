@@ -13,7 +13,7 @@
 #
 
 # change this TARGET to compile your own programs
-TARGET = main
+TARGET = main-pol
 SHELL  = /bin/sh
 
 DBGFLAGS   = -g -Wall
@@ -75,6 +75,6 @@ $(TARGET)-sta: $(OBJS)
 %.o: %.c
 	$(CC) -c $(CFLAGS) $(EXTRACFLAGS) $(CPPFLAGS) $(DLCFLAGS) $<
 clean:
-	-$(RM) *.o $(ALL) main-sta
+	-$(RM) *.o $(ALL) main-pol-sta
 # massey-dyn libmassey.dylib
 

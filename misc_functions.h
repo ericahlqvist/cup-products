@@ -754,26 +754,30 @@ GEN my_reduce_H1_mod (GEN LxAbs, GEN sigma_x, GEN v, GEN elem, GEN p) {
     return new_v;
 }
 
-// Works when torsion is 2 power torsion
+
 GEN my_find_units_mod_p (GEN K, GEN p) {
     int i;
     GEN fund_units = bnf_get_fu(K);
     GEN tors_unit = bnf_get_tuU(K);
-    
+    int tors_gp_ord = bnf_get_tuN(K);
 
     GEN units_mod_p = fund_units;
     // pari_printf("A: %Ps\n", gpow(p, stoi(4), DEFAULTPREC));
     // pari_printf("B: %Ps\n", nfpow(K, tors_unit, gpow(p, stoi(4), DEFAULTPREC)));
-    if (gequal1(nfpow(K, tors_unit, gpow(p, stoi(4), DEFAULTPREC)))) {
+    // pari_printf("tors_unit: %Ps\n", tors_unit);
+    // pari_printf("fund_units: %Ps\n", fund_units);
+    printf("torsion order: %d\n\n", tors_gp_ord);
+
+    if (tors_gp_ord%itos(p)==0) {
         units_mod_p = shallowconcat(units_mod_p, mkvec(tors_unit));
     }
     
-    printf("Units:\n\n");
-    for (i=1;i<glength(units_mod_p)+1;++i) {
-        pari_printf("u %d: %Ps\n", i, algtobasis(K, gel(units_mod_p, i)));
-        pari_printf("u^-1 %d: %Ps\n", i, nfinv(K, algtobasis(K, gel(units_mod_p, i))));
-    }
-    printf("\n");
+    // printf("Units:\n\n");
+    // for (i=1;i<glength(units_mod_p)+1;++i) {
+    //     pari_printf("u %d: %Ps\n", i, algtobasis(K, gel(units_mod_p, i)));
+    //     pari_printf("u^-1 %d: %Ps\n", i, nfinv(K, algtobasis(K, gel(units_mod_p, i))));
+    // }
+    // printf("\n");
 
     // ad-hoc modification
     // gel(units_mod_p, 2) = nfmul(K, gel(units_mod_p, 1), gel(units_mod_p, 4));
@@ -1017,15 +1021,12 @@ GEN my_find_p_power_tors_units(GEN K, GEN p) {
 
 GEN my_find_p_power_units(GEN K, GEN unit_group, GEN p) {
     // This function must be improved to return more ("small") powers
-    if (glength(unit_group)==0) {
+    
+    int cyc_order = glength(unit_group);
+    if (cyc_order==0) {
         return mkvec(algtobasis(K, gen_1));
     }
 
-    if (glength(unit_group)==1) {
-        return mkvec2(algtobasis(K, gen_1), algtobasis(K, nfpow(K, gel(unit_group, 1), p)));
-    }
-
-    int cyc_order = glength(unit_group);
     if (cyc_order == 1) {
         return mkvec2(algtobasis(K, gen_1), algtobasis(K, nfpow(K, gel(unit_group, 1), p)));
     }
@@ -1065,6 +1066,61 @@ GEN my_find_p_power_units(GEN K, GEN unit_group, GEN p) {
     }
     
     return p_power_units;
+}
+
+GEN my_get_unit_group (GEN K, GEN unit_gens, GEN p)
+{
+    pari_sp av = avma;
+    int nr_comp = glength(unit_gens);
+    GEN cyc = zerovec(nr_comp);
+    int i;
+    for (i = 1; i < nr_comp+1; i++)
+    {
+        gel(cyc, i) = p;
+    }
+    
+    int nr = pow(nr_comp, itos(p));
+    
+    GEN group_exp;
+    int n;
+    if (nr_comp > 1) {
+        group_exp = my_get_vect( nr_comp - 1, cyc );
+    }
+    else {
+        group_exp = zerovec(nr);
+        for (n=0; n<nr; ++n) {
+            gel(group_exp, n+1) = mkvec(stoi(n));
+        }
+    }
+    // pari_printf("cyc: %Ps\n\n", Kcyc);
+    // pari_printf("cl_gp_exp: %Ps\n\n", class_group_exp);
+    GEN group = zerovec(nr);
+    GEN current_u, exponents, pow;
+    
+    
+    for (n = 1; n < nr + 1; ++n) {
+        exponents = gel(group_exp, n);
+        
+        int i;
+        current_u = gen_1;
+        for ( i = 1; i < nr_comp + 1; ++i ) {
+            
+            pow = nfpow(K, gel(unit_gens, i), gel(exponents, i));
+            
+            current_u = nfmul(K, current_u, pow);
+            // printf("ideal norm: ");
+            // output(idealnorm(K, current_I));
+            // printf("\n");
+        }
+        if (n%100 == 0) {
+            printf("%d/%d\n", n, nr);
+        }
+        
+        gel(group, n) = algtobasis(K, current_u); 
+    }
+    
+    group = gerepilecopy(av, group);
+    return group;
 }
 
 int my_is_in_tors_power_units(GEN K, GEN a, GEN p_power_units) {
@@ -1459,6 +1515,7 @@ GEN my_find_I_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN class
 }
 
 GEN my_find_I_vect3 (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN units_mod_p, int p_int, GEN p_power_units) {
+    pari_sp av = avma;
     int p_rk = glength(Ja_vect);
     int u_length = glength(units_mod_p);
     GEN I_vect = zerovec(p_rk+u_length);
@@ -1484,7 +1541,7 @@ GEN my_find_I_vect3 (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN unit
         }
         
     } 
-
+    I_vect = gerepilecopy(av, I_vect);
     return I_vect;
 }
 
