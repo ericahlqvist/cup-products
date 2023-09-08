@@ -1081,7 +1081,7 @@ GEN my_get_unit_group (GEN K, GEN unit_gens, GEN p)
         gel(cyc, i) = p;
     }
     
-    int nr = pow(nr_comp, itos(p));
+    int nr = pow(itos(p), nr_comp);
     
     GEN group_exp;
     int n;
@@ -1565,9 +1565,39 @@ GEN my_find_I_full (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN i_xJ, GEN a, GEN c
     pari_sp av = avma;
     GEN diff, current_I, test_vec, class_number = bnf_get_no(Labs), Itest, t, t_rel, norm_t, exponents, norms, L_units, L_unit_group, ret;
     int clnr = itos(class_number), n, roots_of_unity_nr = bnf_get_tuN(K), l;
-    L_units = my_find_units_mod_p(Labs, stoi(p_int));
     
+    
+    // for (n = 1; n < clnr + 1; ++n) {
+    //     printf("%d/%d\n", n, clnr);
+    //     current_I = gel(class_group, n);
+    //     Itest = idealdiv(Labs, i_xJ, my_1MS_ideal(Labs, sigma, current_I));
+    //     test_vec = bnfisprincipal0(Labs, Itest, 1);
+
+    //     if (my_QV_equal0(gel(test_vec, 1)))
+    //     {
+    //         t = gel(test_vec, 2);
+    //         t_rel = rnfeltabstorel(Lrel, t);
+    //         norm_t = rnfeltnorm(Lrel, t_rel);
+    //         exponents = bnfisunit(K, nfmul(K, norm_t, a));
+    //         pari_printf("exponents: %Ps\n", exponents);
+    //         if (my_is_p_power(exponents, p_int, roots_of_unity_nr))
+    //         {
+    //             printf("I found\n\n");
+    //             ret = mkvec2(gel(test_vec, 2), current_I);
+    //             ret = gerepilecopy(av, ret);
+    //             return ret;
+    //         }
+            
+    //     } 
+
+    // }
+
+    printf("Entering the slow round\n\n");
+    printf("roots of unity L: %d\n\n", roots_of_unity_nr);
+    L_units = my_find_units_mod_p(Labs, stoi(p_int));
+    printf("nr of L_units mod p: %ld\n\n", glength(L_units));
     L_unit_group = my_get_unit_group(Labs, L_units, stoi(p_int));
+    printf("size of L_unit_group: %ld\n\n", glength(L_unit_group));
     
     l = glength(L_unit_group);
     norms = zerovec(l);
@@ -1576,33 +1606,6 @@ GEN my_find_I_full (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN i_xJ, GEN a, GEN c
     {
         gel(norms, n) = algtobasis(K, rnfeltnorm(Lrel, rnfeltabstorel(Lrel, gel(L_unit_group, n))));
     }
-    
-    for (n = 1; n < clnr + 1; ++n) {
-        printf("%d/%d\n", n, clnr);
-        current_I = gel(class_group, n);
-        Itest = idealdiv(Labs, i_xJ, my_1MS_ideal(Labs, sigma, current_I));
-        test_vec = bnfisprincipal0(Labs, Itest, 1);
-
-        if (my_QV_equal0(gel(test_vec, 1)))
-        {
-            t = gel(test_vec, 2);
-            t_rel = rnfeltabstorel(Lrel, t);
-            norm_t = rnfeltnorm(Lrel, t_rel);
-            exponents = bnfisunit(K, nfmul(K, norm_t, a));
-            pari_printf("exponents: %Ps\n", exponents);
-            if (my_is_p_power(exponents, p_int, roots_of_unity_nr))
-            {
-                printf("I found\n\n");
-                ret = mkvec2(gel(test_vec, 2), current_I);
-                ret = gerepilecopy(av, ret);
-                return ret;
-            }
-            
-        } 
-
-    }
-
-    printf("Entering the slow round\n\n");
     // pari_close();
     // exit(0);
     int i;
