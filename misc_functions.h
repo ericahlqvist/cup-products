@@ -756,7 +756,7 @@ GEN my_reduce_H1_mod (GEN LxAbs, GEN sigma_x, GEN v, GEN elem, GEN p) {
 
 
 GEN my_find_units_mod_p (GEN K, GEN p) {
-    int i;
+    
     GEN fund_units = bnf_get_fu(K);
     GEN tors_unit = bnf_get_tuU(K);
     int tors_gp_ord = bnf_get_tuN(K);
@@ -814,7 +814,7 @@ int my_action_on_clgp (GEN L, GEN sigma, GEN p) {
     GEN clgpxp = my_get_clgp_p(L, p);
     GEN test_ideal, test_vec;
 
-    GEN unit = idealhnf(L, gen_1);
+    
     int i;
     int j;
     int check = 0;
@@ -899,7 +899,7 @@ void my_unramified_p_extensions_with_trivial_action(GEN K, GEN p, GEN D_prime_ve
     pari_printf("Rsq: %Ps\n", Rsq);
     GEN Rcb = bnrclassfield(K, subgrouplist0(bnf_get_cyc(K), mkvec(gpow(p,stoi(3), DEFAULTPREC)), 2), 1, DEFAULTPREC);
     pari_printf("Rcb: %Ps\n", Rcb);
-    GEN abs_pol;
+    
     printf("[p]-extensions:\n\n");
     int i, j;
     for (i=1; i<glength(R)+1; ++i) {
@@ -1031,7 +1031,7 @@ GEN my_find_p_power_units(GEN K, GEN unit_group, GEN p) {
         return mkvec2(algtobasis(K, gen_1), algtobasis(K, nfpow(K, gel(unit_group, 1), p)));
     }
 
-    int order = pow(3,cyc_order);
+    int order = pow(pow(itos(p),3),cyc_order);
     //printf("order: %d\ncyc_order: %d\n", order, cyc_order);
     GEN cyc = zerovec(cyc_order);
     GEN p_power_units = zerovec(order);
@@ -1040,7 +1040,7 @@ GEN my_find_p_power_units(GEN K, GEN unit_group, GEN p) {
     int i;
     int j;
     for (i=1;i<cyc_order+1;++i) {
-        gel(cyc,i) = stoi(3);
+        gel(cyc,i) = gpow(p, stoi(3), DEFAULTPREC);
     }
     GEN exponents = my_get_vect(cyc_order-1, cyc);
     pari_printf("%Ps\n", exponents);
@@ -1073,7 +1073,9 @@ GEN my_get_unit_group (GEN K, GEN unit_gens, GEN p)
     pari_sp av = avma;
     int nr_comp = glength(unit_gens);
     GEN cyc = zerovec(nr_comp);
+
     int i;
+    
     for (i = 1; i < nr_comp+1; i++)
     {
         gel(cyc, i) = p;
@@ -1092,6 +1094,7 @@ GEN my_get_unit_group (GEN K, GEN unit_gens, GEN p)
             gel(group_exp, n+1) = mkvec(stoi(n));
         }
     }
+    
     // pari_printf("cyc: %Ps\n\n", Kcyc);
     // pari_printf("cl_gp_exp: %Ps\n\n", class_group_exp);
     GEN group = zerovec(nr);
@@ -1103,6 +1106,7 @@ GEN my_get_unit_group (GEN K, GEN unit_gens, GEN p)
         
         int i;
         current_u = gen_1;
+        
         for ( i = 1; i < nr_comp + 1; ++i ) {
             
             pow = nfpow(K, gel(unit_gens, i), gel(exponents, i));
@@ -1112,6 +1116,7 @@ GEN my_get_unit_group (GEN K, GEN unit_gens, GEN p)
             // output(idealnorm(K, current_I));
             // printf("\n");
         }
+        
         if (n%100 == 0) {
             printf("%d/%d\n", n, nr);
         }
@@ -1148,9 +1153,10 @@ int my_is_in_power_units(GEN K, GEN a, GEN p_power_units) {
 }
 
 // Returns vector of tuples (a,J) with div(a)+pJ = 0.
-GEN my_find_Ja_vect(GEN K, GEN J_vect, GEN p) {
+GEN my_find_Ja_vect(GEN K, GEN J_vect, GEN p, GEN units_mod_p) {
     int l = glength(J_vect);
-    GEN Ja_vect = zerovec(l);
+    int r_rk = l + glength(units_mod_p);
+    GEN Ja_vect = zerovec(r_rk);
     GEN a;
     int i;
     
@@ -1158,6 +1164,11 @@ GEN my_find_Ja_vect(GEN K, GEN J_vect, GEN p) {
         a = nfinv(K, gel(bnfisprincipal0(K, idealpow(K, gel(J_vect, i), p), 1), 2));
         gel(Ja_vect, i) = mkvec2(a, gel(J_vect, i));
     }
+    for (i = l+1; i < r_rk+1; i++)
+    {
+        gel(Ja_vect, i) = mkvec2(gel(units_mod_p, i-l), idealhnf(K, gen_1));
+    }
+    
     
     return Ja_vect;
 }
@@ -1259,19 +1270,23 @@ GEN my_find_Ja_vect_modified(GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN J_vect, G
     return Ja_vect;
 }
 
-int my_is_p_power (GEN vect, int p_int) {
-    int l = glength(vect);
-    int check_zero = 1;
-    int check_p = 1;
-    int i;
-    for (i=1;i<l+1;++i) {
-        if (!(itos(gel(vect, i))%p_int==0)) {
-            check_p = 0;
-        }
-    } 
-    if (check_zero) {
+int my_is_p_power (GEN vect, int p_int, int order) {
+    int l = glength(vect), check_p = 1, i;
+
+    if (l==0) {
         return 0;
     }
+    
+    if (itos(gel(vect, l))!=(p_int%order) && itos(gel(vect, l))%p_int!=0) {
+            return 0;
+        }
+    for (i=1;i<l;++i) {
+        if (itos(gel(vect, i))%p_int!=0) {
+            check_p = 0;
+            break;
+        }
+    } 
+
     return check_p;
 }
 
@@ -1415,7 +1430,7 @@ GEN my_find_final_I_vect(GEN Labs, GEN Lrel, GEN sigma, GEN K, GEN class_group, 
         }
         
         for (j=1;j<cl_nr+1;++j) {
-            printf("%d/%d\n", j, cl_nr);
+            //printf("%d/%d\n", j, cl_nr);
             I = gel(class_group, j);
             test_vec = bnfisprincipal0(Labs, my_1MS_ideal(Labs, sigma, I), 1);
             if (my_QV_equal0(gel(test_vec, 1))) {
@@ -1545,3 +1560,109 @@ GEN my_find_I_vect3 (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN unit
     return I_vect;
 }
 
+GEN my_find_I_full (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN i_xJ, GEN a, GEN class_group, int p_int)
+{
+    pari_sp av = avma;
+    GEN diff, current_I, test_vec, class_number = bnf_get_no(Labs), Itest, t, t_rel, norm_t, exponents, norms, L_units, L_unit_group, ret;
+    int clnr = itos(class_number), n, roots_of_unity_nr = bnf_get_tuN(K), l;
+    L_units = my_find_units_mod_p(Labs, stoi(p_int));
+    
+    L_unit_group = my_get_unit_group(Labs, L_units, stoi(p_int));
+    
+    l = glength(L_unit_group);
+    norms = zerovec(l);
+    
+    for (n = 1; n < l+1; n++)
+    {
+        gel(norms, n) = algtobasis(K, rnfeltnorm(Lrel, rnfeltabstorel(Lrel, gel(L_unit_group, n))));
+    }
+    
+    for (n = 1; n < clnr + 1; ++n) {
+        printf("%d/%d\n", n, clnr);
+        current_I = gel(class_group, n);
+        Itest = idealdiv(Labs, i_xJ, my_1MS_ideal(Labs, sigma, current_I));
+        test_vec = bnfisprincipal0(Labs, Itest, 1);
+
+        if (my_QV_equal0(gel(test_vec, 1)))
+        {
+            t = gel(test_vec, 2);
+            t_rel = rnfeltabstorel(Lrel, t);
+            norm_t = rnfeltnorm(Lrel, t_rel);
+            exponents = bnfisunit(K, nfmul(K, norm_t, a));
+            pari_printf("exponents: %Ps\n", exponents);
+            if (my_is_p_power(exponents, p_int, roots_of_unity_nr))
+            {
+                printf("I found\n\n");
+                ret = mkvec2(gel(test_vec, 2), current_I);
+                ret = gerepilecopy(av, ret);
+                return ret;
+            }
+            
+        } 
+
+    }
+
+    printf("Entering the slow round\n\n");
+    // pari_close();
+    // exit(0);
+    int i;
+    for (n = 1; n < clnr + 1; ++n) {
+        printf("%d/%d\n", n, clnr);
+        current_I = gel(class_group, n);
+        Itest = idealdiv(Labs, i_xJ, my_1MS_ideal(Labs, sigma, current_I));
+        test_vec = bnfisprincipal0(Labs, Itest, 1);
+
+        if (my_QV_equal0(gel(test_vec, 1)))
+        {
+            t = gel(test_vec, 2);
+            t_rel = rnfeltabstorel(Lrel, t);
+            norm_t = rnfeltnorm(Lrel, t_rel);
+            diff = nfmul(K, norm_t, a);
+            for ( i = 1; i < l+1; i++)
+            {
+                exponents = bnfisunit(K, nfdiv(K, diff, gel(norms, i)));
+                pari_printf("exponents: %Ps\n", exponents);
+                if (my_is_p_power(exponents, p_int, roots_of_unity_nr))
+                {
+                    printf("I found\n\n");
+                    ret = mkvec2(gel(test_vec, 2), current_I);
+                    ret = gerepilecopy(av, ret);
+                    return ret;
+                }
+                
+            }
+            
+                
+            
+        } 
+
+    }
+    printf("Something is wrong\n");
+   
+    printf(ANSI_COLOR_RED "No I found in my_find_I\n\n" ANSI_COLOR_RESET);
+    pari_close();
+    exit(0);
+
+    
+    return 0;
+}
+
+GEN my_find_I_vect_full (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, int p_int) {
+    pari_sp av = avma;
+    int r_rk = glength(Ja_vect);
+    GEN I_vect = zerovec(r_rk), a, i_xJ;
+   
+    GEN class_group = my_get_clgp (Labs);
+   
+    int i;
+    
+    for (i = 1; i < r_rk+1; ++i)
+    {
+        a = gel(gel(Ja_vect, i), 1);
+        i_xJ = rnfidealup0(Lrel, gel(gel(Ja_vect, i),2), 1);
+        gel(I_vect, i) = gel(my_find_I_full(Labs, Lrel, K, sigma, i_xJ, a, class_group, p_int), 2);
+    } 
+    
+    I_vect = gerepilecopy(av, I_vect);
+    return I_vect;
+}
