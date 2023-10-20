@@ -1164,6 +1164,7 @@ GEN my_find_Ja_vect(GEN K, GEN J_vect, GEN p, GEN units_mod_p) {
         a = nfinv(K, gel(bnfisprincipal0(K, idealpow(K, gel(J_vect, i), p), 1), 2));
         gel(Ja_vect, i) = mkvec2(a, gel(J_vect, i));
     }
+    
     for (i = l+1; i < r_rk+1; i++)
     {
         gel(Ja_vect, i) = mkvec2(gel(units_mod_p, i-l), idealhnf(K, gen_1));
@@ -1668,4 +1669,111 @@ GEN my_find_I_vect_full (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, int 
     
     I_vect = gerepilecopy(av, I_vect);
     return I_vect;
+}
+
+void my_compute_unit_norms(GEN Lrel, GEN K, GEN units_group) {
+    
+    GEN rel_unit, norm;
+    int l = glength(units_group);
+    
+    int i;
+    for (i = 1; i < l+1; i++)
+    {
+        rel_unit = rnfeltabstorel(Lrel, gel(units_group, i));
+        norm = rnfeltnorm(Lrel, rel_unit);
+
+        pari_printf("norm[%d]: %Ps\n", i, bnfisunit(K, norm));
+
+    }
+} 
+
+void my_norms(GEN K, GEN K_ext, GEN p) {
+    GEN Labs, Lrel, unit_group;
+    int l = glength(K_ext);
+    int i;
+    for (i = 1; i < l+1; i++)
+    {
+        Labs = gel(gel(K_ext, i), 1);
+        unit_group = my_find_units_mod_p(Labs, p);
+        Lrel = gel(gel(K_ext, i), 2);
+        my_compute_unit_norms(Lrel, K, unit_group);
+    }
+    
+}
+
+void my_compute_unit_diffs(GEN Labs, GEN sigma, GEN units_group) {
+    
+    GEN diff;
+    int l = glength(units_group);
+    
+    int i;
+    for (i = 1; i < l+1; i++)
+    {
+        diff = my_1MS_elt(Labs, sigma, gel(units_group, i));
+
+        pari_printf("diff[%d]: %Ps\n", i, bnfisunit(Labs, diff));
+
+    }
+} 
+
+void my_diffs(GEN K_ext, GEN p) {
+    GEN Labs, unit_group, sigma;
+    int l = glength(K_ext);
+    int i;
+    for (i = 1; i < l+1; i++)
+    {
+        Labs = gel(gel(K_ext, i), 1);
+        sigma = gel(gel(K_ext, i), 3);
+        unit_group = my_find_units_mod_p(Labs, p);
+       
+        my_compute_unit_diffs(Labs, sigma, unit_group);
+    }
+    
+}
+
+void my_compute_matrices(GEN Labs, GEN sigma, GEN units_group) {
+    
+    GEN image;
+    int l = glength(units_group);
+    
+    int i;
+    printf("1:\n\n");
+    for (i = 1; i < l+1; i++)
+    {
+        image = bnfisunit(Labs, gel(units_group, i));
+
+        pari_printf("%Ps\n", image);
+
+    }
+    printf("\nsigma:\n\n");
+    for (i = 1; i < l+1; i++)
+    {
+        image = bnfisunit(Labs, galoisapply(Labs, sigma, gel(units_group, i)));
+
+        pari_printf("%Ps\n", image);
+
+    }
+    printf("\nsigma^2:\n\n");
+    for (i = 1; i < l+1; i++)
+    {
+        image = bnfisunit(Labs, galoisapply(Labs, sigma, galoisapply(Labs, sigma, gel(units_group, i))));
+
+        pari_printf("%Ps\n", image);
+
+    }
+} 
+
+void my_matrices(GEN K_ext, GEN p) {
+    GEN Labs, unit_group, sigma;
+    int l = glength(K_ext);
+    int i;
+    for (i = 1; i < l+1; i++)
+    {
+        Labs = gel(gel(K_ext, i), 1);
+        sigma = gel(gel(K_ext, i), 3);
+        unit_group = my_find_units_mod_p(Labs, p);
+        printf("Field ext [%d]:\n\n", i);
+        my_compute_matrices(Labs, sigma, unit_group);
+    }
+    
 }

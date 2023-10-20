@@ -18,6 +18,9 @@ Q_2_K := quo< Q_K | cup_rels_K >;
 
 // Some extensions
 
+
+// s^4 - 2*s^3 + 205*s^2 - 204*s + 11769, cyc: [4, 4, 2, 2]
+    // {(a,d)*(b,d)*(c,d), (a,c)*(a,d)*c^2*(c,d), (a,d)*(b,d)*d^2, (a,b)*(a,c)*(a,d)*(b,c)*(b,d), (a,d)*(c,d)};
 F_4<g1,g2,g3,g4> := FreeGroup(4);          
 Q, fQ := pQuotient(F_4, 2, 2 : Print := 1);
 a := Q.1;
@@ -62,30 +65,70 @@ Q_3_candidates := eval Read("Q_3_candidates");
 //-------------------------------------------------------------------
 
 Q_3_sorted := eval Read("Q_3_sorted");
-//1000
-for i in [501..1000] do 
-    p_subgroups := LowIndexSubgroups(Q_3_candidates[i], 2);
-    for k in [1..#Q_2_index_2] do
-        check_nr := 0;
-        check_tot := 1;
-        for j in [1..#p_subgroups] do 
-            Q_t, fQ_t := pQuotient(p_subgroups[j], 2, 2);
-            if IsIsomorphic(Q_t,Q_2_index_2[k]) then
-                check_nr := check_nr+1;
-            end if;
-        end for;
-        if not check_nr eq Q_2_number_of_gps[k] then 
-            printf "index missing: %3o, nr of gps: %3o\n", k, check_nr;
-            check_tot := 0;
-            break;
+
+// Cut down 32768 to 4096 candidates: 
+// for i in [1..#Q_3_candidates] do 
+//     if i mod 100 eq 0 then 
+//         PrintFileMagma("Q_3_sorted", Q_3_sorted : Overwrite := true);
+//     end if;
+//     p_subgroups := LowIndexSubgroups(Q_3_candidates[i], 2);
+//     for k in [1..#Q_2_index_2] do
+//         check_nr := 0;
+//         check_tot := 1;
+//         for j in [1..#p_subgroups] do 
+//             Q_t, fQ_t := pQuotient(p_subgroups[j], 2, 2);
+//             if IsIsomorphic(Q_t,Q_2_index_2[k]) then
+//                 check_nr := check_nr+1;
+//             end if;
+//         end for;
+//         if not check_nr eq Q_2_number_of_gps[k] then 
+//             printf "index missing: %3o\n", k;
+//             check_tot := 0;
+//             break;
+//         end if;
+//     end for;
+//     if check_tot eq 1 then 
+//         printf "Added group %3o\n", i;
+//         Q_3_sorted := Append(Q_3_sorted, Q_3_candidates[i]);
+//     end if;
+//     printf "%3o\n", i;
+// end for;
+// #Q_3_sorted;
+// PrintFileMagma("Q_3_sorted", Q_3_sorted : Overwrite := true);
+
+//-------------------------
+//-----Explore index 4 info
+//-------------------------
+
+Q_3_sorted := eval Read("Q_3_sorted");
+
+for i in [1..1] do 
+    p_subgroups := LowIndexSubgroups(Q_3_sorted[i], 4);
+    if i mod 100 eq 0 then
+        printf "%3o\n", i; 
+    end if;
+    for j in [17..#p_subgroups] do
+        r_2, fr_2 := pQuotient(p_subgroups[j], 2, 2);  
+        if #r_2 eq 2048 then 
+            printf "%o, ", #r_2;
         end if;
     end for;
-    if check_tot eq 1 then 
-        printf "Added group %3o\n", i;
-        Q_3_sorted := Append(Q_3_sorted, Q_3_candidates[i]);
-    end if;
-    printf "%3o\n", i;
+    printf "\n";
 end for;
-#Q_3_sorted;
-PrintFileMagma("Q_3_sorted", Q_3_sorted : Overwrite := true);
 
+// 256  ------->  25 groups 
+// 512  ------->  20 groups
+// 1024 ------->  3  groups
+// 2048 ------->  3  groups
+
+// We have 51 conjugacy classes of index 4 subgroups 
+for i in [1..#Q_3_sorted] do 
+    p_subgroups := LowIndexSubgroups(Q_3_sorted[i], 4);
+    if i mod 100 eq 0 then
+        printf "%3o\n", i; 
+    end if;
+    if #p_subgroups ne 67 then
+        printf "%o\n", #p_subgroups;
+        break;
+    end if;
+end for;

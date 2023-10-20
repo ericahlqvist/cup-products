@@ -25,27 +25,29 @@ class Command(object):
             return self.process.returncode
 
 
-p = "2" # A prime 
-Dmod = "3" # 3, 7, 4, 8
-mod = ""
-if (Dmod == "3" or Dmod == "7"):
-    mod = "8"
-else:
-    mod = "16"
+p = "5" # A prime 
+open_file = "rd-44-80-parts>7" # A file
 
-open_file = ""
+# Dmod = "3" # 3, 7, 4, 8
+# mod = ""
+# if (Dmod == "3" or Dmod == "7"):
+#     mod = "8"
+# else:
+#     mod = "16"
 
-if p == "2":
-    open_file = "p_"+p+"_cyc_2_2_disc_"+Dmod+"_mod_"+mod+".txt"
-else:
-    open_file = "p_"+p+"_disc_"+Dmod+"_mod_"+mod+".txt"
+# open_file = ""
 
-file = open("data/discriminants/"+open_file)
+# if p == "2":
+#     open_file = "p_"+p+"_cyc_2_2_disc_"+Dmod+"_mod_"+mod+".txt"
+# else:
+#     open_file = "p_"+p+"_disc_"+Dmod+"_mod_"+mod+".txt"
+
+file = open("data/polynomials/"+open_file)
 lines = file.readlines()
 
-for line in lines[0:500]:
+for line in lines:
     my_str = ''.join(map(str, line))
-    command = Command("./main-sta "+p+" "+my_str)
+    command = Command("./main-script-sta "+p+" "+my_str)
     code = command.run(timeout=300)
     
     # if code == -15:

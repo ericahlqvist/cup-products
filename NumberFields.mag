@@ -1,0 +1,21 @@
+//Server login:
+// ssh v1eahlqv@ssh1.maths.ed.ac.uk
+// ssh v1eahlqv@ssh3.maths.ed.ac.uk
+
+// ssh compute64d.maths.ed.ac.uk
+
+// magma
+
+
+SetClassGroupBounds("GRH");
+
+K := CyclotomicField(157);
+Discriminant(K);
+Degree(K);
+CyclotomicPolynomial(157);
+C := ClassGroup(K);
+C;
+
+s^96 - s^93 + s^87 - s^84 + s^78 - s^75 + s^69 - s^66 + s^60 - s^57 + s^51 - s^48 + s^45 - s^39 + s^36 - s^30 + s^27 - s^21 + s^18 - s^12 + s^9 - s^3 + 1
+
+279166694105972217574842523946007825170246129374371222175522091081794841989582188161448743097367847830926837881145864884940746378525797028985477687224228751644108979701871715763169

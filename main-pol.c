@@ -51,12 +51,15 @@ main (int argc, char *argv[])
     
 
     pari_printf("POL: %Ps\n", f);
-
+    
     // Define K.pol
     printf("\n");
-    
+    // GEN f_red = polredabs0(f, 0);
+    // pari_printf("pol_red: %Ps\n", f_red);
     // Define base field K
     K = Buchall(f, nf_FORCE, DEFAULTPREC);
+    // MEDDEFAULTPREC, BIGDEFAULTPREC
+    //K = Buchall_param(f, 1.5,1.5,4, nf_FORCE, DEFAULTPREC);
     D = nf_get_disc(bnf_get_nf(K));
     //D = gp_read_str(argv[3]);
     D_prime_vect = gel(factor(D), 1);
@@ -76,14 +79,15 @@ main (int argc, char *argv[])
     pari_printf("K cyc: %Ps\n\n", Kcyc);
     pari_printf("Discriminant: %Ps\n\n", D);
     p_ClFld_pol = bnrclassfield(K, p, 0, DEFAULTPREC);
-    // pari_printf("p Cl Fld: %Ps\n\n", p_ClFld_pol);
+    pari_printf("p Cl Fld: %Ps\n\n", p_ClFld_pol);
     // pari_printf("Fund units: %Ps\n", bnf_get_fu(K));
     // pari_printf("Tors unit: %Ps\n\n", algtobasis(K, bnf_get_tuU(K)));
     // pari_printf("Tors unit 2: %Ps\n\n", nfpow(K, bnf_get_tuU(K), gen_2));
     // pari_printf("Tors unit 3: %Ps\n\n", nfpow(K, bnf_get_tuU(K), stoi(3)));
 
     // GEN clf_pol = polredabs0(mkvec2(bnrclassfield(K, p, 2, DEFAULTPREC), D_prime_vect),0);
-    // // // GEN clf_pol = bnrclassfield(K, p, 2, DEFAULTPREC);
+    // pari_printf("H fld pol: %Ps\n\n", clf_pol);
+    // // GEN clf_pol = bnrclassfield(K, p, 2, DEFAULTPREC);
     // GEN LAB = Buchall(clf_pol, nf_FORCE, DEFAULTPREC);
     // pari_printf("L cyc: %Ps\n\n", bnf_get_cyc(LAB));
     // my_unramified_p_extensions(K, p, D_prime_vect);
@@ -100,43 +104,31 @@ main (int argc, char *argv[])
         pari_close();
         exit(0);
     }
-    // J_vect = bnf_get_gen(K);
-    //pari_printf("J_vect: %Ps\n\n", J_vect);
-    
+
     GEN units_mod_p = my_find_units_mod_p(K, p);
     printf("Nr of units mod p: %ld\n", glength(units_mod_p));
 
     r_rk = glength(J_vect)+glength(units_mod_p);
     printf("r-rank: %d\n\n", r_rk);
-
-    // Ja_vect = my_find_Ja_vect(K, J_vect, p);
-    
-    //pari_printf("Ja_vect: %Ps\n\n", Ja_vect);
-    
-
-
-
+ 
     pari_printf("p_int: %d\n\nmy_pol: %Ps\n\nK_cyc: %Ps\n\n", p_int, f, Kcyc);
 
     GEN K_ext = my_ext(K, p_ClFld_pol, s, p, p_rk, D_prime_vect);
     printf("Extensions found\n\n");
-    
+    //my_norms(K, K_ext, p);
+    //my_diffs(K_ext, p);
+    // my_matrices(K_ext, p);
+    // pari_close();
+    // exit(0);
     // For Ja_vect, choose an extension gel(K_ext, 3) with big class group. Might need to be change once known.
-    int ext_nr = 1;
-    Ja_vect = my_find_Ja_vect_modified(gel(gel(K_ext, ext_nr), 1), gel(gel(K_ext, ext_nr), 2), K, gel(gel(K_ext, ext_nr), 3), J_vect, units_mod_p, p);
-
-    //GEN p_power_units = my_find_p_power_units(K, units_mod_p, p);
-    GEN p_power_units = my_get_unit_group(K, units_mod_p, p);
-    
-    // if (my_is_p_torsion(K,J_vect, p))
-    // {
-    //     printf(ANSI_COLOR_GREEN "p-torsion test passed\n\n" ANSI_COLOR_RESET);
-    // }
-    // else {
-    //     printf(ANSI_COLOR_RED "p-torsion test  failed\n\n" ANSI_COLOR_RESET);
-    //     pari_close();
-    //     exit(0);
-    // }
+    //int ext_nr = 1;
+    //Ja_vect = my_find_Ja_vect_modified(gel(gel(K_ext, ext_nr), 1), gel(gel(K_ext, ext_nr), 2), K, gel(gel(K_ext, ext_nr), 3), J_vect, units_mod_p, p);
+    Ja_vect = my_find_Ja_vect(K, J_vect, p, units_mod_p);
+    pari_printf("Ja_vect: %Ps\n\n", Ja_vect);
+    // GEN p_power_units = my_find_p_power_units(K, units_mod_p, p);
+    // // GEN p_power_units_2 = my_get_unit_group(K, units_mod_p, p);
+    // // GEN p_power_units = gconcat(p_power_units_1, p_power_units_2);
+    // printf("Unit group, size: %ld\n\n", glength(p_power_units));
     
     
     
@@ -148,8 +140,10 @@ main (int argc, char *argv[])
 
     //-----Faster version--------
     // my_cup_matrix_2(K_ext, K, p, p_int, p_rk, J_vect, units_mod_p, r_rk);
-    my_cup_matrix_2_transpose(K_ext, K, p, p_int, p_rk, J_vect, Ja_vect, units_mod_p, r_rk, p_power_units);
-    
+    //my_cup_matrix_2_transpose(K_ext, K, p, p_int, p_rk, J_vect, Ja_vect, units_mod_p, r_rk, p_power_units);
+    my_cup_matrix_3(K_ext, K, p, p_int, p_rk, Ja_vect, r_rk);
+
+
     printf("\n\n");
     printf(ANSI_COLOR_GREEN "Done! \n \n" ANSI_COLOR_RESET);
 
