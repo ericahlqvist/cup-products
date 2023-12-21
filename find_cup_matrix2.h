@@ -552,30 +552,30 @@ void my_quaternion_matrix (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_
         
         printf("\n\n");
         
-        char letters[] = "abcdefghijklmnopqr";
-        printf(ANSI_COLOR_YELLOW "Cup relations:  \n\n" ANSI_COLOR_RESET);
-        int hnf_r_rk = glength(cup_hnf);
-        printf("{");
-        for (j=1; j<hnf_r_rk+1; j++) {
-            for (i=1; i<p_rk+1; ++i) {
-                for (k=i; k<p_rk+1; k++) {
-                    if (gequal1(gel(gel(cup_hnf, j), (2*p_rk-(i-2))*(i-1)/2+k-(i-1)))) {
-                        if (i==k) {
-                            printf("%c^2", letters[i-1]);
-                        }
-                        else {
-                            printf("(%c,%c)", letters[i-1],letters[k-1]);
-                        }
-                    }
-                }
-            }
-            if (j==hnf_r_rk) {
-                printf("}\n");
-            }
-            else {
-                printf(", ");
-            }
-        }
+        // char letters[] = "abcdefghijklmnopqr";
+        // printf(ANSI_COLOR_YELLOW "Cup relations:  \n\n" ANSI_COLOR_RESET);
+        // int hnf_r_rk = glength(cup_hnf);
+        // printf("{");
+        // for (j=1; j<hnf_r_rk+1; j++) {
+        //     for (i=1; i<p_rk+1; ++i) {
+        //         for (k=i; k<p_rk+1; k++) {
+        //             if (gequal1(gel(gel(cup_hnf, j), (2*p_rk-(i-2))*(i-1)/2+k-(i-1)))) {
+        //                 if (i==k) {
+        //                     printf("%c^2", letters[i-1]);
+        //                 }
+        //                 else {
+        //                     printf("(%c,%c)", letters[i-1],letters[k-1]);
+        //                 }
+        //             }
+        //         }
+        //     }
+        //     if (j==hnf_r_rk) {
+        //         printf("}\n");
+        //     }
+        //     else {
+        //         printf(", ");
+        //     }
+        // }
     }
     
 } 
