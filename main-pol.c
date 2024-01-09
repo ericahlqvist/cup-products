@@ -97,13 +97,13 @@ main (int argc, char *argv[])
     p_rk = glength(J_vect);
     printf("p-rank: %d\n\n", p_rk);
 
-    if (p_rk<2)
-    {
-        printf("p-rank less than 2 --> finite tower\n\n");
+    // if (p_rk<2)
+    // {
+    //     printf("p-rank less than 2 --> finite tower\n\n");
         
-        pari_close();
-        exit(0);
-    }
+    //     pari_close();
+    //     exit(0);
+    // }
 
     GEN units_mod_p = my_find_units_mod_p(K, p);
     printf("Nr of units mod p: %ld\n", glength(units_mod_p));

@@ -1167,7 +1167,7 @@ GEN my_find_Ja_vect(GEN K, GEN J_vect, GEN p, GEN units_mod_p) {
     
     for (i = l+1; i < r_rk+1; i++)
     {
-        gel(Ja_vect, i) = mkvec2(gel(units_mod_p, i-l), idealhnf(K, gen_1));
+        gel(Ja_vect, i) = mkvec2(gel(units_mod_p, i-l), idealhnf0(K, gen_1, NULL));
     }
     
     
