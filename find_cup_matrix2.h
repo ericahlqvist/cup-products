@@ -459,7 +459,7 @@ void my_cup_matrix_3 (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect,
     
 } 
 
-void my_cup_matrix_3_script (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, int r_rk)
+void my_cup_matrix_3_script (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, int r_rk, GEN ext_rks, GEN ext_cyc, GEN ext_pol)
 {
     GEN NIpJ, I_vect, I_rel, Labs, Lrel, sigma, Labs_cup, Lrel_cup, sigma_cup;
     int nr_col = (p_rk*(p_rk+1)/2);
@@ -537,9 +537,9 @@ void my_cup_matrix_3_script (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN J
     pari_printf(ANSI_COLOR_CYAN "%ld\n\n" ANSI_COLOR_RESET, mat_rk);
 
     FILE *fptr;
-    fptr = fopen("data/discriminants/ranks-[2,2,2,2].json", "a");
+    fptr = fopen("data/discriminants/ranks-[2,2,2,2]_8_mod_16.json", "a");
 
-    pari_fprintf(fptr, "{\"pol\": \"%Ps\", \"clgp\": \"%Ps\", \"r_rk\": \"%d\", \"mat_rank\": \"%ld\"},\n", nf_get_pol(bnf_get_nf(K)), bnf_get_cyc(K), r_rk, mat_rk);
+    pari_fprintf(fptr, "{\"pol\": \"%Ps\", \"K_cyc\": \"%Ps\", \"ext_cyc\": \"%Ps\", \"ext_pol\": \"%Ps\"},\n", nf_get_pol(bnf_get_nf(K)), bnf_get_cyc(K), ext_cyc, ext_pol);
 
     fclose(fptr);
 

@@ -479,6 +479,48 @@ GEN my_find_H90_ideal (GEN LyAbs, GEN LyRel, GEN K, GEN iJ_div_a2, GEN sigma_y, 
     return H90_ideal;
 }
 
+GEN my_find_ext_ranks(GEN K_ext) {
+    int l = glength(K_ext);
+    GEN ext_rks = zerovec(l);
+
+    int i;
+
+    for (i = 1; i < l+1; i++)
+    {
+        gel(ext_rks, i) = stoi(glength(bnf_get_cyc(gel(gel(K_ext, i), 1))));
+    }
+    
+    return vecsort0(ext_rks, NULL, 0);
+}
+
+GEN my_find_ext_cyc(GEN K_ext) {
+    int l = glength(K_ext);
+    GEN ext_cyc = zerovec(l);
+
+    int i;
+
+    for (i = 1; i < l+1; i++)
+    {
+        gel(ext_cyc, i) = bnf_get_cyc(gel(gel(K_ext, i), 1));
+    }
+    
+    return ext_cyc;
+}
+
+GEN my_find_ext_pol(GEN K_ext) {
+    int l = glength(K_ext);
+    GEN ext_pol = zerovec(l);
+
+    int i;
+
+    for (i = 1; i < l+1; i++)
+    {
+        gel(ext_pol, i) = nf_get_pol(bnf_get_nf(gel(gel(K_ext, i), 1)));
+    }
+    
+    return ext_pol;
+}
+
 GEN my_factor_I_by_primes_below (GEN Labs, GEN Lrel, GEN K, GEN I) {
     pari_sp av = avma;
     GEN factorization = idealfactor(Labs, I);
