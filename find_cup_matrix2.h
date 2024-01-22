@@ -362,7 +362,7 @@ void my_cup_matrix_3 (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect,
     //pari_printf("cup_mat: %Ps\n\n", cup_matrix);
     // i:th extension, j:th ideal J, evaluate on k:th extension 
     for (i=1; i<p_rk+1; ++i) {
-        
+        printf(ANSI_COLOR_MAGENTA "-----------\n\n\nStarting i = %d\n\n\n-------------\n" ANSI_COLOR_RESET, i);
         Labs_cup = gel(gel(K_ext, i), 1);
         Lrel_cup = gel(gel(K_ext, i), 2);
         sigma_cup = gel(gel(K_ext, i), 3);
@@ -370,7 +370,7 @@ void my_cup_matrix_3 (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect,
         // I_vect corresp. to i:th extension
         I_vect = my_find_I_vect_full(Labs_cup, Lrel_cup, K, sigma_cup, Ja_vect, p_int);
         
-        printf("I_vect nr: %d\n\n", i);
+        printf(ANSI_COLOR_GREEN "-----------\n\n\nI_vect nr: %d\n\n\n-------------\n" ANSI_COLOR_RESET, i);
 
         // //Test that we get a correct I
         // if (my_test_H90_ideal(Labs_cup, Lrel_cup, K, sigma_cup, I_vect, J_vect))
@@ -386,7 +386,7 @@ void my_cup_matrix_3 (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect,
         
         for (j=1; j<r_rk+1; ++j) {
             // evaluate cup on j:th basis class (a,J) 
-            
+            printf(ANSI_COLOR_MAGENTA "-----------\n\n\nStarting [i,j] = [%d, %d]\n\n\n-------------\n" ANSI_COLOR_RESET,i, j);
             I_rel = rnfidealabstorel(Lrel_cup, gel(I_vect, j));
             printf("I, %d to rel\n\n", j);
             
@@ -398,7 +398,7 @@ void my_cup_matrix_3 (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect,
             }
             
             for (k=i; k<p_rk+1; ++k) {
-                
+                printf(ANSI_COLOR_YELLOW "----------------\n\n\n\nStarting [i,j,k] = [%d, %d, %d]\n\n\n\n----------------\n" ANSI_COLOR_RESET, i,j,k);
                 // take Artin symbol with resp. to k:th extension
                 Labs = gel(gel(K_ext, k), 1);
                 Lrel = gel(gel(K_ext, k), 2);
@@ -537,7 +537,7 @@ void my_cup_matrix_3_script (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN J
     pari_printf(ANSI_COLOR_CYAN "%ld\n\n" ANSI_COLOR_RESET, mat_rk);
 
     FILE *fptr;
-    fptr = fopen("data/discriminants/ranks-[2,2,2,2]_8_mod_16.json", "a");
+    fptr = fopen("data/discriminants/ranks-[2,2,2,2]_4_mod_16.json", "a");
 
     pari_fprintf(fptr, "{\"pol\": \"%Ps\", \"K_cyc\": \"%Ps\", \"ext_cyc\": \"%Ps\", \"ext_pol\": \"%Ps\"},\n", nf_get_pol(bnf_get_nf(K)), bnf_get_cyc(K), ext_cyc, ext_pol);
 
