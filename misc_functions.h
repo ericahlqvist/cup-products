@@ -51,6 +51,17 @@ int my_QV_equal0 (GEN v) {
     return output;
 }
 
+int my_QV_equal0_mod_p (GEN v, int p) {
+    int output = 1;
+    int i;
+    for (i=1; i<glength(v)+1; ++i) {
+        if (!(itos(gel(v,i))%p == 0)) {
+            output = 0;
+        }
+    }
+    return output;
+}
+
 int my_QV_equal (GEN v1, GEN v2) {
     int output = 1;
     int i;
@@ -432,6 +443,8 @@ GEN my_find_H90_ideal_single_prime (GEN LyAbs, GEN LyRel, GEN K, GEN primes, GEN
     return H90_ideal;
 }
 
+
+
 GEN my_find_H90_ideal (GEN LyAbs, GEN LyRel, GEN K, GEN iJ_div_a2, GEN sigma_y, int p) {
     pari_sp av = avma;
     GEN factorization = idealfactor(LyAbs, iJ_div_a2);
@@ -479,13 +492,53 @@ GEN my_find_H90_ideal (GEN LyAbs, GEN LyRel, GEN K, GEN iJ_div_a2, GEN sigma_y, 
     return H90_ideal;
 }
 
+GEN my_1MS_operator (GEN L, GEN sigma) {
+    pari_sp av = avma;
+    GEN cyc = bnf_get_cyc(L); 
+    GEN gens = bnf_get_gen(L);
+    int l = glength(cyc);
+    GEN M = zeromatcopy(l,l);
+    int i;
+    for (i = 1; i < l+1; i++)
+    {
+        gel(M, i) = bnfisprincipal0(L, my_1MS_ideal(L, sigma, gel(gens, i)), 0);
+    }
+    
+    M = gerepilecopy(av, M);
+    return M;
+}
+
+
+GEN my_norm_operator (GEN Labs, GEN Lrel, GEN K, GEN p) {
+    pari_sp av = avma;
+    GEN M, Lgens, Kgens, g, g_rel, Ng;
+    int Klength, Llength, i;
+    Lgens = my_find_units_mod_p(Labs, p);
+    Kgens = my_find_units_mod_p(K, p);
+    Llength = glength(Lgens);
+    Klength = glength(Kgens);
+    M = zeromatcopy(Klength, Llength);
+
+    for (i = 1; i < Llength+1; i++)
+    {
+        g = gel(Lgens, i);
+        g_rel = rnfeltabstorel(Lrel, g);
+        Ng = rnfeltnorm(Lrel, g_rel);
+        gel(M, i) = bnfisunit(K, Ng);
+    }
+    
+
+    M = gerepilecopy(av, M);
+    return M;
+}
+
 GEN my_H90 (GEN L, GEN iJ, GEN sigma) {
     pari_sp av = avma;
-    GEN H90_ideal, gens, M, D, B, E;
+    GEN H90_ideal, gens, M, D, B, E, Itest, test_vec;
     gens = bnr_get_gen(L);
     int l = glength(gens);
     
-    M = zeromat(l,l);
+    M = zeromatcopy(l,l);
     D = zerovec(l);
 
     // finding exponents for iJ 
@@ -504,6 +557,7 @@ GEN my_H90 (GEN L, GEN iJ, GEN sigma) {
     for (i = 1; i < l+1; i++)
     {
         H90_ideal = idealmul(L, H90_ideal, idealpow(L, gel(gens, i), gel(E, i)));
+       
     }
 
     H90_ideal = gerepilecopy(av, H90_ideal);
@@ -1668,7 +1722,7 @@ GEN my_find_I_full (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN i_xJ, GEN a, GEN c
 
     // }
 
-    printf("Entering the slow round\n\n");
+    //printf("Entering the slow round\n\n");
     printf("roots of unity L: %d\n\n", roots_of_unity_nr);
     L_units = my_find_units_mod_p(Labs, stoi(p_int));
     printf("nr of L_units mod p: %ld\n\n", glength(L_units));
@@ -1720,7 +1774,7 @@ GEN my_find_I_full (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN i_xJ, GEN a, GEN c
         } 
 
     }
-    printf("Something is wrong\n");
+    printf(ANSI_COLOR_RED "my_find_I_full ended with a problem\n" ANSI_COLOR_RESET);
    
     printf(ANSI_COLOR_RED "No I found in my_find_I\n\n" ANSI_COLOR_RESET);
     pari_close();
@@ -1750,10 +1804,10 @@ GEN my_find_I_vect_full (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, int 
     return I_vect;
 }
 
-GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, int p_int) {
+GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p) {
     pari_sp av = avma;
-    int r_rk = glength(Ja_vect);
-    GEN I_vect = zerovec(r_rk), a, iJ;
+    int r_rk = glength(Ja_vect), f, j, done = 0;
+    GEN I_vect = zerovec(r_rk), a, iJ, F, F_ker_T, t, t_rel, Nt, diff, exp;
    
     int i;
     
@@ -1761,7 +1815,36 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, int p_int) {
     {
         a = gel(gel(Ja_vect, i), 1);
         iJ = rnfidealup0(Lrel, gel(gel(Ja_vect, i),2), 1);
-        gel(I_vect, i) = my_H90(Labs, iJ, sigma);
+        F = my_H90(Labs, iJ, sigma);
+        /*
+            Find F_ker_T --------------------
+        */
+        for (j = 1; j < f+1; j++)
+        {
+            t = gel(bnfisprincipal0(Labs, idealdiv(Labs, iJ, gel(F_ker_T, j)), 1), 2);
+            t_rel = rnfeltabstorel(Lrel, t);
+            Nt = rnfeltnorm(Lrel, t_rel);
+            diff = nfmul(K, Nt, a);
+            exp = bnfisunit(K, diff);
+            /* check if exp lies in the image of the operator associated to N: (O_L)^x -> (O_K)^x */
+
+            if (matsolvemod(my_norm_operator(Labs, Lrel, K, p), 0, exp, 0))
+            {
+                gel(I_vect, i) = gel(F_ker_T, j);
+                done = 1;
+                break;
+            }
+            
+        }
+        if (!done)
+        {
+            printf(ANSI_COLOR_RED "my_H90_vect ended with a problem \n" ANSI_COLOR_RESET);
+            pari_close();
+            exit(0);
+        }
+        
+         
+        
     } 
     
     I_vect = gerepilecopy(av, I_vect);
