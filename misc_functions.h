@@ -479,6 +479,37 @@ GEN my_find_H90_ideal (GEN LyAbs, GEN LyRel, GEN K, GEN iJ_div_a2, GEN sigma_y, 
     return H90_ideal;
 }
 
+GEN my_H90 (GEN L, GEN iJ, GEN sigma) {
+    pari_sp av = avma;
+    GEN H90_ideal, gens, M, D, B, E;
+    gens = bnr_get_gen(L);
+    int l = glength(gens);
+    
+    M = zeromat(l,l);
+    D = zerovec(l);
+
+    // finding exponents for iJ 
+    B = bnfisprincipal0(L, iJ, 0);
+
+    // finding the matrix M consisting of exponents for the (1-s)g_i, Cl(L) = < g_1, ..., g_n > 
+    int i;
+    for (i = 1; i < l+1; i++)
+    {
+        gel(M, i) = bnfisprincipal0(L, my_1MS_ideal(L, sigma, gel(gens, i)), 0);
+    }
+    // Gauss
+    E = matsolvemod(M,D,B,0);
+
+    H90_ideal = idealhnf0(L, gen_1, NULL);
+    for (i = 1; i < l+1; i++)
+    {
+        H90_ideal = idealmul(L, H90_ideal, idealpow(L, gel(gens, i), gel(E, i)));
+    }
+
+    H90_ideal = gerepilecopy(av, H90_ideal);
+    return H90_ideal;
+}
+
 GEN my_find_ext_ranks(GEN K_ext) {
     int l = glength(K_ext);
     GEN ext_rks = zerovec(l);
@@ -676,6 +707,7 @@ GEN my_get_vect (int n, GEN cyc)
 GEN my_get_clgp (GEN K)
 {
     pari_sp av = avma;
+    printf("-------\n\nComputing the class group\n\n---------\n");
     GEN Kcyc = bnf_get_cyc(K);
     GEN Kgen = bnf_get_gen(K);
     GEN class_number = bnf_get_no(K);
@@ -712,7 +744,7 @@ GEN my_get_clgp (GEN K)
             // output(idealnorm(K, current_I));
             // printf("\n");
         }
-        if (n%100 == 0) {
+        if (n%1000 == 0) {
             printf("%d/%d\n", n, clnr);
         }
         
@@ -1085,7 +1117,7 @@ GEN my_find_p_power_units(GEN K, GEN unit_group, GEN p) {
         gel(cyc,i) = gpow(p, stoi(3), DEFAULTPREC);
     }
     GEN exponents = my_get_vect(cyc_order-1, cyc);
-    pari_printf("%Ps\n", exponents);
+    //pari_printf("%Ps\n", exponents);
     for (i=1;i<order+1;++i) {
         exp = gel(exponents, i); 
         current_power = algtobasis(K, gen_1);
@@ -1113,6 +1145,7 @@ GEN my_find_p_power_units(GEN K, GEN unit_group, GEN p) {
 GEN my_get_unit_group (GEN K, GEN unit_gens, GEN p)
 {
     pari_sp av = avma;
+    printf("-------\n\nComputing the unit group\n\n---------\n");
     int nr_comp = glength(unit_gens);
     GEN cyc = zerovec(nr_comp);
 
@@ -1159,7 +1192,7 @@ GEN my_get_unit_group (GEN K, GEN unit_gens, GEN p)
             // printf("\n");
         }
         
-        if (n%100 == 0) {
+        if (n%1000 == 0) {
             printf("%d/%d\n", n, nr);
         }
         
@@ -1667,7 +1700,11 @@ GEN my_find_I_full (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN i_xJ, GEN a, GEN c
             for ( i = 1; i < l+1; i++)
             {
                 exponents = bnfisunit(K, nfdiv(K, diff, gel(norms, i)));
-                pari_printf("exponents: %Ps\n", exponents);
+                if (l%1000==0)
+                {
+                    pari_printf("exponents[%d]: %Ps\n", i, exponents);
+                }
+                
                 if (my_is_p_power(exponents, p_int, roots_of_unity_nr))
                 {
                     printf("I found\n\n");
@@ -1707,6 +1744,24 @@ GEN my_find_I_vect_full (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, int 
         a = gel(gel(Ja_vect, i), 1);
         i_xJ = rnfidealup0(Lrel, gel(gel(Ja_vect, i),2), 1);
         gel(I_vect, i) = gel(my_find_I_full(Labs, Lrel, K, sigma, i_xJ, a, class_group, p_int), 2);
+    } 
+    
+    I_vect = gerepilecopy(av, I_vect);
+    return I_vect;
+}
+
+GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, int p_int) {
+    pari_sp av = avma;
+    int r_rk = glength(Ja_vect);
+    GEN I_vect = zerovec(r_rk), a, iJ;
+   
+    int i;
+    
+    for (i = 1; i < r_rk+1; ++i)
+    {
+        a = gel(gel(Ja_vect, i), 1);
+        iJ = rnfidealup0(Lrel, gel(gel(Ja_vect, i),2), 1);
+        gel(I_vect, i) = my_H90(Labs, iJ, sigma);
     } 
     
     I_vect = gerepilecopy(av, I_vect);
