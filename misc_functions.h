@@ -1,4 +1,28 @@
 
+GEN my_xvector (int l, int x) {
+    GEN vec = zerovec(l);
+    int i; 
+    GEN a = stoi(x);
+    for (i = 1; i < l+1; i++)
+    {
+        gel(vec, i) = a;
+    }
+    return vec;
+    
+}
+
+GEN my_xcol (int l, int x) {
+    GEN vec = zerocol(l);
+    int i; 
+    GEN a = stoi(x);
+    for (i = 1; i < l+1; i++)
+    {
+        gel(vec, i) = a;
+    }
+    return vec;
+    
+}
+
 GEN my_int_to_frac_vec (GEN v) {
     GEN vec = zerovec(glength(v));
     GEN frac = cgetg(3, t_FRAC);
@@ -723,6 +747,45 @@ GEN my_ideal_from_exp (GEN K, GEN exp) {
     return ideal;
 
 }
+
+GEN my_scalar_mult (GEN scalar, GEN vect) {
+    printf("\nmy_scalar_mult\n");
+    pari_sp av = avma;
+
+    GEN new_vect = gcopy(vect);
+    
+    int i, l = glength(vect);
+    
+    for (i = 1; i < l+1; i++)
+    {
+        gel(new_vect, i) = gmul(scalar, gel(vect, i));
+    }
+    
+    
+    new_vect = gerepilecopy(av, new_vect);
+    return new_vect;
+}
+
+GEN my_vect_from_exp (GEN basis, GEN exp) {
+    printf("\nmy_vect_from_exp\n");
+    pari_sp av = avma;
+    int n = glength(gel(basis, 1));
+    GEN vect = zerocol(n);
+    pari_printf("exp: %Ps\n", exp);
+    int l = glength(exp);
+
+    int i;
+    for (i = 1; i < l+1; i++)
+    {
+        
+        vect = ZC_add(vect, ZC_Z_mul(gel(basis, i), gel(exp, i)));
+    }
+    
+    vect = gerepilecopy(av, vect);
+    return vect;
+
+}
+
 
 GEN my_H90 (GEN L, GEN iJ, GEN sigma) {
     printf("\nmy_H90\n");
@@ -1832,11 +1895,47 @@ GEN my_find_I_vect_full (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, int 
     return I_vect;
 }
 
+GEN my_get_sums (GEN basis) {
+    printf("my_get_sums\n");
+    pari_sp av = avma;
+    int l = glength(basis), i, ord = 2;
+    int n = pow(ord, l);
+    GEN gp = zerovec(n);
+    GEN cyc = zerovec(l);
+    
+    if (l<2)
+    {
+        gp = basis;
+        pari_printf(ANSI_COLOR_MAGENTA "gp: %Ps\n" ANSI_COLOR_RESET, gp);
+        gp = gerepilecopy(av, gp);
+        return gp;
+    }
+    
+
+    else {
+        for (i = 1; i < l+1; i++)
+        {
+            gel(cyc, i) = stoi(ord);
+        }
+        
+        GEN exp = my_get_vect( l - 1, cyc );
+        pari_printf(ANSI_COLOR_MAGENTA "exp_list: %Ps\n" ANSI_COLOR_RESET, exp);
+        for (i = 1; i < n+1; i++)
+        {
+            gel(gp, i) = my_vect_from_exp(basis, gel(exp, i));
+        }
+    }
+    pari_printf(ANSI_COLOR_RED "Basis: %Ps\n" ANSI_COLOR_RESET, basis);
+    pari_printf(ANSI_COLOR_RED "Sums: %Ps\n" ANSI_COLOR_RESET, gp);
+    gp = gerepilecopy(av, gp);
+    return gp;
+}
+
 GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p) {
     printf(ANSI_COLOR_CYAN "\nmy_H90_vect\n" ANSI_COLOR_RESET);
     pari_sp av = avma;
     int r_rk = glength(Ja_vect), f, j, done = 0;
-    GEN I_vect = zerovec(r_rk), a, iJ, F, ker_T, F_ker_T, t, t_rel, Nt, diff, exp, is_princ, is_norm;
+    GEN I_vect = zerovec(r_rk), a, iJ, F, ker_T, ker_T_basis, F_ker_T, t, t_rel, Nt, diff, exp, is_princ, is_norm;
    
     int i;
     
@@ -1847,17 +1946,19 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p) {
         iJ = rnfidealup0(Lrel, gel(gel(Ja_vect, i),2), 1);
         F = my_H90(Labs, iJ, sigma);
         // pari_printf("F: %Ps\n", F);
-        ker_T = gtovec(matker0(my_1MS_operator(Labs, sigma), 1));
+        ker_T_basis = gtovec(matker0(my_1MS_operator(Labs, sigma), 1));
         
-        if (glength(ker_T)==0)
+        
+        if (glength(ker_T_basis)==0)
         {
             gel(I_vect, i) = F;
             done = 1;
         }
         else {
+            ker_T = my_get_sums(ker_T_basis);
             ker_T = shallowconcat(mkvec(zerocol(glength(gel(ker_T, 1)))), ker_T);
             
-            // pari_printf("ker_T: %Ps\n", ker_T);
+            pari_printf(ANSI_COLOR_CYAN "ker_T: %Ps\n" ANSI_COLOR_RESET, ker_T);
             // pari_printf("ker_T[2]: %Ps\n", gel(ker_T, 2));
             f = glength(ker_T);
             // printf("f: %d\n", f);
@@ -1869,7 +1970,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p) {
             {
                 // pari_printf("Adding the exp: %Ps\n", gel(ker_T, j));
                 // pari_printf("And the ideal: %Ps\n", my_ideal_from_exp(Labs, gel(ker_T, j)));
-                F_ker_T = idealmul(Labs, F, my_ideal_from_exp(Labs, gel(ker_T, j)));
+                F_ker_T = idealmul(Labs, F, idealred(Labs, my_ideal_from_exp(Labs, gel(ker_T, j))));
                 pari_printf("F_ker_T: %Ps\n", F_ker_T);
                 is_princ = bnfisprincipal0(Labs, idealdiv(Labs, iJ, my_1MS_ideal(Labs, sigma, F_ker_T)), 1);
                 if (!my_QV_equal0(gel(is_princ, 1)))
@@ -1886,7 +1987,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p) {
                 exp = bnfisunit(K, diff);
                 pari_printf(ANSI_COLOR_YELLOW "exp: %Ps\n" ANSI_COLOR_RESET, exp);
                 pari_printf("M: %Ps\n", my_norm_operator(Labs, Lrel, K, p));
-                pari_printf("D: %Ps\n", zerocol(glength(exp)));
+                pari_printf("D: %Ps\n", my_xcol(glength(exp), itos(p)));
                 pari_printf("B: %Ps\n", gtocol(exp));
                 /* check if exp lies in the image of the operator associated to N: (O_L)^x -> (O_K)^x */
                 // if (my_QV_equal0(my_norm_operator(Labs, Lrel, K, p)))
