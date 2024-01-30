@@ -140,7 +140,11 @@ main (int argc, char *argv[])
     //-----Faster version--------
     // my_cup_matrix_2(K_ext, K, p, p_int, p_rk, J_vect, units_mod_p, r_rk);
     //my_cup_matrix_2_transpose(K_ext, K, p, p_int, p_rk, J_vect, Ja_vect, units_mod_p, r_rk, p_power_units);
-    my_cup_matrix_3_script(K_ext, K, p, p_int, p_rk, Ja_vect, r_rk);
+    GEN ext_rks = my_find_ext_ranks(K_ext);
+    GEN ext_cyc = my_find_ext_cyc(K_ext);
+    GEN ext_pol = my_find_ext_pol(K_ext);
+    
+    my_cup_matrix_3_script(K_ext, K, p, p_int, p_rk, Ja_vect, r_rk, ext_rks, ext_cyc, ext_pol);
     
     printf("\n\n");
     printf(ANSI_COLOR_GREEN "Done! \n \n" ANSI_COLOR_RESET);

@@ -26,7 +26,7 @@ class Command(object):
 
 
 p = "2" # A prime 
-open_file = "p_2_[2,2,2,2]_disc_8_mod_16.txt" # A file
+open_file = "p_2_[2,2,2,2]_disc_4_mod_16.txt" # A file
 
 # Dmod = "3" # 3, 7, 4, 8
 # mod = ""

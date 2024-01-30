@@ -143,10 +143,13 @@ GEN my_ext(GEN base, GEN base_clf, GEN s, GEN p, int p_rk, GEN D_prime_vect)
         
         /* Define Lrel/Labs */
         p1red = rnfpolredbest(base, mkvec2(q1, D_prime_vect), 0);
+        // p1red = q1;
+        printf("Reduced polynomial for relative extension found\n");
         Lrel = rnfinit(base, p1red);
-        //printf("Lrel found\n");
+        printf("Lrel found\n");
+        pari_printf("Abs pol: %Ps\n", rnf_get_polabs(Lrel));
         Labs = Buchall(rnf_get_polabs(Lrel), nf_FORCE, DEFAULTPREC);
-        //printf("Labs found\n");
+        printf("Labs found\n");
         pari_printf("L_cyc[%d]: %Ps\n", i, bnf_get_cyc(Labs));
         pari_printf("rel_pol[%d]: %Ps\n", i, p1red);
         pari_printf("abs pol: %Ps\n\n", gsubstpol(rnf_get_polabs(Lrel),y, s));
