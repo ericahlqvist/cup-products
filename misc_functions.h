@@ -517,14 +517,20 @@ GEN my_find_H90_ideal (GEN LyAbs, GEN LyRel, GEN K, GEN iJ_div_a2, GEN sigma_y, 
 
 GEN my_1MS_operator (GEN L, GEN sigma) {
     pari_sp av = avma;
-    GEN cyc = bnf_get_cyc(L); 
+    GEN cyc = bnf_get_cyc(L), col; 
     GEN gens = bnf_get_gen(L);
     int l = glength(cyc);
     GEN M = zeromatcopy(l,l);
     int i;
+    int j;
     for (i = 1; i < l+1; i++)
     {
-        gel(M, i) = bnfisprincipal0(L, my_1MS_ideal(L, sigma, gel(gens, i)), 0);
+        col = bnfisprincipal0(L, my_1MS_ideal(L, sigma, gel(gens, i)), 0);
+        for (j = 1; j < l+1; j++)
+        {
+            gel(col, j) = modii(gel(col, j), gel(cyc, j));
+        }
+        gel(M, i) = col;
     }
     pari_printf("my_1MS_operator: %Ps\n", M);
     M = gerepilecopy(av, M);
@@ -1898,14 +1904,14 @@ GEN my_find_I_vect_full (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, int 
 GEN my_get_sums (GEN basis) {
     printf("my_get_sums\n");
     pari_sp av = avma;
-    int l = glength(basis), i, ord = 2;
+    int l = glength(basis), i, ord = 3;
     int n = pow(ord, l);
     GEN gp = zerovec(n);
     GEN cyc = zerovec(l);
     
     if (l<2)
     {
-        gp = basis;
+        gp = shallowconcat(mkvec(zerocol(glength(gel(basis, 1)))), basis);
         pari_printf(ANSI_COLOR_MAGENTA "gp: %Ps\n" ANSI_COLOR_RESET, gp);
         gp = gerepilecopy(av, gp);
         return gp;
@@ -1956,7 +1962,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p) {
         }
         else {
             ker_T = my_get_sums(ker_T_basis);
-            ker_T = shallowconcat(mkvec(zerocol(glength(gel(ker_T, 1)))), ker_T);
+            //ker_T = shallowconcat(mkvec(zerocol(glength(gel(ker_T, 1)))), ker_T);
             
             pari_printf(ANSI_COLOR_CYAN "ker_T: %Ps\n" ANSI_COLOR_RESET, ker_T);
             // pari_printf("ker_T[2]: %Ps\n", gel(ker_T, 2));
