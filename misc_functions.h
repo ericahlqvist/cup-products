@@ -1836,7 +1836,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p) {
     printf(ANSI_COLOR_CYAN "\nmy_H90_vect\n" ANSI_COLOR_RESET);
     pari_sp av = avma;
     int r_rk = glength(Ja_vect), f, j, done = 0;
-    GEN I_vect = zerovec(r_rk), a, iJ, F, ker_T, F_ker_T, t, t_rel, Nt, diff, exp, is_princ;
+    GEN I_vect = zerovec(r_rk), a, iJ, F, ker_T, F_ker_T, t, t_rel, Nt, diff, exp, is_princ, is_norm;
    
     int i;
     
@@ -1846,7 +1846,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p) {
         a = gel(gel(Ja_vect, i), 1);
         iJ = rnfidealup0(Lrel, gel(gel(Ja_vect, i),2), 1);
         F = my_H90(Labs, iJ, sigma);
-        pari_printf("F: %Ps\n", F);
+        // pari_printf("F: %Ps\n", F);
         ker_T = gtovec(matker0(my_1MS_operator(Labs, sigma), 1));
         
         if (glength(ker_T)==0)
@@ -1857,17 +1857,18 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p) {
         else {
             ker_T = shallowconcat(mkvec(zerocol(glength(gel(ker_T, 1)))), ker_T);
             
-            pari_printf("ker_T: %Ps\n", ker_T);
-            pari_printf("ker_T[2]: %Ps\n", gel(ker_T, 2));
+            // pari_printf("ker_T: %Ps\n", ker_T);
+            // pari_printf("ker_T[2]: %Ps\n", gel(ker_T, 2));
             f = glength(ker_T);
-            printf("f: %d\n", f);
+            // printf("f: %d\n", f);
             /*
                 Find F_ker_T --------------------
             */
             
             for (j = 1; j < f+1; j++)
             {
-                
+                // pari_printf("Adding the exp: %Ps\n", gel(ker_T, j));
+                // pari_printf("And the ideal: %Ps\n", my_ideal_from_exp(Labs, gel(ker_T, j)));
                 F_ker_T = idealmul(Labs, F, my_ideal_from_exp(Labs, gel(ker_T, j)));
                 pari_printf("F_ker_T: %Ps\n", F_ker_T);
                 is_princ = bnfisprincipal0(Labs, idealdiv(Labs, iJ, my_1MS_ideal(Labs, sigma, F_ker_T)), 1);
@@ -1883,7 +1884,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p) {
                 Nt = rnfeltnorm(Lrel, t_rel);
                 diff = nfmul(K, Nt, a);
                 exp = bnfisunit(K, diff);
-                pari_printf("exp: %Ps\n", exp);
+                pari_printf(ANSI_COLOR_YELLOW "exp: %Ps\n" ANSI_COLOR_RESET, exp);
                 pari_printf("M: %Ps\n", my_norm_operator(Labs, Lrel, K, p));
                 pari_printf("D: %Ps\n", zerocol(glength(exp)));
                 pari_printf("B: %Ps\n", gtocol(exp));
@@ -1894,8 +1895,15 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p) {
                 //     done = 1;
                 //     break;
                 // }
-                if (matsolvemod(my_norm_operator(Labs, Lrel, K, p), zerocol(glength(exp)), gtocol(exp), 0))
+                is_norm = matsolvemod(my_norm_operator(Labs, Lrel, K, p), zerocol(glength(exp)), gtocol(exp), 0);
+                pari_printf(ANSI_COLOR_CYAN "is_norm: %Ps\n" ANSI_COLOR_RESET, is_norm);
+                if (my_QV_equal0(exp) || !gequal0(is_norm))
                 {
+                    //pari_printf(ANSI_COLOR_CYAN "Norm of elt with exp: %Ps\n" ANSI_COLOR_RESET, is_norm);
+                    // w = gel(bnf_get_fu(Labs), 1);
+                    // w_rel = rnfeltabstorel(Lrel, w);
+                    // Nw = rnfeltnorm(Lrel, w_rel);
+                    // pari_printf("Norm w: %Ps\n", Nw);
                     gel(I_vect, i) = F_ker_T;
                     done = 1;
                     break;
