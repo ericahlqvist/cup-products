@@ -798,10 +798,11 @@ GEN my_H90 (GEN L, GEN iJ, GEN sigma) {
     pari_sp av = avma;
     GEN H90_ideal, gens, M, B, E, D;
     gens = bnf_get_gen(L);
+    D = gtocol(bnf_get_cyc(L));
     int l = glength(gens);
     
     M = zeromatcopy(l,l);
-    D = zerocol(l);
+    //D = zerocol(l);
     // finding exponents for iJ 
     B = bnfisprincipal0(L, iJ, 0);
 
@@ -1941,8 +1942,8 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p) {
     printf(ANSI_COLOR_CYAN "\nmy_H90_vect\n" ANSI_COLOR_RESET);
     pari_sp av = avma;
     int r_rk = glength(Ja_vect), f, j, done = 0;
-    GEN I_vect = zerovec(r_rk), a, iJ, F, ker_T, ker_T_basis, F_ker_T, t, t_rel, Nt, diff, exp, is_princ, is_norm;
-   
+    GEN I_vect = zerovec(r_rk), a, iJ, F, ker_T, ker_T_basis, ker_sol, F_ker_T, t, t_rel, Nt, diff, exp, is_princ, is_norm, cyc;
+    cyc = gtocol(bnf_get_cyc(Labs));
     int i;
     
     for (i = 1; i < r_rk+1; ++i)
@@ -1952,8 +1953,8 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p) {
         iJ = rnfidealup0(Lrel, gel(gel(Ja_vect, i),2), 1);
         F = my_H90(Labs, iJ, sigma);
         // pari_printf("F: %Ps\n", F);
-        ker_T_basis = gtovec(matker0(my_1MS_operator(Labs, sigma), 1));
-        
+        ker_sol = matsolvemod(my_1MS_operator(Labs, sigma), cyc, zerocol(glength(cyc)), 1);
+        ker_T_basis = gtovec(gel(ker_sol, 2));
         
         if (glength(ker_T_basis)==0)
         {
