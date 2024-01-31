@@ -437,7 +437,7 @@ GEN my_get_vect (int n, GEN cyc)
 }
 
 GEN my_ideal_from_exp (GEN K, GEN exp) {
-    printf("\nmy_ideal_from_exp\n");
+    //printf("\nmy_ideal_from_exp\n");
     pari_sp av = avma;
     GEN ideal = idealhnf(K, gen_1);
     GEN gens = bnf_get_gen(K);
@@ -527,7 +527,7 @@ GEN my_find_units_mod_p (GEN K, GEN p) {
     // pari_printf("B: %Ps\n", nfpow(K, tors_unit, gpow(p, stoi(4), DEFAULTPREC)));
     // pari_printf("tors_unit: %Ps\n", tors_unit);
     // pari_printf("fund_units: %Ps\n", fund_units);
-    printf("torsion order: %d\n\n", tors_gp_ord);
+    //printf("torsion order: %d\n\n", tors_gp_ord);
 
     if (tors_gp_ord%itos(p)==0) {
         units_mod_p = shallowconcat(units_mod_p, mkvec(tors_unit));
@@ -659,7 +659,7 @@ GEN my_find_Ja_vect(GEN K, GEN J_vect, GEN p, GEN units_mod_p) {
 GEN my_get_sums (GEN basis) {
     printf("my_get_sums\n");
     pari_sp av = avma;
-    int l = glength(basis), i, ord = 3;
+    int l = glength(basis), i, ord = 2;
     int n = pow(ord, l);
     GEN gp = zerovec(n);
     GEN cyc = zerovec(l);
@@ -709,6 +709,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p) {
         // pari_printf("F: %Ps\n", F);
         ker_sol = matsolvemod(my_1MS_operator(Labs, sigma), cyc, zerocol(glength(cyc)), 1);
         ker_T_basis = gtovec(gel(ker_sol, 2));
+        printf(ANSI_COLOR_GREEN "------------------------\n\n\nker_T_basis size: %ld\n\n\n------------------------\n" ANSI_COLOR_RESET, glength(ker_T_basis));
         
         if (glength(ker_T_basis)==0)
         {
@@ -717,18 +718,21 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p) {
         }
         else {
             ker_T = my_get_sums(ker_T_basis);
-            //ker_T = shallowconcat(mkvec(zerocol(glength(gel(ker_T, 1)))), ker_T);
+
+            // WARNING: This makes it faster but might not find the answer. Switch back to the above ker_T
+            //ker_T = shallowconcat(mkvec(zerocol(glength(gel(ker_T_basis, 1)))), ker_T_basis);
             
             //pari_printf(ANSI_COLOR_CYAN "ker_T: %Ps\n" ANSI_COLOR_RESET, ker_T);
             // pari_printf("ker_T[2]: %Ps\n", gel(ker_T, 2));
             f = glength(ker_T);
-            // printf("f: %d\n", f);
+            printf("Searching a chunk of ker (1-sigma) of size: %d\n", f);
             /*
                 Find F_ker_T --------------------
             */
             
             for (j = 1; j < f+1; j++)
             {
+                printf("%d/%d\n", j, f);
                 // pari_printf("Adding the exp: %Ps\n", gel(ker_T, j));
                 // pari_printf("And the ideal: %Ps\n", my_ideal_from_exp(Labs, gel(ker_T, j)));
                 F_ker_T = idealmul(Labs, F, idealred(Labs, my_ideal_from_exp(Labs, gel(ker_T, j))));
