@@ -602,7 +602,7 @@ void my_quaternion_matrix (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_
         sigma_cup = gel(gel(K_ext, i), 3);
 
         // I_vect corresp. to i:th extension
-        I_vect = my_find_I_vect_full(Labs_cup, Lrel_cup, K, sigma_cup, Ja_vect, p_int);
+        I_vect = my_H90_vect(Labs_cup, Lrel_cup, K, sigma_cup, Ja_vect, stoi(p_int));
         
         printf("I_vect nr: %d\n\n", i);
 
