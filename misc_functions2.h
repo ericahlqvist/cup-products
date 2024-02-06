@@ -437,7 +437,7 @@ GEN my_get_vect (int n, GEN cyc)
 }
 
 GEN my_ideal_from_exp (GEN K, GEN exp) {
-    //printf("\nmy_ideal_from_exp\n");
+    printf("\nmy_ideal_from_exp\n");
     pari_sp av = avma;
     GEN ideal = idealhnf(K, gen_1);
     GEN gens = bnf_get_gen(K);
@@ -445,7 +445,8 @@ GEN my_ideal_from_exp (GEN K, GEN exp) {
     int i;
     for (i = 1; i < l+1; i++)
     {
-        ideal = idealmul(K, ideal, idealpow(K, gel(gens, i), gel(exp, i)));
+        printf("%d/%d\n", i, l);
+        ideal = idealred(K, idealmul(K, ideal, idealred(K, idealpow(K, gel(gens, i), gel(exp, i)))));
     }
     
 
@@ -492,27 +493,59 @@ GEN my_H90 (GEN L, GEN iJ, GEN sigma) {
     int i;
     for (i = 1; i < l+1; i++)
     {
-        gel(M, i) = bnfisprincipal0(L, my_1MS_ideal(L, sigma, gel(gens, i)), 0);
+        gel(M, i) = bnfisprincipal0(L, idealred(L, my_1MS_ideal(L, sigma, gel(gens, i))), 0);
     }
     // Gauss
     // pari_printf("M: %Ps\n", M);
     // pari_printf("B: %Ps\n", B);
+    //printf("Gauss start\n");
     E = matsolvemod(M,D,B,0);
+    //printf("Gauss done\n");
     // pari_printf("E: %Ps\n", E);
     
     H90_ideal = my_ideal_from_exp(L, E);
-    //pari_printf("H90_ideal: %Ps\n", H90_ideal);
-    GEN Itest = idealdiv(L, iJ, my_1MS_ideal(L, sigma, H90_ideal));
-    GEN test_vec = bnfisprincipal0(L, Itest, 0);
+    printf(ANSI_COLOR_GREEN "H90_ideal found\n" ANSI_COLOR_RESET);
+    // GEN Itest = idealred(L,idealdiv(L, iJ, my_1MS_ideal(L, sigma, H90_ideal)));
+    // GEN test_vec = bnfisprincipal0(L, Itest, 0);
     
-    if (!my_QV_equal0(test_vec)) {
-        printf(ANSI_COLOR_RED "Problem in my_H90\n" ANSI_COLOR_RESET);
-        pari_close();
-        exit(0);
-    }
+    // if (!my_QV_equal0(test_vec)) {
+    //     printf(ANSI_COLOR_RED "Problem in my_H90\n" ANSI_COLOR_RESET);
+    //     pari_close();
+    //     exit(0);
+    // }
 
     H90_ideal = gerepilecopy(av, H90_ideal);
     return H90_ideal;
+}
+
+GEN my_H90_exp (GEN L, GEN iJ, GEN sigma) {
+    printf("\nmy_H90_exp\n");
+    pari_sp av = avma;
+    GEN H90_exp, gens, M, B, D;
+    gens = bnf_get_gen(L);
+    D = gtocol(bnf_get_cyc(L));
+    int l = glength(gens);
+    
+    M = zeromatcopy(l,l);
+    //D = zerocol(l);
+    // finding exponents for iJ 
+    B = bnfisprincipal0(L, iJ, 0);
+
+    // finding the matrix M consisting of exponents for the (1-s)g_i, Cl(L) = < g_1, ..., g_n > 
+    int i;
+    for (i = 1; i < l+1; i++)
+    {
+        gel(M, i) = bnfisprincipal0(L, idealred(L, my_1MS_ideal(L, sigma, gel(gens, i))), 0);
+    }
+    // Gauss
+    // pari_printf("M: %Ps\n", M);
+    // pari_printf("B: %Ps\n", B);
+    //printf("Gauss start\n");
+    H90_exp = matsolvemod(M,D,B,0);
+    //printf("Gauss done\n");
+
+    H90_exp = gerepilecopy(av, H90_exp);
+    return H90_exp;
 }
 
 
@@ -572,6 +605,7 @@ GEN my_norm_operator (GEN Labs, GEN Lrel, GEN K, GEN p) {
 
 GEN my_find_p_gens (GEN K, GEN p)
 {
+    pari_sp av = avma;
     GEN my_n = bnf_get_cyc(K);
     int l = glength(my_n);
     
@@ -589,7 +623,7 @@ GEN my_find_p_gens (GEN K, GEN p)
         //pari_printf("current_gen: %Ps\n\n", current_gen);
         gel(p_gens, i) = idealred(K, current_gen);
     }
-    
+    p_gens = gerepilecopy(av, p_gens);
     return p_gens;
 }
 
@@ -634,6 +668,7 @@ void my_unramified_p_extensions(GEN K, GEN p, GEN D_prime_vect) {
 
 // Returns vector of tuples (a,J) with div(a)+pJ = 0.
 GEN my_find_Ja_vect(GEN K, GEN J_vect, GEN p, GEN units_mod_p) {
+    pari_sp av = avma;
     int l = glength(J_vect);
     int r_rk = l + glength(units_mod_p);
     GEN Ja_vect = zerovec(r_rk);
@@ -650,7 +685,7 @@ GEN my_find_Ja_vect(GEN K, GEN J_vect, GEN p, GEN units_mod_p) {
         gel(Ja_vect, i) = mkvec2(gel(units_mod_p, i-l), idealhnf0(K, gen_1, NULL));
     }
     
-    
+    Ja_vect = gerepilecopy(av, Ja_vect);
     return Ja_vect;
 }
 
@@ -779,6 +814,109 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p) {
         if (!done)
         {
             printf(ANSI_COLOR_RED "my_H90_vect ended with a problem \n" ANSI_COLOR_RESET);
+            pari_close();
+            exit(0);
+        }
+        
+         
+        
+    } 
+    
+    I_vect = gerepilecopy(av, I_vect);
+    return I_vect;
+}
+
+GEN my_H90_exp_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p) {
+    // This function is not ready to be used
+    printf(ANSI_COLOR_CYAN "\nmy_H90_exp_vect\n" ANSI_COLOR_RESET);
+    pari_sp av = avma;
+    int r_rk = glength(Ja_vect), f, j, done = 0;
+    GEN I_vect = zerovec(r_rk), a, iJ, F, ker_T, ker_T_basis, ker_sol, F_ker_T, t, t_rel, Nt, diff, exp, is_princ, is_norm, cyc;
+    cyc = gtocol(bnf_get_cyc(Labs));
+    int i;
+    
+    for (i = 1; i < r_rk+1; ++i)
+    {
+        done = 0;
+        a = gel(gel(Ja_vect, i), 1);
+        iJ = rnfidealup0(Lrel, gel(gel(Ja_vect, i),2), 1);
+        F = my_H90_exp(Labs, iJ, sigma);
+        // pari_printf("F: %Ps\n", F);
+        ker_sol = matsolvemod(my_1MS_operator(Labs, sigma), cyc, zerocol(glength(cyc)), 1);
+        ker_T_basis = gtovec(gel(ker_sol, 2));
+        printf(ANSI_COLOR_GREEN "------------------------\n\n\nker_T_basis size: %ld\n\n\n------------------------\n" ANSI_COLOR_RESET, glength(ker_T_basis));
+        
+        if (glength(ker_T_basis)==0)
+        {
+            gel(I_vect, i) = F;
+            done = 1;
+        }
+        else {
+            ker_T = my_get_sums(ker_T_basis);
+
+            // WARNING: This makes it faster but might not find the answer. Switch back to the above ker_T
+            //ker_T = shallowconcat(mkvec(zerocol(glength(gel(ker_T_basis, 1)))), ker_T_basis);
+            
+            //pari_printf(ANSI_COLOR_CYAN "ker_T: %Ps\n" ANSI_COLOR_RESET, ker_T);
+            // pari_printf("ker_T[2]: %Ps\n", gel(ker_T, 2));
+            f = glength(ker_T);
+            printf("Searching a chunk of ker (1-sigma) of size: %d\n", f);
+            /*
+                Find F_ker_T --------------------
+            */
+            
+            for (j = 1; j < f+1; j++)
+            {
+                printf("%d/%d\n", j, f);
+                // pari_printf("Adding the exp: %Ps\n", gel(ker_T, j));
+                // pari_printf("And the ideal: %Ps\n", my_ideal_from_exp(Labs, gel(ker_T, j)));
+                F_ker_T = ZC_add(F, gel(ker_T, j));
+                //pari_printf("F_ker_T: %Ps\n", F_ker_T);
+
+                // Here we should check, using linear algebra--------- 
+                is_princ = bnfisprincipal0(Labs, idealdiv(Labs, iJ, my_1MS_ideal(Labs, sigma, F_ker_T)), 1);
+                //-----------------------------------
+                if (!my_QV_equal0(gel(is_princ, 1)))
+                {
+                    printf(ANSI_COLOR_RED "Problem in my_H90_exp_vect\n" ANSI_COLOR_RESET);
+                    pari_close();
+                    exit(0);
+                }
+                
+                t = gel(is_princ, 2);
+                t_rel = rnfeltabstorel(Lrel, t);
+                Nt = rnfeltnorm(Lrel, t_rel);
+                diff = nfmul(K, Nt, a);
+                exp = bnfisunit(K, diff);
+                // pari_printf(ANSI_COLOR_YELLOW "exp: %Ps\n" ANSI_COLOR_RESET, exp);
+                // pari_printf("M: %Ps\n", my_norm_operator(Labs, Lrel, K, p));
+                // pari_printf("D: %Ps\n", my_xcol(glength(exp), itos(p)));
+                // pari_printf("B: %Ps\n", gtocol(exp));
+                /* check if exp lies in the image of the operator associated to N: (O_L)^x -> (O_K)^x */
+                // if (my_QV_equal0(my_norm_operator(Labs, Lrel, K, p)))
+                // {
+                //     gel(I_vect, i) = F_ker_T;
+                //     done = 1;
+                //     break;
+                // }
+                is_norm = matsolvemod(my_norm_operator(Labs, Lrel, K, p), zerocol(glength(exp)), gtocol(exp), 0);
+                //pari_printf(ANSI_COLOR_CYAN "is_norm: %Ps\n" ANSI_COLOR_RESET, is_norm);
+                if (my_QV_equal0(exp) || !gequal0(is_norm))
+                {
+                    //pari_printf(ANSI_COLOR_CYAN "Norm of elt with exp: %Ps\n" ANSI_COLOR_RESET, is_norm);
+                    // w = gel(bnf_get_fu(Labs), 1);
+                    // w_rel = rnfeltabstorel(Lrel, w);
+                    // Nw = rnfeltnorm(Lrel, w_rel);
+                    // pari_printf("Norm w: %Ps\n", Nw);
+                    gel(I_vect, i) = F_ker_T;
+                    done = 1;
+                    break;
+                }
+            }
+        }
+        if (!done)
+        {
+            printf(ANSI_COLOR_RED "my_H90_exp_vect ended with a problem \n" ANSI_COLOR_RESET);
             pari_close();
             exit(0);
         }
