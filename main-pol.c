@@ -11,13 +11,12 @@
 #define ANSI_COLOR_CYAN    "\x1b[36m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
 
-#include "misc_functions.h"
+#include "misc_functions2.h"
 #include "tests.h"
 #include "artin_symbol.h"
-#include "test_artin.h"
+//#include "test_artin.h"
 #include "ext_and_aut2.h"
-#include "find_cup_matrix.h"
-#include "find_cup_matrix2.h"
+#include "find_cup_matrix3.h"
 
 
 

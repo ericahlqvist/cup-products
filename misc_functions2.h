@@ -735,7 +735,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p) {
                 printf("%d/%d\n", j, f);
                 // pari_printf("Adding the exp: %Ps\n", gel(ker_T, j));
                 // pari_printf("And the ideal: %Ps\n", my_ideal_from_exp(Labs, gel(ker_T, j)));
-                F_ker_T = idealmul(Labs, F, idealred(Labs, my_ideal_from_exp(Labs, gel(ker_T, j))));
+                F_ker_T = idealred(Labs, idealmul(Labs, F, idealred(Labs, my_ideal_from_exp(Labs, gel(ker_T, j)))));
                 //pari_printf("F_ker_T: %Ps\n", F_ker_T);
                 is_princ = bnfisprincipal0(Labs, idealdiv(Labs, iJ, my_1MS_ideal(Labs, sigma, F_ker_T)), 1);
                 if (!my_QV_equal0(gel(is_princ, 1)))
