@@ -1,0 +1,214 @@
+//Server login:
+// ssh v1eahlqv@ssh1.maths.ed.ac.uk
+// ssh v1eahlqv@ssh3.maths.ed.ac.uk
+
+// ssh compute64d.maths.ed.ac.uk
+
+// MAGMA_MEMORY_LIMIT
+
+GetMaximumMemoryUsage();
+
+Q_3_candidates := eval Read("Q_3_candidates");
+Q_3_sorted := eval Read("Q_3_sorted");
+Q_2_index_4 := eval Read("Q_2_index_4");
+Ab_index_4 := eval Read("Ab_index_4");
+Q_2_K := eval Read("Q_2_K");
+Q_3_conj := eval Read("Q_3_conj");
+quotients_49 := eval Read("quotients_49");
+quotients_50 := eval Read("quotients_50");
+
+// Create quotients:
+// [8,8,2,2,2]
+sub_gps_all := Subgroups(Q_2_index_4[50] : OrderEqual:=2);
+
+// [4,4,2,2,2]
+sub_gps_all := Subgroups(Q_2_index_4[49] : OrderEqual:=2);
+#Q_2_index_4[49];
+IsCentral(Q_2_index_4[49], CommutatorSubgroup(Q_2_index_4[49]));
+CommutatorSubgroup(Q_2_index_4[50]);
+// order 2^5 --> max 31 subgroups to consider. 
+
+CommutatorSubgroup(Q_2_index_4[51]);
+// (2^7-1)*(2^7-2)/((2^2-1)*(2^2-2));
+
+Center(Q_2_index_4[49]);
+
+
+sub_gps := [];
+for i in [1..#sub_gps_all] do 
+    if sub_gps_all[i]`length eq 1 then 
+        sub_gps := Append(sub_gps, sub_gps_all[i]`subgroup);
+    end if;
+end for;
+#sub_gps;
+sub_gps[1];
+IsCentral(Q_2_index_4[50], sub_gps[1]);
+Q_2_index_4[50] / sub_gps[2];
+
+quotients_50 := [];
+for g in sub_gps do 
+    if g subset CommutatorSubgroup(Q_2_index_4[50]) then 
+        qu, qum := Q_2_index_4[50] / g;
+        quotients_50 := Append(quotients_50, qu);
+    end if;
+end for;
+#quotients_50;
+
+
+quotients_49 := [];
+for g in sub_gps do 
+    if g subset CommutatorSubgroup(Q_2_index_4[49]) then 
+        qu, qum := Q_2_index_4[49] / g;
+        quotients_49 := Append(quotients_49, qu);
+    end if;
+end for;
+#quotients_49;
+
+PrintFileMagma("quotients_49", quotients_49 : Overwrite := true);
+PrintFileMagma("quotients_50", quotients_50 : Overwrite := true);
+
+
+//-------------------------
+
+// Sort by group 50
+Q_3_sorted_group_50 := [];
+for i in [3000..#Q_3_sorted] do 
+    printf "%3o\n", i;
+    Q_3 := Q_3_sorted[i];
+    p_subgroups := LowIndexSubgroups(Q_3, 4);
+    Q_2_of_subgroups := [];
+    // Create list of Q_2's
+    for g in p_subgroups do 
+        if (AbelianQuotientInvariants(g) eq [2,2,2,8,8]) or (AbelianQuotientInvariants(g) eq [2,2,2,4,8]) then
+            AbelianQuotientInvariants(g);
+            qu, qum := pQuotient(g, 2, 2);
+            Q_2_of_subgroups := Append(Q_2_of_subgroups, qu);
+        end if;
+    end for;
+    // Check if quotient
+    
+    for q in [1..#quotients_50] do 
+        if IsIsomorphic(Q_2_of_subgroups[1], quotients_50[q]) then 
+            printf "q: %3o\n", q;
+            printf "Added: %3o\n", i;
+            Q_3_sorted_group_50 := Append(Q_3_sorted_group_50, Q_3_sorted[i]);
+            break;
+        end if;
+    end for;
+end for;
+#Q_3_sorted_group_50;
+
+// Sort by group 49
+Q_3_sorted_group_49 := [];
+for i in [1050..#Q_3_sorted] do 
+    printf "%3o\n", i;
+    Q_3 := Q_3_sorted[i];
+    p_subgroups := LowIndexSubgroups(Q_3, 4);
+    Q_2_of_subgroups := [];
+    // Create list of Q_2's
+    for g in p_subgroups do 
+        if (AbelianQuotientInvariants(g) eq [2,2,2,4,4]) then
+            qu, qum := pQuotient(g, 2, 2);
+            Q_2_of_subgroups := Append(Q_2_of_subgroups, qu);
+        end if;
+    end for;
+    // Check if quotient
+    
+    for q in [1..#quotients_49] do 
+        if IsIsomorphic(Q_2_of_subgroups[1], quotients_49[q]) then 
+            printf "q: %3o\n", q;
+            printf "Added: %3o\n", i;
+            Q_3_sorted_group_49 := Append(Q_3_sorted_group_49, Q_3_sorted[i]);
+            break;
+        end if;
+    end for;
+end for;
+#Q_3_sorted_group_49;
+
+// ------ Check if Q_2 of index 4 subgroups can do anything
+
+Q_3 := Q_3_sorted[1];
+p_subgroups := LowIndexSubgroups(Q_3, 4);
+AbelianQuotientInvariants(p_subgroups[8]);
+AbelianQuotientInvariants(LowIndexSubgroups(Q_3_sorted[2000], 4)[8]);
+
+qu_1, qum_1 := pQuotient(p_subgroups[8], 2, 2);
+qu_2, qum_2 := pQuotient(LowIndexSubgroups(Q_3_sorted[2000], 4)[10], 2, 2);
+
+IsIsomorphic(qu_1, qu_2);
+
+Q_2_list := [];
+for g in p_subgroups do 
+    qu, qum := pQuotient(g, 2, 2);
+    Q_2_list := Append(Q_2_list, qu);
+end for;
+
+for j in [2000..#Q_3_sorted] do 
+    j;
+    p_subgroups_new := LowIndexSubgroups(Q_3_sorted[j], 4);
+    for i in [1..#p_subgroups_new] do 
+        qu, qum := pQuotient(p_subgroups_new[i], 2, 2);
+        if not IsIsomorphic(qu, Q_2_list[i]) then 
+            printf "STOP\n";
+            i;
+        end if;
+    end for;
+    printf "------------\n";
+end for;
+
+Q_3_first := [];
+for g in p_subgroups do 
+    if #g eq (#Q_3/4) then 
+        qu, qum := pQuotient(g, 2, 2);
+        Q_3_first := Append(Q_3_first, qu);
+    end if;
+end for;
+#Q_3_first;
+
+// 460
+Q_3_sorted_by_first := [];
+for i in [3000..#Q_3_sorted] do 
+    printf "%3o\n", i;
+    Q_3 := Q_3_sorted[i];
+    p_subgroups := LowIndexSubgroups(Q_3, 4);
+    Q_2_of_subgroups := [];
+    // Create list of Q_2's
+    //printf "[ ";
+    for g in p_subgroups do 
+        if #g eq (#Q_3)/4 then
+            qu, qum := pQuotient(g, 2, 2);
+            Q_2_of_subgroups := Append(Q_2_of_subgroups, qu);
+            //printf "%3o, ", #qu;
+        end if;
+    end for;
+    //printf "]\n";
+    
+    // Check 13 first groups of order 256:
+    check_tot := true;
+    for j in [1..#Q_3_first] do
+        //printf "j: %3o, L: %3o, ", j, #Q_2_of_subgroups;
+        check := true;
+        //printf "j: %3o\n", j;
+        for k in [1..#Q_2_of_subgroups] do 
+            //printf "k: %3o, L: %3o\n", k, #Q_2_of_subgroups;
+            if IsIsomorphic(Q_3_first[j], Q_2_of_subgroups[k]) then 
+                //printf "match: %3o, L:%3o\n", k, #Q_2_of_subgroups;
+                Q_2_of_subgroups := Remove(Q_2_of_subgroups, k);
+                //printf "k: %3o\n", k;
+                check := false;
+                break;
+            end if;
+        end for;
+        if check then 
+            check_tot := false;
+            //printf "j: %3o\n", j;
+            break;
+        end if;
+    end for;
+    if check_tot then 
+        Q_3_sorted_by_first := Append(Q_3_sorted_by_first, Q_3_sorted[i]);
+        printf "Added index %3o\n", i;
+    end if;
+end for;
+#Q_3_sorted_by_first;
+

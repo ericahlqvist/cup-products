@@ -26,7 +26,7 @@ class Command(object):
 
 
 p = "2" # A prime 
-open_file = "p_2_[2,2,2,2]_disc_4_mod_16.txt" # A file
+open_file = "p_2_[2,2,2,2]_disc_7_mod_8.txt" # A file
 
 # Dmod = "3" # 3, 7, 4, 8
 # mod = ""
@@ -48,7 +48,7 @@ lines = file.readlines()
 for line in lines[0:100]:
     my_str = ''.join(map(str, line))
     pol = "s^2+"+my_str[1:]
-    command = Command("./main-script-sta "+p+" "+pol)
+    command = Command("./main-gp-script-sta "+p+" "+pol)
     code = command.run(timeout=300)
     
     # if code == -15:

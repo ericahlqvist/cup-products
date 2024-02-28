@@ -14,7 +14,7 @@ d := Q_K.4;
 cup_rels_K := {(a,b)*(a,c)*(b,c), a^2*(a,c)*b^2*(b,d), (a,c)*b^2*c^2, a^2*(a,b)*(c,d), a^2*(a,c)*(a,d)*b^2*d^2};
 
 Q_2_K := quo< Q_K | cup_rels_K >;
-
+#Q_2_K;
 
 // Some extensions
 
