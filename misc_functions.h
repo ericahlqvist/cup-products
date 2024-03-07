@@ -1108,6 +1108,65 @@ void my_unramified_p_extensions(GEN K, GEN p, GEN D_prime_vect) {
     // printf("\n");
 }
 
+GEN my_p_extensions(GEN K, GEN p, GEN D_prime_vect) {
+    pari_sp av = avma;
+    int j;
+    GEN s = pol_x(fetch_user_var("s"));
+    GEN x = pol_x(fetch_user_var("x"));
+    GEN index = mkvec(p);
+    GEN cyc_pol = zerovec(2);
+    // GEN R = nfsubfields0(clf_pol,4,1);
+    // pari_printf("subgrouplist: %Ps\n", subgrouplist0(bnf_get_cyc(K), mkvec(gpow(p,gen_2, DEFAULTPREC)), 0));
+
+    GEN R = bnrclassfield(K, subgrouplist0(bnf_get_cyc(K), index, 2), 2, DEFAULTPREC);
+    //GEN Rsq = bnrclassfield(K, subgrouplist0(bnf_get_cyc(K), mkvec(gpow(p,gen_2, DEFAULTPREC)), 2), 2, DEFAULTPREC);
+    //GEN Rcb = bnrclassfield(K, subgrouplist0(bnf_get_cyc(K), mkvec(gpow(p,stoi(3), DEFAULTPREC)), 2), 2, DEFAULTPREC);
+    GEN abs_pol;
+    int l = glength(R);
+    gel(cyc_pol, 1) = zerovec(l);
+    gel(cyc_pol, 2) = zerovec(l);
+    //pari_printf("cyc_pol: %Ps\n", cyc_pol);
+    //printf("[p]-extensions:\n\n");
+    //pari_printf("R[15]: %Ps\n", gel(R, l));
+    GEN pol;
+    for (j=1;j<l+1;j++) {
+        //pari_printf("R: %Ps\n", R);
+        
+        abs_pol = polredabs0(mkvec2(gel(R, j), D_prime_vect), 0);
+        //abs_pol = gel(R, i);
+        //printf("i/l: %d/%d\n", i, l);
+        //pari_printf("pol: %Ps\n", gel(R, i));
+        
+        
+        //abs_pol = polredabs(gel(R, i));
+        gel(gel(cyc_pol, 1), j) = bnf_get_cyc(Buchall(abs_pol, nf_FORCE, DEFAULTPREC));
+        
+        gel(gel(cyc_pol, 2), j) = gsubstpol(abs_pol, x, s);
+        //printf("i/l: %d/%d\n", j, l);
+        //pari_printf("%Ps, cyc: %Ps\n", gsubstpol(abs_pol, x, s), bnf_get_cyc(Buchall(abs_pol, nf_FORCE, DEFAULTPREC)));
+        
+    }
+    
+    //printf("\n");
+    // printf("[p,p]-extensions:\n\n");
+    // for (i=1;i<glength(Rsq)+1;i++) {
+    //     abs_pol = polredabs0(mkvec2(gel(Rsq, i), D_prime_vect), 0);
+    //     //abs_pol = polredabs(gel(R, i));
+    //     pari_printf("%Ps, cyc: %Ps\n", gsubstpol(abs_pol, x, s), bnf_get_cyc(Buchall(abs_pol, nf_FORCE, DEFAULTPREC)));
+    // }
+    // printf("\n");
+    // printf("[p,p,p]-extensions:\n\n");
+    // for (i=1;i<glength(Rcb)+1;i++) {
+    //     abs_pol = polredabs0(mkvec2(gel(Rcb, i), D_prime_vect), 0);
+    //     //abs_pol = polredabs(gel(R, i));
+    //     pari_printf("%Ps, cyc: %Ps\n", gsubstpol(abs_pol, x, s), bnf_get_cyc(Buchall(abs_pol, nf_FORCE, DEFAULTPREC)));
+    // }
+    // printf("\n");
+    
+    cyc_pol = gerepilecopy(av, cyc_pol);
+    return cyc_pol;
+}
+
 void my_unramified_p_extensions_with_trivial_action(GEN K, GEN p, GEN D_prime_vect) {
     GEN x, y, p1, q1, p1red, Lrel, Labs, s_lift_x, cx, sigma;
 

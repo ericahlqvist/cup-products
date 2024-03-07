@@ -140,7 +140,7 @@ main (int argc, char *argv[])
     //-----Faster version--------
     // my_cup_matrix_2(K_ext, K, p, p_int, p_rk, J_vect, units_mod_p, r_rk);
     //my_cup_matrix_2_transpose(K_ext, K, p, p_int, p_rk, J_vect, Ja_vect, units_mod_p, r_rk, p_power_units);
-    my_cup_matrix_3(K_ext, K, p, p_int, p_rk, Ja_vect, r_rk);
+    int mat_rk = my_cup_matrix_3(K_ext, K, p, p_int, p_rk, Ja_vect, r_rk);
 
 
     printf("\n\n");
@@ -157,7 +157,6 @@ main (int argc, char *argv[])
     min = duration/60000;
 
     printf (ANSI_COLOR_YELLOW "Runtime: %d min, %d,%d sec\n\n" ANSI_COLOR_RESET, min, sec, msec);
-    
     //-----------
-    return 0;
+    return mat_rk;
 }

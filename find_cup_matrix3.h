@@ -2,7 +2,7 @@
 //< x_i\cup x_k, (a_j, J_j)>
 
 
-void my_cup_matrix_3 (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, int r_rk)
+int my_cup_matrix_3 (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, int r_rk)
 {
     GEN NIpJ, I_vect, I_rel, Labs, Lrel, sigma, Labs_cup, Lrel_cup, sigma_cup;
     int nr_col = (p_rk*(p_rk+1)/2);
@@ -25,6 +25,12 @@ void my_cup_matrix_3 (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect,
         // I_vect corresp. to i:th extension
         //I_vect = my_find_I_vect_full(Labs_cup, Lrel_cup, K, sigma_cup, Ja_vect, p_int);
         I_vect = my_H90_vect(Labs_cup, Lrel_cup, K, sigma_cup, Ja_vect, stoi(p_int));
+        if (gequal(I_vect,stoi(-1)))
+        {
+            I_vect = my_find_I_vect_full(Labs_cup, Lrel_cup, K, sigma_cup, Ja_vect, p_int);
+            // return 111;
+        }
+        
         pari_printf(ANSI_COLOR_GREEN "-----------\n\n\nI_vect nr: %d\n\n\n-------------\n%Ps\n" ANSI_COLOR_RESET, i, I_vect);
 
         // //Test that we get a correct I
@@ -111,7 +117,7 @@ void my_cup_matrix_3 (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect,
             }
         }
     }
-    
+    return mat_rk;
 } 
 
 
@@ -193,7 +199,7 @@ void my_cup_matrix_and_relators (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, G
     //pari_printf(ANSI_COLOR_CYAN "%ld\n\n" ANSI_COLOR_RESET, mat_rk);
 
     FILE *fptr;
-    fptr = fopen("data/discriminants/relators-[2,2,2,2]_7_mod_8.json", "a");
+    fptr = fopen("data/discriminants/relators-[2,2,2,2]_4_mod_16.json", "a");
 
 
     if (mat_rk > 0) {
