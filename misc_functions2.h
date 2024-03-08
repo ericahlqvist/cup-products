@@ -341,6 +341,26 @@ GEN my_1MS_operator (GEN L, GEN sigma) {
     return M;
 }
 
+GEN my_1MS_elt_operator (GEN L, GEN sigma) {
+    printf("my_1MS_operator\n");
+    pari_sp av = avma;
+    GEN int_basis = nf_get_zk(bnf_get_nf(L)), col, basis_vec;
+    //pari_printf("int_basis: %Ps\n", int_basis);
+    int l = glength(int_basis);
+    GEN M = zeromatcopy(l,l);
+    int i;
+    
+    for (i = 1; i < l+1; i++)
+    {
+        basis_vec = algtobasis(L, gel(int_basis, i));
+        col = algtobasis(L, my_1MS_elt(L, sigma, basis_vec));
+        //pari_printf("col: %Ps\n", col);
+        gel(M, i) = col;
+    }
+    M = gerepilecopy(av, M);
+    return M;
+}
+
 
 GEN my_find_ext_ranks(GEN K_ext) {
     int l = glength(K_ext);
@@ -965,6 +985,107 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p) {
     return I_vect;
 }
 
+GEN my_H90_12 (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN a, GEN J, GEN p) {
+    printf(ANSI_COLOR_CYAN "\nmy_H90_vect\n" ANSI_COLOR_RESET);
+    pari_sp av = avma;
+    int f, j, done = 0;
+    GEN I, iJ, F, ker_T, ker_T_basis, ker_sol, F_ker_T, t, t_rel, Nt, diff, exp, is_princ, is_norm, cyc;
+    cyc = gtocol(bnf_get_cyc(Labs));
+    
+    
+
+    done = 0;
+    iJ = rnfidealup0(Lrel, J, 1);
+    F = my_H90(Labs, iJ, sigma);
+    // pari_printf("F: %Ps\n", F);
+    ker_sol = matsolvemod(my_1MS_operator(Labs, sigma), cyc, zerocol(glength(cyc)), 1);
+    ker_T_basis = gtovec(gel(ker_sol, 2));
+    printf(ANSI_COLOR_GREEN "------------------------\n\n\nker_T_basis size: %ld\n\n\n------------------------\n" ANSI_COLOR_RESET, glength(ker_T_basis));
+    
+    if (glength(ker_T_basis)==0)
+    {
+        I = F;
+        done = 1;
+    }
+    else {
+        ker_T = my_get_sums(ker_T_basis);
+
+        // WARNING: This makes it faster but might not find the answer. Switch back to the above ker_T
+        //ker_T = shallowconcat(mkvec(zerocol(glength(gel(ker_T_basis, 1)))), ker_T_basis);
+        
+        //pari_printf(ANSI_COLOR_CYAN "ker_T: %Ps\n" ANSI_COLOR_RESET, ker_T);
+        // pari_printf("ker_T[2]: %Ps\n", gel(ker_T, 2));
+        f = glength(ker_T);
+        printf("Searching a chunk of ker (1-sigma) of size: %d\n", f);
+        /*
+            Find F_ker_T --------------------
+        */
+        
+        for (j = 1; j < f+1; j++)
+        {
+            printf("\nSearching: %d/%d\n", j, f);
+            // pari_printf("Adding the exp: %Ps\n", gel(ker_T, j));
+            // pari_printf("And the ideal: %Ps\n", my_ideal_from_exp(Labs, gel(ker_T, j)));
+            F_ker_T = idealred(Labs, idealmul(Labs, F, idealred(Labs, my_ideal_from_exp(Labs, gel(ker_T, j)))));
+            //pari_printf("F_ker_T: %Ps\n", F_ker_T);
+            is_princ = bnfisprincipal0(Labs, idealdiv(Labs, iJ, my_1MS_ideal(Labs, sigma, F_ker_T)), 1);
+            if (!my_QV_equal0(gel(is_princ, 1)))
+            {
+                printf(ANSI_COLOR_RED "Problem in my_H90_vect\n" ANSI_COLOR_RESET);
+                pari_close();
+                exit(111);
+            }
+            
+            t = gel(is_princ, 2);
+            printf("t: %ld\n", glength(t));
+            if (glength(t)==0)
+            {
+                return stoi(-1);
+            }
+            
+            t_rel = rnfeltabstorel(Lrel, t);
+            Nt = rnfeltnorm(Lrel, t_rel);
+            diff = nfmul(K, Nt, a);
+            exp = bnfisunit(K, diff);
+            // pari_printf(ANSI_COLOR_YELLOW "exp: %Ps\n" ANSI_COLOR_RESET, exp);
+            // pari_printf("M: %Ps\n", my_norm_operator(Labs, Lrel, K, p));
+            // pari_printf("D: %Ps\n", my_xcol(glength(exp), itos(p)));
+            // pari_printf("B: %Ps\n", gtocol(exp));
+            /* check if exp lies in the image of the operator associated to N: (O_L)^x -> (O_K)^x */
+            // if (my_QV_equal0(my_norm_operator(Labs, Lrel, K, p)))
+            // {
+            //     gel(I_vect, i) = F_ker_T;
+            //     done = 1;
+            //     break;
+            // }
+            is_norm = matsolvemod(my_norm_operator(Labs, Lrel, K, p), zerocol(glength(exp)), gtocol(exp), 0);
+            //pari_printf(ANSI_COLOR_CYAN "is_norm: %Ps\n" ANSI_COLOR_RESET, is_norm);
+            if (my_QV_equal0(exp) || !gequal0(is_norm))
+            {
+                //pari_printf(ANSI_COLOR_CYAN "Norm of elt with exp: %Ps\n" ANSI_COLOR_RESET, is_norm);
+                // w = gel(bnf_get_fu(Labs), 1);
+                // w_rel = rnfeltabstorel(Lrel, w);
+                // Nw = rnfeltnorm(Lrel, w_rel);
+                // pari_printf("Norm w: %Ps\n", Nw);
+                I = F_ker_T;
+                done = 1;
+                break;
+            }
+        }
+    }
+    if (!done)
+    {
+        printf(ANSI_COLOR_RED "my_H90_vect ended with a problem \n" ANSI_COLOR_RESET);
+        return stoi(-1);
+        // pari_close();
+        // exit(111);
+    }
+    
+    
+    I = gerepilecopy(av, I);
+    return I;
+}
+
 GEN my_H90_exp_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p) {
     // This function is not ready to be used
     printf(ANSI_COLOR_CYAN "\nmy_H90_exp_vect\n" ANSI_COLOR_RESET);
@@ -1235,27 +1356,30 @@ GEN my_find_I_full (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN i_xJ, GEN a, GEN c
         if (my_QV_equal0(gel(test_vec, 1)))
         {
             t = gel(test_vec, 2);
-            t_rel = rnfeltabstorel(Lrel, t);
-            norm_t = rnfeltnorm(Lrel, t_rel);
-            diff = nfmul(K, norm_t, a);
-            for ( i = 1; i < l+1; i++)
+            if (glength(t)!=0)
             {
-                exponents = bnfisunit(K, nfdiv(K, diff, gel(norms, i)));
-                if (l%1000==0)
+
+                t_rel = rnfeltabstorel(Lrel, t);
+                norm_t = rnfeltnorm(Lrel, t_rel);
+                diff = nfmul(K, norm_t, a);
+                for ( i = 1; i < l+1; i++)
                 {
-                    pari_printf("exponents[%d]: %Ps\n", i, exponents);
+                    exponents = bnfisunit(K, nfdiv(K, diff, gel(norms, i)));
+                    if (l%1000==0)
+                    {
+                        pari_printf("exponents[%d]: %Ps\n", i, exponents);
+                    }
+                    
+                    if (my_is_p_power(exponents, p_int, roots_of_unity_nr))
+                    {
+                        printf("I found\n\n");
+                        ret = mkvec2(gel(test_vec, 2), current_I);
+                        ret = gerepilecopy(av, ret);
+                        return ret;
+                    }
+                    
                 }
-                
-                if (my_is_p_power(exponents, p_int, roots_of_unity_nr))
-                {
-                    printf("I found\n\n");
-                    ret = mkvec2(gel(test_vec, 2), current_I);
-                    ret = gerepilecopy(av, ret);
-                    return ret;
-                }
-                
             }
-            
                 
             
         } 
