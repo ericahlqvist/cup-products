@@ -29,7 +29,7 @@ with psycopg2.connect("dbname=cup-db") as conn:
     with conn.cursor() as cur:
 
         # Query the database and obtain data as Python objects.
-        cur.execute("SELECT Polynomial FROM p_rank_deg_2_4_8 LIMIT 1000")
+        cur.execute("SELECT Polynomial FROM p_rank_deg_2_4_8 OFFSET 770 LIMIT 230")
         cur.fetchone()
         
 

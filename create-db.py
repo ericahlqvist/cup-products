@@ -38,7 +38,7 @@ for item in data:
         cursor.execute("""
             INSERT INTO p_rank_deg_2_4_16 (polynomial, first_parent_pol, second_parent_pol, third_parent_pol, cyc)
             VALUES (%s, %s, %s, %s, %s);
-        """, (pol_vec[i], item['pol'], row[0], row[1], cyc_vec[i]))
+        """, (pol_vec[i], this_pol_txt, row[0], row[1], cyc_vec[i]))
 
 # Commit the changes and close the connection
 conn.commit()
