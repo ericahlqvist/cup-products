@@ -99,12 +99,12 @@ int my_cup_matrix_3 (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, 
         for (j=1; j<hnf_r_rk+1; j++) {
             for (i=1; i<p_rk+1; ++i) {
                 for (k=i; k<p_rk+1; k++) {
-                    if (gequal1(gel(gel(cup_hnf, j), (2*p_rk-(i-2))*(i-1)/2+k-(i-1)))) {
+                    if (!gequal0(gel(gel(cup_hnf, j), (2*p_rk-(i-2))*(i-1)/2+k-(i-1)))) {
                         if (i==k) {
-                            printf("%c^2", letters[i-1]);
+                            pari_printf("%c^(%d*%Ps)", letters[i-1], p_int, gel(gel(cup_hnf, j), (2*p_rk-(i-2))*(i-1)/2+k-(i-1)));
                         }
                         else {
-                            printf("(%c,%c)", letters[i-1],letters[k-1]);
+                            pari_printf("(%c,%c)^%Ps", letters[i-1],letters[k-1], gel(gel(cup_hnf, j), (2*p_rk-(i-2))*(i-1)/2+k-(i-1)));
                         }
                     }
                 }

@@ -90,6 +90,10 @@ main (int argc, char *argv[])
     // GEN LAB = Buchall(clf_pol, nf_FORCE, DEFAULTPREC);
     // pari_printf("L cyc: %Ps\n\n", bnf_get_cyc(LAB));
     // my_unramified_p_extensions(K, p, D_prime_vect);
+    
+    // pari_close();
+    // exit(0);
+
     // my_unramified_p_extensions_with_trivial_action(K, p, D_prime_vect);
     
     J_vect = my_find_p_gens(K, p);
@@ -142,6 +146,8 @@ main (int argc, char *argv[])
     //my_cup_matrix_2_transpose(K_ext, K, p, p_int, p_rk, J_vect, Ja_vect, units_mod_p, r_rk, p_power_units);
     int mat_rk = my_cup_matrix_3(K_ext, K, p, p_int, p_rk, Ja_vect, r_rk);
 
+    printf("\n\n");
+    printf(ANSI_COLOR_RED "If p is not 2, this will not give Q_2 but a quotient of Q_2: Q_2/G^p" ANSI_COLOR_RESET);
 
     printf("\n\n");
     printf(ANSI_COLOR_GREEN "Done! \n \n" ANSI_COLOR_RESET);
