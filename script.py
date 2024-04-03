@@ -25,8 +25,8 @@ class Command(object):
             return self.process.returncode
 
 
-p = "2" # A prime 
-open_file = "p_2_[2,2,2,2]_disc_4_mod_16.txt" # A file
+p = "5" # A prime 
+open_file = "p_5_disc_7_mod_8.txt" # A file
 
 # Dmod = "3" # 3, 7, 4, 8
 # mod = ""
@@ -45,12 +45,12 @@ open_file = "p_2_[2,2,2,2]_disc_4_mod_16.txt" # A file
 file = open("data/discriminants/"+open_file)
 lines = file.readlines()
 
-for line in lines[:1]:
+for line in lines[0:1000]:
     my_str = ''.join(map(str, line))
     pol = "s^2+"+my_str[1:]
-    command = Command("./main-pol-sta "+p+" "+pol)
-    code = command.run(timeout=300, stdout=subprocess.PIPE, text=True)
-    print(code.stdout)
+    command = Command("./main-script-sta "+p+" "+pol)
+    code = command.run(timeout=300)
+    ##print(code.stdout)
     # if code == -15:
     #     res_file = open("output/"+p+"_"+Dmod+"mod"+mod+".txt", "a")
     #     print(my_str)

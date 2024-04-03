@@ -86,7 +86,7 @@ main (int argc, char *argv[])
 
     // GEN clf_pol = polredabs0(mkvec2(bnrclassfield(K, p, 2, DEFAULTPREC), D_prime_vect),0);
     // pari_printf("H fld pol: %Ps\n\n", clf_pol);
-    // // GEN clf_pol = bnrclassfield(K, p, 2, DEFAULTPREC);
+    // // // GEN clf_pol = bnrclassfield(K, p, 2, DEFAULTPREC);
     // GEN LAB = Buchall(clf_pol, nf_FORCE, DEFAULTPREC);
     // pari_printf("L cyc: %Ps\n\n", bnf_get_cyc(LAB));
     // my_unramified_p_extensions(K, p, D_prime_vect);
@@ -100,6 +100,7 @@ main (int argc, char *argv[])
     p_rk = glength(J_vect);
     printf("p-rank: %d\n\n", p_rk);
 
+    // // 6,7
     // if (p_rk<2)
     // {
     //     printf("p-rank less than 2 --> finite tower\n\n");
@@ -144,10 +145,14 @@ main (int argc, char *argv[])
     //-----Faster version--------
     // my_cup_matrix_2(K_ext, K, p, p_int, p_rk, J_vect, units_mod_p, r_rk);
     //my_cup_matrix_2_transpose(K_ext, K, p, p_int, p_rk, J_vect, Ja_vect, units_mod_p, r_rk, p_power_units);
-    int mat_rk = my_cup_matrix_3(K_ext, K, p, p_int, p_rk, Ja_vect, r_rk);
+    printf("\n\n");
+    printf(ANSI_COLOR_RED "For indices (i,i) we have B(x_i) instead of x_i cup x_i to get the correct presentation of Q_2." ANSI_COLOR_RESET);
 
     printf("\n\n");
-    printf(ANSI_COLOR_RED "If p is not 2, this will not give Q_2 but a quotient of Q_2: Q_2/G^p" ANSI_COLOR_RESET);
+    int mat_rk = my_relations(K_ext, K, p, p_int, p_rk, Ja_vect, r_rk);
+
+    printf("\n\n");
+    printf(ANSI_COLOR_RED "This determines Q_2." ANSI_COLOR_RESET);
 
     printf("\n\n");
     printf(ANSI_COLOR_GREEN "Done! \n \n" ANSI_COLOR_RESET);

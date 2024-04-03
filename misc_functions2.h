@@ -529,16 +529,18 @@ GEN my_get_clgp (GEN K)
 }
 
 GEN my_ideal_from_exp (GEN K, GEN exp) {
-    printf("\nmy_ideal_from_exp\n");
+    //printf("\nmy_ideal_from_exp\n");
+    pari_printf("exp: %Ps\n", exp);
     pari_sp av = avma;
-    GEN ideal = idealhnf(K, gen_1);
+    GEN ideal = idealhnf0(K, gen_1, NULL);
     GEN gens = bnf_get_gen(K);
     int l = glength(exp);
     int i;
     for (i = 1; i < l+1; i++)
     {
         printf("%d/%d\n", i, l);
-        ideal = idealred(K, idealmul(K, ideal, idealred(K, idealpow(K, gel(gens, i), gel(exp, i)))));
+        ideal = idealred0(K, idealmul(K, ideal, idealred0(K, idealpow(K, gel(gens, i), gel(exp, i)), NULL)), NULL);
+        //printf("%d/%d\n", i, l);
     }
     
 
@@ -933,8 +935,9 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p) {
                 }
                 
                 t = gel(is_princ, 2);
-                printf("t: %ld\n", glength(t));
-                if (glength(t)==0)
+                pari_printf("t: %Ps\n", t);
+                printf("length t: %ld\n", glength(t));
+                if (glength(t)==0 || my_QV_equal0(t))
                 {
                     return stoi(-1);
                 }
