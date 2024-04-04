@@ -40,32 +40,46 @@ main (int argc, char *argv[])
     
     GEN p = cgeti(DEFAULTPREC);
     GEN s = pol_x(fetch_user_var("s"));
-    // GEN x = pol_x(fetch_user_var("x"));
     GEN K, f, Kcyc, p_ClFld_pol, J_vect, Ja_vect, D, D_prime_vect;
 
+    // Read the prime number p from arguments
     p = gp_read_str(argv[1]);
     p_int = atoi(argv[1]);
     
+    // Read the defining polynomial for K
     f = gp_read_str(argv[2]);
+    pari_printf("POL: %Ps\n\n", f);
     
-
-    pari_printf("POL: %Ps\n", f);
-    
-    // Define K.pol
-    printf("\n");
-    // GEN f_red = polredabs0(f, 0);
-    // pari_printf("pol_red: %Ps\n", f_red);
+    //--------------------------------------------------
     // Define base field K
     K = Buchall(f, nf_FORCE, DEFAULTPREC);
+    //--------------------------------------------------
+
+    // Other possible precisions
     // MEDDEFAULTPREC, BIGDEFAULTPREC
+
     //K = Buchall_param(f, 1.5,1.5,4, nf_FORCE, DEFAULTPREC);
+
+    //--------------------------------------------------
+    // Discriminant
     D = nf_get_disc(bnf_get_nf(K));
-    //D = gp_read_str(argv[3]);
+    pari_printf("Discriminant: %Ps\n\n", D);
+
+    // Factor discriminant
     D_prime_vect = gel(factor(D), 1);
+    //--------------------------------------------------
+
     //tu = bnf_get_tuU(K);
+
+    //--------------------------------------------------
+    // Class group of K (cycle type)
     Kcyc = bnf_get_cyc(K);
+    pari_printf("K cyc: %Ps\n\n", Kcyc);
+
+    // Class numer of K
     int Knr = itos(bnf_get_no(K));
 
+    // Test if p divides the class number. If not, then H^1(X, Z/pZ) = 0 and there is nothing to compute. 
     if (Knr%p_int != 0)
     {
         pari_printf("%Ps does not divide the class number %d\n", p, Knr);
@@ -73,12 +87,14 @@ main (int argc, char *argv[])
         pari_close();
         exit(0);
     }
-    
+    //--------------------------------------------------
 
-    pari_printf("K cyc: %Ps\n\n", Kcyc);
-    pari_printf("Discriminant: %Ps\n\n", D);
+    //--------------------------------------------------
+    // Define polynomials for the generating fields for the part of the Hilbert class field corresp to Cl(K)/p. 
     p_ClFld_pol = bnrclassfield(K, p, 0, DEFAULTPREC);
     pari_printf("p Cl Fld: %Ps\n\n", p_ClFld_pol);
+    //--------------------------------------------------
+
     // pari_printf("Fund units: %Ps\n", bnf_get_fu(K));
     // pari_printf("Tors unit: %Ps\n\n", algtobasis(K, bnf_get_tuU(K)));
     // pari_printf("Tors unit 2: %Ps\n\n", nfpow(K, bnf_get_tuU(K), gen_2));
@@ -96,9 +112,12 @@ main (int argc, char *argv[])
 
     // my_unramified_p_extensions_with_trivial_action(K, p, D_prime_vect);
     
+    //--------------------------------------------------
+    // Find generators for the p-torsion of the class group
     J_vect = my_find_p_gens(K, p);
     p_rk = glength(J_vect);
     printf("p-rank: %d\n\n", p_rk);
+    //--------------------------------------------------
 
     // // 6,7
     // if (p_rk<2)
@@ -109,50 +128,47 @@ main (int argc, char *argv[])
     //     exit(0);
     // }
 
+    //--------------------------------------------------
+    // find generators for the group of units modulo p
     GEN units_mod_p = my_find_units_mod_p(K, p);
     printf("Nr of units mod p: %ld\n", glength(units_mod_p));
 
+    // Define r_rk -- the rank of H^2(X, Z/pZ)
     r_rk = glength(J_vect)+glength(units_mod_p);
     printf("r-rank: %d\n\n", r_rk);
- 
-    pari_printf("p_int: %d\n\nmy_pol: %Ps\n\nK_cyc: %Ps\n\n", p_int, f, Kcyc);
+    //--------------------------------------------------
 
+    //--------------------------------------------------
+    // Define the extensions generating the p-part of the Hilbert class field corresponding to CL(K)/p
     GEN K_ext = my_ext(K, p_ClFld_pol, s, p, p_rk, D_prime_vect);
     printf("Extensions found\n\n");
-    //my_norms(K, K_ext, p);
-    //my_diffs(K_ext, p);
-    // my_matrices(K_ext, p);
-    // pari_close();
-    // exit(0);
-    // For Ja_vect, choose an extension gel(K_ext, 3) with big class group. Might need to be change once known.
-    //int ext_nr = 1;
-    //Ja_vect = my_find_Ja_vect_modified(gel(gel(K_ext, ext_nr), 1), gel(gel(K_ext, ext_nr), 2), K, gel(gel(K_ext, ext_nr), 3), J_vect, units_mod_p, p);
+    //--------------------------------------------------
+
+    //--------------------------------------------------
+    // Find generators for H^1(X, mu_p), which is dual to H^2(X, Z/pZ)
     Ja_vect = my_find_Ja_vect(K, J_vect, p, units_mod_p);
     pari_printf("Ja_vect: %Ps\n\n", Ja_vect);
+    //--------------------------------------------------
+
     // GEN p_power_units = my_find_p_power_units(K, units_mod_p, p);
     // // GEN p_power_units_2 = my_get_unit_group(K, units_mod_p, p);
     // // GEN p_power_units = gconcat(p_power_units_1, p_power_units_2);
     // printf("Unit group, size: %ld\n\n", glength(p_power_units));
     
     
-    
-    //Defines a matrix over F_2 with index (i*k, j) corresponding to 
-    //< x_i\cup x_k, (a_j, J_j)>
+    //--------------------------------------------------
+    // Defines a matrix over F_p with index (i*k, j) corresponding to 
+    // < x_i\cup x_k, (a_j, J_j)> if i is not equal to j and
+    // < B(x_i), (a_j, J_j)> if i=j. 
 
-    // my_cup_matrix(K_ext, K, p, p_int, p_rk, J_vect, Ja_vect, units_mod_p, r_rk);
-    // my_cup_matrix_transpose(K_ext, K, p, p_int, p_rk, J_vect, Ja_vect, units_mod_p, r_rk);
-
-    //-----Faster version--------
-    // my_cup_matrix_2(K_ext, K, p, p_int, p_rk, J_vect, units_mod_p, r_rk);
-    //my_cup_matrix_2_transpose(K_ext, K, p, p_int, p_rk, J_vect, Ja_vect, units_mod_p, r_rk, p_power_units);
-    printf("\n\n");
-    printf(ANSI_COLOR_RED "For indices (i,i) we have B(x_i) instead of x_i cup x_i to get the correct presentation of Q_2." ANSI_COLOR_RESET);
-
-    printf("\n\n");
     int mat_rk = my_relations(K_ext, K, p, p_int, p_rk, Ja_vect, r_rk);
-
     printf("\n\n");
+
+    printf(ANSI_COLOR_RED "For indices (i,i) we have B(x_i) instead of x_i cup x_i to get the correct presentation of Q_2.\n\n" ANSI_COLOR_RESET);
+    
     printf(ANSI_COLOR_RED "This determines Q_2." ANSI_COLOR_RESET);
+
+    //--------------------------------------------------
 
     printf("\n\n");
     printf(ANSI_COLOR_GREEN "Done! \n \n" ANSI_COLOR_RESET);

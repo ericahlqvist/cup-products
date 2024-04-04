@@ -1,6 +1,6 @@
 
 
-import subprocess, threading
+import subprocess, threading, json
 
 class Command(object):
     def __init__(self, cmd):
@@ -26,28 +26,12 @@ class Command(object):
 
 
 p = "5" # A prime 
-open_file = "p_5_disc_7_mod_8.txt" # A file
 
-# Dmod = "3" # 3, 7, 4, 8
-# mod = ""
-# if (Dmod == "3" or Dmod == "7"):
-#     mod = "8"
-# else:
-#     mod = "16"
+with open('output/5_4mod16.json', 'r') as file:
+    data = json.load(file)
 
-# open_file = ""
-
-# if p == "2":
-#     open_file = "p_"+p+"_cyc_2_2_disc_"+Dmod+"_mod_"+mod+".txt"
-# else:
-#     open_file = "p_"+p+"_disc_"+Dmod+"_mod_"+mod+".txt"
-
-file = open("data/discriminants/"+open_file)
-lines = file.readlines()
-
-for line in lines[0:1000]:
-    my_str = ''.join(map(str, line))
-    pol = "s^2+"+my_str[1:]
+for item in data[:1000]:
+    pol = "s^2+"+str(item['D'])[1:]
     command = Command("./main-script-sta "+p+" "+pol)
     code = command.run(timeout=300)
     ##print(code.stdout)
