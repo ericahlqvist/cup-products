@@ -43,7 +43,6 @@ GEN my_p_Artin_symbol(GEN Labs, GEN Lrel, GEN K, GEN K_factorization, GEN p, GEN
     // pari_printf("Inertia: %Ps\n\n", inertia_index);
     
     // Define a generator for k(q) (Make sure the choose this such that we get a generator for k(q)^x).
-    int l = nf_get_degree(bnf_get_nf(Labs));
     
     GEN generator;
 

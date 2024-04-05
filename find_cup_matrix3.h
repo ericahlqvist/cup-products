@@ -210,12 +210,52 @@ int my_relations (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, int
         }
         
     }
-
+    // ------------------------
+    //Check symmetry:
+    printf(ANSI_COLOR_YELLOW "Full Cup Matrix:  (for (i,k) with i>k we have - (x_i cup x_k) instead of x_i cup x_k in order to see the symmetry).\n\n" ANSI_COLOR_RESET);
+    for (j=1; j<nr_row+1; ++j) {
+        pari_printf(ANSI_COLOR_CYAN "%Ps\n\n" ANSI_COLOR_RESET, gel(cup_matrix_full, j));
+    }
+    int sym_check = 1;
+    GEN fail = zerovec(2);
+    for (i = 1; i < p_rk+1; i++)
+    {
+        for (j = 1; j < r_rk; j++)
+        {
+            for (k = 1; k < p_rk+1; k++)
+            {
+                if (!gequal(gmael2(cup_matrix_full, j, p_rk*(k-1)+i), gmael2(cup_matrix_full, j, p_rk*(i-1)+k)))
+                {
+                    gel(fail, 1) = stoi(i);
+                    gel(fail, 2) = stoi(k);
+                    sym_check = 0;
+                    break;
+                }
+                
+            }
+        }
+    }
+    switch (sym_check)
+    {
+    case 1:
+        printf(ANSI_COLOR_GREEN "\nSymmetry test passed\n\n" ANSI_COLOR_RESET);
+        break;
+    case 0:
+        pari_printf(ANSI_COLOR_RED "\nSymmetry test failed at: %Ps\n\n" ANSI_COLOR_RESET, fail);
+        break;
+    default:
+        break;
+    }
+    
+    printf("-----------------------------------------------------------------------------------------------\n\n");
     printf(ANSI_COLOR_YELLOW "Cup Matrix:  \n\n" ANSI_COLOR_RESET);
     for (j=1; j<nr_row+1; ++j) {
         pari_printf(ANSI_COLOR_CYAN "%Ps\n\n" ANSI_COLOR_RESET, gel(cup_matrix, j));
     }
+    printf(ANSI_COLOR_RED "For indices (i,i) we have B(x_i) instead of x_i cup x_i to get the correct presentation of Q_2.\n\n" ANSI_COLOR_RESET);
     
+    printf(ANSI_COLOR_CYAN "This determines the second quotient Q_2 for the lower p-central series and not only the Zassenhaus quotient ZQ_2.\n\n" ANSI_COLOR_RESET);
+    printf("-----------------------------------------------------------------------------------------------\n\n");
     printf(ANSI_COLOR_YELLOW "rank: ");
     long mat_rk = FpM_rank((ZM_copy(cup_matrix)), p);
     pari_printf(ANSI_COLOR_CYAN "%ld\n\n" ANSI_COLOR_RESET, mat_rk);
@@ -254,46 +294,7 @@ int my_relations (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, int
             }
         }
     }
-
-
-    // ------------------------
-    //Check symmetry:
-    printf(ANSI_COLOR_YELLOW "Full Cup Matrix:  \n\n" ANSI_COLOR_RESET);
-    for (j=1; j<nr_row+1; ++j) {
-        pari_printf(ANSI_COLOR_CYAN "%Ps\n\n" ANSI_COLOR_RESET, gel(cup_matrix_full, j));
-    }
-    int sym_check = 1;
-    GEN fail = zerovec(2);
-    for (i = 1; i < p_rk+1; i++)
-    {
-        for (j = 1; j < r_rk; j++)
-        {
-            for (k = 1; k < p_rk+1; k++)
-            {
-                if (!gequal(gmael2(cup_matrix_full, j, p_rk*(k-1)+i), gmael2(cup_matrix_full, j, p_rk*(i-1)+k)))
-                {
-                    gel(fail, 1) = stoi(i);
-                    gel(fail, 2) = stoi(k);
-                    sym_check = 0;
-                    break;
-                }
-                
-            }
-        }
-    }
-    switch (sym_check)
-    {
-    case 1:
-        printf(ANSI_COLOR_GREEN "\nSymmetry test passed\n" ANSI_COLOR_RESET);
-        break;
-    case 0:
-        pari_printf(ANSI_COLOR_RED "\nSymmetry test failed at: %Ps\n" ANSI_COLOR_RESET, fail);
-        break;
-    default:
-        break;
-    }
-    
-
+    printf("-----------------------------------------------------------------------------------------------\n\n");
     
     return 0;
 }
@@ -545,7 +546,7 @@ int my_cup_matrix_12 (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, int r_rk, GE
     GEN x = pol_x(fetch_user_var("x"));
     // int vec_len = (p_rk-1)*p_rk*(p_rk+1)/6;
     GEN cup_matrix = zerovec(0);
-    GEN xi;
+    
     
     int i, j, k;
 
@@ -571,7 +572,7 @@ int my_cup_matrix_12 (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, int r_rk, GE
                 Lrel_z = gel(gel(K_ext, k), 2);
                 sigma_z = gel(gel(K_ext, k), 3);
 
-                xi = algtobasis(Labs_x, stoi(-1));
+                
                 pari_printf("rel_pol: %Ps\n", gel(p_ClFld_pol, i));
                 c = nfmul(Labs_x, stoi(-1), nfdiv(Labs_x, nfadd(Labs_x, galoisapply(Labs_x, sigma_x, rnfeltreltoabs(Lrel_x, x)), rnfeltreltoabs(Lrel_x, x)), gen_2));
                 b = nfadd(Labs_x, c, algtobasis(Labs_x, rnfeltreltoabs(Lrel_x, x)));
