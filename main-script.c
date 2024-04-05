@@ -149,7 +149,7 @@ main (int argc, char *argv[])
     GEN ext_cyc = gel(ext_cyc_pol, 1);
     GEN ext_pol = gel(ext_cyc_pol, 2);
     FILE *fptr;
-    fptr = fopen("data/discriminants/p_rank_deg_[5_2_2]_4_mod_16.json", "a");
+    fptr = fopen("data/discriminants/p_rank_deg_[5_2_2]_8_mod_16.json", "a");
 
     pari_fprintf(fptr, "{\"pol\": \"%Ps\", \"K_cyc\": \"%Ps\", \"ext_cyc\": \"%Ps\", \"ext_pol\": \"%Ps\"},\n", nf_get_pol(bnf_get_nf(K)), bnf_get_cyc(K), ext_cyc, ext_pol);
 

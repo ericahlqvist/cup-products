@@ -27,7 +27,7 @@ class Command(object):
 
 p = "5" # A prime 
 
-with open('output/5_4mod16.json', 'r') as file:
+with open('output/5_8mod16.json', 'r') as file:
     data = json.load(file)
 
 for item in data[:1000]:

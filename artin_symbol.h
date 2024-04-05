@@ -4,12 +4,13 @@ Let L/K be a Galois extension and let p be a prime in O_K which is unramified in
 (2) Otherwise, since we assume L/K to be unramified of prime degree, the only other option is that p is inert in L and hence G_q=Gal(L/K). 
 The element sigma_p is independent of the choice of q since we assume L/K to be abelian. 
 
+Since k(q)^x is cyclic, it is enough to check that sigma_p(g) = g^N(p) for a generator g of k(q)^x.
 */
 
 
 GEN my_p_Artin_symbol(GEN Labs, GEN Lrel, GEN K, GEN K_factorization, GEN p, GEN Gal_rel, GEN p_exp) {
     pari_sp av = avma;
-    GEN p_Artin_symbol, exp, sigma;
+    GEN p_Artin_symbol, exp, sigma, y=pol_x(fetch_user_var("y"));;
     
     // Define the prime from factorization
     GEN prime = idealhnf0(K, gel(gel(gel(K_factorization, 1), 1), 1), gel(gel(gel(K_factorization, 1), 1), 2));
@@ -44,36 +45,16 @@ GEN my_p_Artin_symbol(GEN Labs, GEN Lrel, GEN K, GEN K_factorization, GEN p, GEN
     // Define a generator for k(q) (Make sure the choose this such that we get a generator for k(q)^x).
     int l = nf_get_degree(bnf_get_nf(Labs));
     
-    GEN generator = zerocol(l);
-    gel(generator, 2) = gen_1;
-    gel(generator, 4) = gen_1;
-
+    GEN generator;
 
     int test = 0, i;
     GEN test_vec, elem1, elem2;
 
-    //pari_printf("ideal factor: %Ps\n\n", gel(gel(idealfactor(Labs, prime_lift_1), 1), 1));
+    
     GEN prinit = nfmodprinit(Labs, gel(gel(idealfactor(Labs, prime_lift_1), 1), 1));
     
-    GEN test_v = nf_to_Fq(bnf_get_nf(Labs), generator, prinit);
-    if (gequal0(test_v) || gequal1(test_v))
-    {
-        pari_printf("gen mod q: %Ps\n\n", test_v);
-        printf(ANSI_COLOR_RED "Choose a different generator in my_p_Artin_symbol\n\n" ANSI_COLOR_RESET);
-        pari_close();
-        exit(111);
-    }
-    
-    
-
-    // printf("prinit: ");
-    // output(prinit);
-    // printf("\n");
-    // printf("mod prime: ");
-    // output(gel(gel(idealfactor(Labs, prime_lift_1), 1), 1));
-    // printf("\n");
-
-    // pari_printf("exp: %Ps\n\n", exp);
+    // Define the generator
+    generator = algtobasis(Labs, y);
 
     for (i = 1; i < glength(Gal_rel)+1; i++)
     {
