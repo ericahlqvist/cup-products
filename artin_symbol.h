@@ -1,56 +1,71 @@
+/*-------------- The Artin Symbol ---------------
+Let L/K be a Galois extension and let p be a prime in O_K which is unramified in L (in our case this holds for all primes in O_K since L/K is unramified). Choose a prime q in O_L lying above p. Then there is a unique element sigma_p in G_q:={sigma in Gal(L/K) : sigma(q)=q} such that sigma = (-)^N(p) when acting on the residue field k(q). 
+(1) If p is split in L, then G_q = {1} and k(q) = k(p) which means that (-)^N(p) = (-) = id and hence sigma_p = 1 (so 0 when identified with Z/pZ). 
+(2) Otherwise, since we assume L/K to be unramified of prime degree, the only other option is that p is inert in L and hence G_q=Gal(L/K). 
+The element sigma_p is independent of the choice of q since we assume L/K to be abelian. 
+
+*/
+
+
 GEN my_p_Artin_symbol(GEN Labs, GEN Lrel, GEN K, GEN K_factorization, GEN p, GEN Gal_rel, GEN p_exp) {
     pari_sp av = avma;
-    GEN p_Artin_symbol;
-    // Find prime below to determine size of residue field
-    //GEN prime_below = gel(gel(gel(K_factorization, 1), 1), 1);
+    GEN p_Artin_symbol, exp, sigma;
+    
     // Define the prime from factorization
     GEN prime = idealhnf0(K, gel(gel(gel(K_factorization, 1), 1), 1), gel(gel(gel(K_factorization, 1), 1), 2));
-    // Lift the prime
+
+    // Lift the prime. This gives a fractional ideal.
     GEN prime_lift = rnfidealup0(Lrel, prime, 1);
+
+    // Factorize the fractional ideal
     GEN factorization = idealfactor(Labs, prime_lift);
-    GEN exp;
-    // printf("Rel Deg: %ld\n", rnf_get_degree(Lrel));
-    // printf("Fact of lift: ");
-    // output(factorization);
-    // printf("\n\n");
+    
+    // Check if the prime is split
     if (glength(gel(factorization, 1))==itos(p))
     {
         //printf(ANSI_COLOR_GREEN "Split\n\n" ANSI_COLOR_RESET);
         p_Artin_symbol = gen_0;
         return p_Artin_symbol;
     }
+    // Otherwise it most be inert
     else {
+        // Determine the size of the residue field: N(p)
         exp = idealnorm(K, prime); 
-        //exp = prime_below;
-        // if (!equalii(idealnorm(K, prime), prime_below)) {
-        //     pari_printf("Norm p: %Ps\n\nExp: %Ps\n\n", idealnorm(K, prime), prime_below);
-        //     pari_close();
-        //     exit(0);
-        // }
         
         //printf(ANSI_COLOR_YELLOW "Inert\n\n" ANSI_COLOR_RESET);
     }
-     //idealnorm(K, prime);
-    //pari_printf("Norm p: %Ps\n\n", exp);
 
-    // pari_printf("K_factorization: %Ps\n\n", K_factorization);
-    // pari_printf("Factorization: %Ps\n\n", factorization);
+    // Define the prime from the factorization
     GEN prime_lift_1 = idealhnf0(Labs, gel(gel(gel(factorization, 1), 1), 1), gel(gel(gel(factorization, 1), 1), 2));
     
-    //GEN inertia_index = gel(gel(gel(K_factorization, 1), 1), 4); // Always 1
-    //pari_printf("Inertia: %Ps\n\n", inertia_index);
+    // GEN inertia_index = gel(gel(gel(K_factorization, 1), 1), 4); // Always 1
+    // pari_printf("Inertia: %Ps\n\n", inertia_index);
     
-    GEN sigma;
-    
+    // Define a generator for k(q) (Make sure the choose this such that we get a generator for k(q)^x).
     int l = nf_get_degree(bnf_get_nf(Labs));
+    
     GEN generator = zerocol(l);
     gel(generator, 2) = gen_1;
-    int test = 0;
-    GEN test_vec;
-    int i;
-    GEN elem1, elem2;
+    gel(generator, 4) = gen_1;
+
+
+    int test = 0, i;
+    GEN test_vec, elem1, elem2;
+
     //pari_printf("ideal factor: %Ps\n\n", gel(gel(idealfactor(Labs, prime_lift_1), 1), 1));
     GEN prinit = nfmodprinit(Labs, gel(gel(idealfactor(Labs, prime_lift_1), 1), 1));
+    
+    GEN test_v = nf_to_Fq(bnf_get_nf(Labs), generator, prinit);
+    if (gequal0(test_v) || gequal1(test_v))
+    {
+        pari_printf("gen mod q: %Ps\n\n", test_v);
+        printf(ANSI_COLOR_RED "Choose a different generator in my_p_Artin_symbol\n\n" ANSI_COLOR_RESET);
+        pari_close();
+        exit(111);
+    }
+    
+    
+
     // printf("prinit: ");
     // output(prinit);
     // printf("\n");
@@ -114,6 +129,8 @@ GEN my_Artin_symbol (GEN Labs, GEN Lrel, GEN K, GEN I_K, int p, GEN sigma) {
     }
     
     int Artin_symbol = 0;
+
+    // Factorize the fractional ideal into primes
     GEN factorization = idealfactor(K, I_K);
     //pari_printf("factorization: %Ps\n\n", factorization);
     GEN primes_and_es_in_factorization = my_find_primes_in_factorization(K, factorization);
@@ -130,6 +147,7 @@ GEN my_Artin_symbol (GEN Labs, GEN Lrel, GEN K, GEN I_K, int p, GEN sigma) {
     int i;
     for (i = 1; i < glength(prime_vect)+1; i++)
     {
+        // The prime in "prid" format
         prime = idealfactor(K, gel(prime_vect, i));
         //pari_printf("Prime -> p-Artin: %Ps\n\n", prime);
         p_exp = gel(e_vect, i);
@@ -145,6 +163,8 @@ GEN my_Artin_symbol (GEN Labs, GEN Lrel, GEN K, GEN I_K, int p, GEN sigma) {
         else {
             // printf(ANSI_COLOR_YELLOW "%ld\n" ANSI_COLOR_RESET, itos(gel(e_vect, i)));
             //printf(ANSI_COLOR_GREEN "Non-trivial\n\n" ANSI_COLOR_RESET);
+
+            // Compute the Artin symbol for the prime 
             p_Artin_symbol = itos(my_p_Artin_symbol(Labs, Lrel, K, prime, stoi(p), Gal_rel, p_exp));
             //printf("p_Artin_symbol: %d\n\n", p_Artin_symbol);
             

@@ -971,7 +971,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p) {
                 //printf("length t: %ld\n", glength(t));
 
                 // In case precision is too low, t may not be given, but instead a "place holder" []^~.
-                if (glength(t)==0 || my_QV_equal0(t))
+                if (glength(t)==0)
                 {
                     return stoi(-1);
                 }

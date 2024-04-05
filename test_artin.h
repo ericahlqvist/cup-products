@@ -69,27 +69,27 @@ void my_test_artin_on_norms (GEN Labs, GEN Lrel, GEN K, int p, GEN sigma) {
         
 }
 
-void my_test_artin_on_norms_2 (GEN LxAbs, GEN LxRel, GEN LyAbs, GEN LyRel, GEN K, int p, GEN sigma_x, GEN sigma_y) {
-    GEN p_gens = my_find_p_gens(K, stoi(p));
-    GEN Irel, N, artin_symbol, i_xJ, I;
-    GEN class_group = my_get_clgp (LxAbs);
-    int i;
-    for (i = 1; i < glength(p_gens)+1; i++)
-    {
-        i_xJ = rnfidealup0(LxRel, gel(p_gens, i), 1);
-        I = gel(my_find_I(LxAbs, K, sigma_x, i_xJ, class_group),2);
-        Irel = rnfidealabstorel(LxRel, I);
-        N = rnfidealnormrel(LxRel, Irel);
-        artin_symbol = my_Artin_symbol(LyAbs, LyRel, K, N, p, sigma_y);
-        //output(artin_symbol);
-        if (itos(artin_symbol))
-        {
-            printf(ANSI_COLOR_RED "Artin symbol not zero on norms\n\n" ANSI_COLOR_RESET);
-            pari_close();
-            exit(0);
-        }
+// void my_test_artin_on_norms_2 (GEN LxAbs, GEN LxRel, GEN LyAbs, GEN LyRel, GEN K, int p, GEN sigma_x, GEN sigma_y) {
+//     GEN p_gens = my_find_p_gens(K, stoi(p));
+//     GEN Irel, N, artin_symbol, i_xJ, I;
+//     GEN class_group = my_get_clgp (LxAbs);
+//     int i;
+//     for (i = 1; i < glength(p_gens)+1; i++)
+//     {
+//         i_xJ = rnfidealup0(LxRel, gel(p_gens, i), 1);
+//         I = gel(my_find_I(LxAbs, K, sigma_x, i_xJ, class_group),2);
+//         Irel = rnfidealabstorel(LxRel, I);
+//         N = rnfidealnormrel(LxRel, Irel);
+//         artin_symbol = my_Artin_symbol(LyAbs, LyRel, K, N, p, sigma_y);
+//         //output(artin_symbol);
+//         if (itos(artin_symbol))
+//         {
+//             printf(ANSI_COLOR_RED "Artin symbol not zero on norms\n\n" ANSI_COLOR_RESET);
+//             pari_close();
+//             exit(0);
+//         }
         
-    }
-    printf(ANSI_COLOR_GREEN "Artin symbol zero on norms\n\n" ANSI_COLOR_RESET);
+//     }
+//     printf(ANSI_COLOR_GREEN "Artin symbol zero on norms\n\n" ANSI_COLOR_RESET);
         
-}
+// }

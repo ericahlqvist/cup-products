@@ -14,7 +14,7 @@
 #include "misc_functions2.h"
 #include "tests.h"
 #include "artin_symbol.h"
-//#include "test_artin.h"
+#include "test_artin.h"
 #include "ext_and_aut2.h"
 #include "find_cup_matrix3.h"
 
@@ -147,7 +147,7 @@ main (int argc, char *argv[])
     //--------------------------------------------------
     // Find generators for H^1(X, mu_p), which is dual to H^2(X, Z/pZ)
     Ja_vect = my_find_Ja_vect(K, J_vect, p, units_mod_p);
-    pari_printf("Ja_vect: %Ps\n\n", Ja_vect);
+    //pari_printf("Ja_vect: %Ps\n\n", Ja_vect);
     //--------------------------------------------------
 
     // GEN p_power_units = my_find_p_power_units(K, units_mod_p, p);
@@ -158,15 +158,15 @@ main (int argc, char *argv[])
     
     //--------------------------------------------------
     // Defines a matrix over F_p with index (i*k, j) corresponding to 
-    // < x_i\cup x_k, (a_j, J_j)> if i is not equal to j and
-    // < B(x_i), (a_j, J_j)> if i=j. 
-
+    // < x_i\cup x_k, (a_j, J_j) > if i is not equal to j and
+    // < B(x_i), (a_j, J_j) > if i=j. 
+    // Here < - , - > denotes the Artin--Verdier pairing, which may be computed using our cup product formula and the Artin symbol. 
     int mat_rk = my_relations(K_ext, K, p, p_int, p_rk, Ja_vect, r_rk);
     printf("\n\n");
 
     printf(ANSI_COLOR_RED "For indices (i,i) we have B(x_i) instead of x_i cup x_i to get the correct presentation of Q_2.\n\n" ANSI_COLOR_RESET);
     
-    printf(ANSI_COLOR_RED "This determines Q_2." ANSI_COLOR_RESET);
+    printf(ANSI_COLOR_CYAN "This determines the second quotient Q_2 for the lower p-central series and not only the Zassenhaus quotient ZQ_2." ANSI_COLOR_RESET);
 
     //--------------------------------------------------
 
@@ -177,7 +177,7 @@ main (int argc, char *argv[])
     pari_close();
 
     //--------
-    // Compute the time the whole program took
+    // Compute the time the whole program took to run
     clock_t duration = (clock()-start) / 1000;
     msec = duration%1000000;
     sec = (duration/1000)%60;
