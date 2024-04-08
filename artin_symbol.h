@@ -3,17 +3,25 @@ GEN my_find_generator(GEN Labs, GEN prime, GEN prinit) {
     GEN generator=gen_0, pow;
 
     GEN order = gsub(idealnorm(Labs, prime), gen_1);
-    GEN prime_factors = gel(factor(order), 1);
-    GEN zk = nf_get_zk(bnf_get_nf(Labs));
-    int i, check;
+    GEN div = divisors(order);
+    
+    
+    pari_printf("Order: %Ps\n", order);
+    pari_printf("Divisors: %Ps\n", div);
+    GEN zk = my_get_prod(Labs, nf_get_zk(bnf_get_nf(Labs)));
+    int i, check, min;
     int j;
     for (i = 1; i < glength(zk)+1; i++)
     {
         check=1;
-        for (j = 1; j < glength(prime_factors)+1; j++)
+        // Increase this in case you get an error in the p Artin symbol
+        min = (glength(div) < 50) ? glength(div) : 50;
+        printf("\n----------------------\n\nmin: %d\n\n----------------------\n\n", min);
+        for (j = 2; j < min; j++)
         {
-            pow = nfpow(Labs, gel(zk, i), gel(prime_factors, j));
-            if (gequal1(nf_to_Fq(bnf_get_nf(Labs), pow, prinit)))
+            pow = nfpow(Labs, gel(zk, i), gel(div, j));
+            pari_printf("pow[%Ps] mod: %Ps\n", gel(div, j), nf_to_Fq(bnf_get_nf(Labs), pow, prinit));
+            if (gequal0(nf_to_Fq(bnf_get_nf(Labs), pow, prinit)) || gequal1(nf_to_Fq(bnf_get_nf(Labs), pow, prinit)))
             {
                 check=0;
                 break;
@@ -23,6 +31,8 @@ GEN my_find_generator(GEN Labs, GEN prime, GEN prinit) {
         if (check)
         {
             generator=gel(zk, i);
+            pari_printf("Generator: %d\n", i);
+            pari_printf("mod %Ps: %Ps\n", order, nf_to_Fq(bnf_get_nf(Labs), generator, prinit));
             break;
         }
         
@@ -92,15 +102,15 @@ GEN my_p_Artin_symbol(GEN Labs, GEN Lrel, GEN K, GEN K_factorization, GEN p, GEN
     GEN prinit = nfmodprinit(Labs, gel(gel(idealfactor(Labs, prime_lift_1), 1), 1));
 
     // Define the generator
-    
-    generator = my_find_generator(Labs, prime_lift_1, prinit);
-    
-    if (!generator)
-    {
-        printf(ANSI_COLOR_RED "No gen found for p-Artin\n" ANSI_COLOR_RESET);
-        pari_close();
-        exit(111);
-    }
+    generator = nfmodprlift(Labs,ffprimroot(nfmodpr(Labs,algtobasis(Labs, gp_read_str("y")),prinit), NULL),prinit);
+    // generator = my_find_generator(Labs, prime_lift_1, prinit);
+    // //generator = algtobasis(Labs, gp_read_str("y"));
+    // if (gequal0(generator))
+    // {
+    //     printf(ANSI_COLOR_RED "No gen found for p-Artin\n" ANSI_COLOR_RESET);
+    //     pari_close();
+    //     exit(111);
+    // }
     
     
     

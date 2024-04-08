@@ -193,11 +193,11 @@ int my_relations (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, int
                 sigma = gel(gel(K_ext, k), 3);
                 if (i<k) {
                     gmael2(cup_matrix, j, (2*p_rk-(i-2))*(i-1)/2+k-(i-1)) = stoi(smodis(my_Artin_symbol(Labs, Lrel, K, idealred0(K,NIpJ, NULL), p_int, sigma), p_int));
-                    gmael2(cup_matrix_full, j, p_rk*(k-1)+i) = stoi(smodis(my_Artin_symbol(Labs, Lrel, K, idealred0(K,NIpJ, NULL), p_int, sigma), p_int));
+                    gmael2(cup_matrix_full, j, p_rk*(k-1)+i) = gmael2(cup_matrix, j, (2*p_rk-(i-2))*(i-1)/2+k-(i-1));
                 }
                 if (i==k) {
                     gmael2(cup_matrix, j, (2*p_rk-(i-2))*(i-1)/2+k-(i-1)) = stoi(smodis(my_Artin_symbol(Labs, Lrel, K, gel(gel(Ja_vect, j), 2), p_int, sigma), p_int));
-                    gmael2(cup_matrix_full, j, p_rk*(k-1)+i) = stoi(smodis(my_Artin_symbol(Labs, Lrel, K, gel(gel(Ja_vect, j), 2), p_int, sigma), p_int));
+                    gmael2(cup_matrix_full, j, p_rk*(k-1)+i) = gmael2(cup_matrix, j, (2*p_rk-(i-2))*(i-1)/2+k-(i-1));
                 }
                 if (i>k) {
                     gmael2(cup_matrix_full, j, p_rk*(k-1)+i) = stoi(smodis(gneg(my_Artin_symbol(Labs, Lrel, K, idealred0(K,NIpJ, NULL), p_int, sigma)), p_int));

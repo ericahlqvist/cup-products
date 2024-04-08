@@ -440,6 +440,24 @@ GEN my_Gal_rel (GEN Labs, GEN Lrel, GEN K, GEN sigma, int p) {
     return Gal_rel;
 }
 
+GEN my_get_prod(GEN Labs, GEN zk) {
+    pari_sp av = avma;
+    GEN vect = gcopy(zk);
+
+    int i, j;
+
+    for (i = 1; i < glength(zk)+1; i++)
+    {
+        for (j = 1; j < glength(zk)+1; j++)
+        {
+            vect = shallowconcat(vect, mkvec(nfmul(Labs, gel(zk, i), gel(zk, j))));
+        }
+        
+    }
+    
+    return gerepilecopy(av, vect);
+}
+
 // Creates a set (vector) of of exponents in bijection with Cl(L) 
 GEN my_get_vect (int n, GEN cyc)
 {
