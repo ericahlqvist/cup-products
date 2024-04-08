@@ -105,10 +105,16 @@ main (int argc, char *argv[])
     // // // GEN clf_pol = bnrclassfield(K, p, 2, DEFAULTPREC);
     // GEN LAB = Buchall(clf_pol, nf_FORCE, DEFAULTPREC);
     // pari_printf("L cyc: %Ps\n\n", bnf_get_cyc(LAB));
+
+    //-----------------------------
+    // Uncomment this if you just want the polynomials of the unramified deg p extensions
+
     // my_unramified_p_extensions(K, p, D_prime_vect);
     
     // pari_close();
     // exit(0);
+
+    //------------------------------
 
     // my_unramified_p_extensions_with_trivial_action(K, p, D_prime_vect);
     
@@ -162,28 +168,23 @@ main (int argc, char *argv[])
     // < B(x_i), (a_j, J_j) > if i=j. 
     // Here < - , - > denotes the Artin--Verdier pairing, which may be computed using our cup product formula and the Artin symbol. 
     int mat_rk = my_relations(K_ext, K, p, p_int, p_rk, Ja_vect, r_rk);
-    printf("\n\n");
-
-    printf(ANSI_COLOR_RED "For indices (i,i) we have B(x_i) instead of x_i cup x_i to get the correct presentation of Q_2.\n\n" ANSI_COLOR_RESET);
-    
-    printf(ANSI_COLOR_CYAN "This determines the second quotient Q_2 for the lower p-central series and not only the Zassenhaus quotient ZQ_2." ANSI_COLOR_RESET);
+    //printf("\n");
 
     //--------------------------------------------------
 
-    printf("\n\n");
-    printf(ANSI_COLOR_GREEN "Done! \n \n" ANSI_COLOR_RESET);
+    //printf(ANSI_COLOR_GREEN "Done! \n \n" ANSI_COLOR_RESET);
 
     // Close pari
     pari_close();
 
-    //--------
-    // Compute the time the whole program took to run
-    clock_t duration = (clock()-start) / 1000;
-    msec = duration%1000000;
-    sec = (duration/1000)%60;
-    min = duration/60000;
+    // //--------
+    // // Compute the time the whole program took to run
+    // clock_t duration = (clock()-start) / 1000;
+    // msec = duration%1000000;
+    // sec = (duration/1000)%60;
+    // min = duration/60000;
 
-    printf (ANSI_COLOR_YELLOW "Runtime: %d min, %d,%d sec\n\n" ANSI_COLOR_RESET, min, sec, msec);
-    //-----------
+    // printf (ANSI_COLOR_YELLOW "Runtime: %d min, %d,%d sec\n\n" ANSI_COLOR_RESET, min, sec, msec);
+    // //-----------
     return mat_rk;
 }

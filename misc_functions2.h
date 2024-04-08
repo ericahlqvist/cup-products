@@ -342,7 +342,7 @@ GEN my_1MS_operator (GEN L, GEN sigma) {
 }
 
 GEN my_1MS_elt_operator (GEN L, GEN sigma) {
-    printf("my_1MS_operator\n");
+    printf("my_1MS_elt_operator\n");
     pari_sp av = avma;
     GEN int_basis = nf_get_zk(bnf_get_nf(L)), col, basis_vec;
     //pari_printf("int_basis: %Ps\n", int_basis);
@@ -638,31 +638,28 @@ GEN my_get_unit_group (GEN K, GEN unit_gens, GEN p)
 GEN my_H90 (GEN L, GEN iJ, GEN sigma) {
     printf("\nmy_H90\n");
     pari_sp av = avma;
-    GEN H90_ideal, gens, M, B, E, D;
+    GEN H90_ideal, M, B, E, D;
 
-    // Find generators for Cl(L)
-    gens = bnf_get_gen(L);
 
     // Cycle type of Cl(L) as a column vector
     D = gtocol(bnf_get_cyc(L));
-
-    // Number of components of L_cyc
-    int l = glength(gens);
     
     // l x l zero matrix
-    M = zeromatcopy(l,l);
+    // M = zeromatcopy(l,l);
+    // finding the matrix M consisting of exponents for the (1-sigma)g_i, Cl(L) = < g_1, ..., g_n > 
+    // that is, finding the matrix corresponding to the linear operator (1-sigma)
+    M = my_1MS_operator(L, sigma);
     //D = zerocol(l);
 
     // finding exponents for iJ when written as a products of ideals in gens
     B = bnfisprincipal0(L, iJ, 0);
 
-    // finding the matrix M consisting of exponents for the (1-sigma)g_i, Cl(L) = < g_1, ..., g_n > 
-    // that is, finding the matrix corresponding to the linear operator (1-sigma)
-    int i;
-    for (i = 1; i < l+1; i++)
-    {
-        gel(M, i) = bnfisprincipal0(L, idealred0(L, my_1MS_ideal(L, sigma, gel(gens, i)), NULL), 0);
-    }
+    
+    // int i;
+    // for (i = 1; i < l+1; i++)
+    // {
+    //     gel(M, i) = bnfisprincipal0(L, idealred0(L, my_1MS_ideal(L, sigma, gel(gens, i)), NULL), 0);
+    // }
 
     // Gauss: Solving the system M*X = B (i.e., finding I s.t. (1-sigma)I = iJ)
     E = matsolvemod(M,D,B,0);
@@ -990,7 +987,8 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p) {
                 exp = bnfisunit0(K, diff, NULL);
                 pari_printf(ANSI_COLOR_MAGENTA "exp: %Ps\n" ANSI_COLOR_RESET, exp);
 
-                // Check if N(t)*a is the norm of a unit. If it is, we may modify t by this unit without modifying I+I'' and hence we are done. Returns zero if not a norm (which should never happen).
+                // Check if N(t)*a is the norm of a unit. If it is, we may modify t by this unit without effecting the equality 
+                // (1-sigma)I=iJ and hence we are done. Returns zero if not a norm (which should never happen).
                 is_norm = matsolvemod(my_norm_operator(Labs, Lrel, K, p), zerocol(glength(exp)), gtocol(exp), 0);
                 pari_printf(ANSI_COLOR_CYAN "is_norm: %Ps\n" ANSI_COLOR_RESET, is_norm);
 

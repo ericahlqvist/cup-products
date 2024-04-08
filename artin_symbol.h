@@ -1,3 +1,40 @@
+GEN my_find_generator(GEN Labs, GEN prime, GEN prinit) {
+    pari_sp av = avma;
+    GEN generator=gen_0, pow;
+
+    GEN order = gsub(idealnorm(Labs, prime), gen_1);
+    GEN prime_factors = gel(factor(order), 1);
+    GEN zk = nf_get_zk(bnf_get_nf(Labs));
+    int i, check;
+    int j;
+    for (i = 1; i < glength(zk)+1; i++)
+    {
+        check=1;
+        for (j = 1; j < glength(prime_factors)+1; j++)
+        {
+            pow = nfpow(Labs, gel(zk, i), gel(prime_factors, j));
+            if (gequal1(nf_to_Fq(bnf_get_nf(Labs), pow, prinit)))
+            {
+                check=0;
+                break;
+            }
+            
+        }
+        if (check)
+        {
+            generator=gel(zk, i);
+            break;
+        }
+        
+        
+    }
+    
+    
+    
+    return gerepilecopy(av, generator);
+}
+
+
 /*-------------- The Artin Symbol ---------------
 Let L/K be a Galois extension and let p be a prime in O_K which is unramified in L (in our case this holds for all primes in O_K since L/K is unramified). Choose a prime q in O_L lying above p. Then there is a unique element sigma_p in G_q:={sigma in Gal(L/K) : sigma(q)=q} such that sigma = (-)^N(p) when acting on the residue field k(q). 
 (1) If p is split in L, then G_q = {1} and k(q) = k(p) which means that (-)^N(p) = (-) = id and hence sigma_p = 1 (so 0 when identified with Z/pZ). 
@@ -8,9 +45,10 @@ Since k(q)^x is cyclic, it is enough to check that sigma_p(g) = g^N(p) for a gen
 */
 
 
-GEN my_p_Artin_symbol(GEN Labs, GEN Lrel, GEN K, GEN K_factorization, GEN p, GEN Gal_rel, GEN p_exp) {
+GEN my_p_Artin_symbol(GEN Labs, GEN Lrel, GEN K, GEN K_factorization, GEN p, GEN Gal_rel, GEN p_exp, GEN sigma_0) {
     pari_sp av = avma;
-    GEN p_Artin_symbol, exp, sigma, y=pol_x(fetch_user_var("y"));;
+    GEN p_Artin_symbol, exp, sigma;
+    //GEN y=pol_x(fetch_user_var("y"));
     
     // Define the prime from factorization
     GEN prime = idealhnf0(K, gel(gel(gel(K_factorization, 1), 1), 1), gel(gel(gel(K_factorization, 1), 1), 2));
@@ -43,6 +81,7 @@ GEN my_p_Artin_symbol(GEN Labs, GEN Lrel, GEN K, GEN K_factorization, GEN p, GEN
     // pari_printf("Inertia: %Ps\n\n", inertia_index);
     
     // Define a generator for k(q) (Make sure the choose this such that we get a generator for k(q)^x).
+    // WARNING: This is a critical thing and sometimes gives rise to a problem!
     
     GEN generator;
 
@@ -51,10 +90,21 @@ GEN my_p_Artin_symbol(GEN Labs, GEN Lrel, GEN K, GEN K_factorization, GEN p, GEN
 
     
     GEN prinit = nfmodprinit(Labs, gel(gel(idealfactor(Labs, prime_lift_1), 1), 1));
-    
-    // Define the generator
-    generator = algtobasis(Labs, y);
 
+    // Define the generator
+    
+    generator = my_find_generator(Labs, prime_lift_1, prinit);
+    
+    if (!generator)
+    {
+        printf(ANSI_COLOR_RED "No gen found for p-Artin\n" ANSI_COLOR_RESET);
+        pari_close();
+        exit(111);
+    }
+    
+    
+    
+    
     for (i = 1; i < glength(Gal_rel)+1; i++)
     {
         sigma = gel(Gal_rel, i);
@@ -93,7 +143,7 @@ GEN my_p_Artin_symbol(GEN Labs, GEN Lrel, GEN K, GEN K_factorization, GEN p, GEN
     {
         printf(ANSI_COLOR_RED "ERROR - no galois elem for Artin \n\n" ANSI_COLOR_RESET);
         pari_close();
-        exit(0);
+        exit(111);
     }
     
 
@@ -145,7 +195,7 @@ GEN my_Artin_symbol (GEN Labs, GEN Lrel, GEN K, GEN I_K, int p, GEN sigma) {
             //printf(ANSI_COLOR_GREEN "Non-trivial\n\n" ANSI_COLOR_RESET);
 
             // Compute the Artin symbol for the prime 
-            p_Artin_symbol = itos(my_p_Artin_symbol(Labs, Lrel, K, prime, stoi(p), Gal_rel, p_exp));
+            p_Artin_symbol = itos(my_p_Artin_symbol(Labs, Lrel, K, prime, stoi(p), Gal_rel, p_exp, sigma));
             //printf("p_Artin_symbol: %d\n\n", p_Artin_symbol);
             
         }
