@@ -101,16 +101,9 @@ GEN my_p_Artin_symbol(GEN Labs, GEN Lrel, GEN K, GEN K_factorization, GEN p, GEN
     
     GEN prinit = nfmodprinit(Labs, gel(gel(idealfactor(Labs, prime_lift_1), 1), 1));
 
-    // Define the generator
+    // Define the generator (lifting a primitive element from the residue field)
     generator = nfmodprlift(Labs,ffprimroot(nfmodpr(Labs,algtobasis(Labs, gp_read_str("y")),prinit), NULL),prinit);
-    // generator = my_find_generator(Labs, prime_lift_1, prinit);
-    // //generator = algtobasis(Labs, gp_read_str("y"));
-    // if (gequal0(generator))
-    // {
-    //     printf(ANSI_COLOR_RED "No gen found for p-Artin\n" ANSI_COLOR_RESET);
-    //     pari_close();
-    //     exit(111);
-    // }
+   
     
     
     

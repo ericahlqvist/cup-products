@@ -149,7 +149,7 @@ GEN my_ext(GEN base, GEN base_clf, GEN s, GEN p, int p_rk, GEN D_prime_vect)
         printf("Lrel found\n");
         pari_printf("Abs pol: %Ps\n", rnf_get_polabs(Lrel));
         
-        Labs = Buchall(rnf_get_polabs(Lrel), nf_FORCE, DEFAULTPREC);
+        Labs = Buchall(rnf_get_polabs(Lrel), nf_GEN, DEFAULTPREC);
         printf("Labs found\n");
         pari_printf("L_cyc[%d]: %Ps\n", i, bnf_get_cyc(Labs));
         pari_printf("rel_pol[%d]: %Ps\n", i, p1red);

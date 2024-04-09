@@ -788,22 +788,19 @@ GEN my_find_p_gens (GEN K, GEN p)
 {
     pari_sp av = avma;
     GEN my_n = bnf_get_cyc(K);
-    int l = glength(my_n);
-    
-    GEN p_gens;
-    p_gens = zerovec(l);
-    GEN current_gen;
-    
-    GEN my_gens = bnf_get_gen(K);
-    //pari_printf("my_gens: %Ps\n\n", my_gens);
     int i;
-    for (i = 1; i < l+1; ++i)
+    GEN p_gens = cgetg(1, t_VEC), current_gen, my_gens = bnf_get_gen(K);
+
+    for (i = 1; i < glength(my_n)+1; i++)
     {
-        //pari_printf("my_n, my_n/p, gen^my_n: %Ps, %Ps, %Ps\n\n", gel(my_n, i), gdiv(gel(my_n, i),p), gel(bnfisprincipal0(K, idealpow(K, gel(my_gens, i), gel(my_n, i)), 1), 1));
-        current_gen = idealpow(K,gel(my_gens, i), gdiv(gel(my_n, i),p));
-        //pari_printf("current_gen: %Ps\n\n", current_gen);
-        gel(p_gens, i) = idealred0(K, current_gen, NULL);
+        if (dvdii(gel(my_n, i), p))
+        {
+            current_gen = idealpow(K,gel(my_gens, i), gdiv(gel(my_n, i),p));
+            p_gens = shallowconcat(p_gens, mkvec(idealred0(K, current_gen, NULL)));
+        }
+        
     }
+  
     p_gens = gerepilecopy(av, p_gens);
     return p_gens;
 }
@@ -970,6 +967,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p) {
                 //pari_printf("F_ker_T: %Ps\n", F_ker_T);
 
                 // Now find the corresponding t
+                // (Can possibly be improved by using the flag nf_GENMAT: Return t in factored form (compact representation), as a small product of S-units for a small set of finite places S, possibly with huge exponents. This kind of result can be cheaply mapped to K^*/(K^*)^l or to C or Q_p to bounded accuracy and this is usually enough for applications.)
                 is_princ = bnfisprincipal0(Labs, idealdiv(Labs, iJ, my_1MS_ideal(Labs, sigma, F_ker_T)), nf_GEN);
 
                 // Sanity check
@@ -982,12 +980,16 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p) {
                 
                 // The corresponding t
                 t = gel(is_princ, 2);
+                //pari_printf("t (compact): %Ps\n", gel(is_princ, 2));
+                // pari_close();
+                // exit(0);
                 //pari_printf("t: %Ps\n", t);
                 //printf("length t: %ld\n", glength(t));
 
                 // In case precision is too low, t may not be given, but instead a "place holder" []^~.
                 if (glength(t)==0)
                 {
+                    pari_printf("t has length zero: %Ps\n", t);
                     return stoi(-1);
                 }
                 
