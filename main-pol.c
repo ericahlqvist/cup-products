@@ -48,11 +48,13 @@ main (int argc, char *argv[])
     
     // Read the defining polynomial for K
     f = gp_read_str(argv[2]);
-    pari_printf("POL: %Ps\n\n", f);
+    printf("\n-------------------------------------------------------------------\n\n");
+    pari_printf("\nPOL: %Ps\n\n", f);
     
     //--------------------------------------------------
     // Define base field K
-    K = Buchall(f, nf_FORCE, DEFAULTPREC);
+    // Use flag nf_FORCE
+    K = Buchall(f, nf_GEN, DEFAULTPREC);
     //--------------------------------------------------
 
     // Other possible precisions
@@ -75,8 +77,10 @@ main (int argc, char *argv[])
     // Class group of K (cycle type)
     Kcyc = bnf_get_cyc(K);
     pari_printf("K cyc: %Ps\n\n", Kcyc);
+    // pari_close();
+    // exit(0);
 
-    // Class numer of K
+    // Class number of K
     int Knr = itos(bnf_get_no(K));
 
     // Test if p divides the class number. If not, then H^1(X, Z/pZ) = 0 and there is nothing to compute. 
@@ -88,11 +92,21 @@ main (int argc, char *argv[])
         exit(0);
     }
     //--------------------------------------------------
+    //-----------------------------
+    // // Uncomment this if you just want the polynomials of the unramified deg p extensions
 
+    // my_unramified_p_extensions(K, p, D_prime_vect);
+    
+    // pari_close();
+    // exit(0);
+
+    //------------------------------
     //--------------------------------------------------
     // Define polynomials for the generating fields for the part of the Hilbert class field corresp to Cl(K)/p. 
     p_ClFld_pol = bnrclassfield(K, p, 0, DEFAULTPREC);
     pari_printf("p Cl Fld: %Ps\n\n", p_ClFld_pol);
+    // pari_close();
+    // exit(0);
     //--------------------------------------------------
 
     // pari_printf("Fund units: %Ps\n", bnf_get_fu(K));
@@ -106,15 +120,7 @@ main (int argc, char *argv[])
     // GEN LAB = Buchall(clf_pol, nf_FORCE, DEFAULTPREC);
     // pari_printf("L cyc: %Ps\n\n", bnf_get_cyc(LAB));
 
-    //-----------------------------
-    // Uncomment this if you just want the polynomials of the unramified deg p extensions
-
-    // my_unramified_p_extensions(K, p, D_prime_vect);
     
-    // pari_close();
-    // exit(0);
-
-    //------------------------------
 
     // my_unramified_p_extensions_with_trivial_action(K, p, D_prime_vect);
     
@@ -168,23 +174,23 @@ main (int argc, char *argv[])
     // < B(x_i), (a_j, J_j) > if i=j. 
     // Here < - , - > denotes the Artin--Verdier pairing, which may be computed using our cup product formula and the Artin symbol. 
     int mat_rk = my_relations(K_ext, K, p, p_int, p_rk, Ja_vect, r_rk);
-    //printf("\n");
+    printf("\n");
 
     //--------------------------------------------------
 
-    //printf(ANSI_COLOR_GREEN "Done! \n \n" ANSI_COLOR_RESET);
+    printf(ANSI_COLOR_GREEN "Done! \n \n" ANSI_COLOR_RESET);
 
     // Close pari
     pari_close();
 
-    // //--------
-    // // Compute the time the whole program took to run
-    // clock_t duration = (clock()-start) / 1000;
-    // msec = duration%1000000;
-    // sec = (duration/1000)%60;
-    // min = duration/60000;
+    //--------
+    // Compute the time the whole program took to run
+    clock_t duration = (clock()-start) / 1000;
+    msec = duration%1000000;
+    sec = (duration/1000)%60;
+    min = duration/60000;
 
-    // printf (ANSI_COLOR_YELLOW "Runtime: %d min, %d,%d sec\n\n" ANSI_COLOR_RESET, min, sec, msec);
-    // //-----------
+    printf (ANSI_COLOR_YELLOW "Runtime: %d min, %d,%d sec\n\n" ANSI_COLOR_RESET, min, sec, msec);
+    //-----------
     return mat_rk;
 }
