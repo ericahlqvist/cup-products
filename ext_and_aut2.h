@@ -149,11 +149,15 @@ GEN my_ext(GEN base, GEN base_clf, GEN s, GEN p, int p_rk, GEN D_prime_vect)
         printf("Lrel found\n");
         pari_printf("Abs pol: %Ps\n", rnf_get_polabs(Lrel));
         
-        Labs = Buchall(rnf_get_polabs(Lrel), nf_GEN, DEFAULTPREC);
+        Labs = Buchall(rnf_get_polabs(Lrel), nf_FORCE, DEFAULTPREC);
+        
+        // May change flag to nf_FORCE
+        // Other precisions: MEDDEFAULTPREC, BIGDEFAULTPREC
+        //Labs = Buchall_param(rnf_get_polabs(Lrel), 1.5,1.5,4, nf_FORCE, DEFAULTPREC);
         printf("Labs found\n");
         pari_printf("L_cyc[%d]: %Ps\n", i, bnf_get_cyc(Labs));
         pari_printf("rel_pol[%d]: %Ps\n", i, p1red);
-        pari_printf("abs pol: %Ps\n\n", gsubstpol(rnf_get_polabs(Lrel),y, s));
+        pari_printf("\nabs pol: %Ps\n\n", gsubstpol(rnf_get_polabs(Lrel),y, s));
 
         s_lift_x = rnfeltup0(Lrel, s, 1);
         cx = galoisconj(Labs, NULL);
@@ -163,16 +167,13 @@ GEN my_ext(GEN base, GEN base_clf, GEN s, GEN p, int p_rk, GEN D_prime_vect)
             if ( (!my_QV_equal(algtobasis(Labs,gel(cx, j)), algtobasis(Labs,y))) && my_QV_equal(galoisapply(Labs, gel(cx,j), s_lift_x), s_lift_x)) 
             {
                 sigma = algtobasis(Labs, gel(cx, j));
-                pari_printf("sigma: %Ps\n\n", sigma);
+                //pari_printf("sigma: %Ps\n\n", sigma);
                 break;
             }
         }
-        printf(ANSI_COLOR_CYAN "---> sigma <--- \n \n" ANSI_COLOR_RESET);
+        //printf(ANSI_COLOR_CYAN "---> sigma <--- \n \n" ANSI_COLOR_RESET);
         
-        // my_action_on_clgp(Labs, sigma, p);
-        // my_test_artin_on_norms(Labs, Lrel, base, itos(p), sigma);
         
-        //Should throw away some trash here to free memory
 
         gel(base_ext, i) = mkvec3(Labs, Lrel, sigma);
         // my_test_artin_symbol (Labs, Lrel, base, itos(p), sigma);

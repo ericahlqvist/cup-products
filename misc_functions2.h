@@ -547,7 +547,7 @@ GEN my_get_clgp (GEN K)
 }
 
 GEN my_ideal_from_exp (GEN K, GEN exp) {
-    //printf("\nmy_ideal_from_exp\n");
+    printf("\nmy_ideal_from_exp\n");
     pari_printf("exp: %Ps\n", exp);
     pari_sp av = avma;
     GEN ideal = idealhnf0(K, gen_1, NULL);
@@ -823,7 +823,7 @@ void my_unramified_p_extensions(GEN K, GEN p, GEN D_prime_vect) {
         //printf("i: %d\n", i);
         abs_pol = polredabs0(mkvec2(gel(R, i), D_prime_vect), 0);
         //abs_pol = polredabs(gel(R, i));
-        pari_printf("%Ps, cyc: %Ps\n", gsubstpol(abs_pol, x, s), bnf_get_cyc(Buchall(abs_pol, nf_FORCE, DEFAULTPREC)));
+        pari_printf("%Ps, cyc: %Ps\n", gsubstpol(abs_pol, x, s), bnf_get_cyc(Buchall(abs_pol, nf_GEN, DEFAULTPREC)));
         
     }
     printf("\n");
@@ -977,10 +977,15 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p) {
                     pari_close();
                     exit(111);
                 }
+
+                //pari_printf("t (compact): %Ps\n", gel(is_princ, 2));
                 
                 // The corresponding t
                 t = gel(is_princ, 2);
-                //pari_printf("t (compact): %Ps\n", gel(is_princ, 2));
+
+                // nffactorback can be VERY costly. Probably better to use nf_GEN above and keep searching in case prec is to low.
+                //t = nffactorback(Labs, gel(gel(is_princ, 2), 1), gel(gel(is_princ, 2), 2));
+                
                 // pari_close();
                 // exit(0);
                 //pari_printf("t: %Ps\n", t);
@@ -990,7 +995,8 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p) {
                 if (glength(t)==0)
                 {
                     pari_printf("t has length zero: %Ps\n", t);
-                    return stoi(-1);
+                    continue;
+                    //return stoi(-1);
                 }
                 
                 // In relative coordinates
@@ -1357,7 +1363,7 @@ void my_matrices(GEN K_ext, GEN p) {
 GEN my_find_I_full (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN i_xJ, GEN a, GEN class_group, int p_int)
 {
     pari_sp av = avma;
-    GEN diff, current_I, test_vec, class_number = bnf_get_no(Labs), Itest, t, t_rel, norm_t, exponents, norms, L_units, L_unit_group, ret;
+    GEN diff, current_I, test_vec, class_number = bnf_get_no(Labs), Itest, t, t_rel, norm_t, exponents, norms, L_units, L_unit_group, ret, is_princ;
     int clnr = itos(class_number), n, roots_of_unity_nr = bnf_get_tuN(K), l;
     
     
@@ -1411,7 +1417,10 @@ GEN my_find_I_full (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN i_xJ, GEN a, GEN c
 
         if (my_QV_equal0(gel(test_vec, 1)))
         {
-            t = gel(test_vec, 2);
+            // Compute again and this time force it to find the generator (may cause an overflow)
+            is_princ = bnfisprincipal0(Labs, Itest, nf_GENMAT);
+            t = nffactorback(Labs, gel(gel(is_princ, 2), 1), gel(gel(is_princ, 2), 2));
+            //t = gel(test_vec, 2);
             pari_printf("t: %Ps\n", t);
             printf("length t: %ld\n", glength(t));
             if (glength(t)!=0)
