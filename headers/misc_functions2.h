@@ -425,8 +425,10 @@ GEN my_find_ext_pol(GEN K_ext) {
 }
 
 GEN my_Gal_rel (GEN Labs, GEN Lrel, GEN K, GEN sigma, int p) {
-    
+    printf("\n------------------------\nStart: my_Gal_rel\n------------------------\n\n");
+    setalldebug(1);
     GEN Gal_rel = zerovec(p);
+    pari_printf("\nsigma: %Ps\n\n", sigma);
     GEN current_sigma = sigma;
     int i;
     
@@ -436,7 +438,7 @@ GEN my_Gal_rel (GEN Labs, GEN Lrel, GEN K, GEN sigma, int p) {
         current_sigma = galoisapply(Labs, sigma, current_sigma); 
         
     }
-
+    printf("\n------------------------\nEnd: my_Gal_rel\n------------------------\n\n");
     return Gal_rel;
 }
 
@@ -654,7 +656,7 @@ GEN my_get_unit_group (GEN K, GEN unit_gens, GEN p)
 // Returns an ideal I in Div(L) such that iJ = (1-sigma)I in Cl(L)
 //------------------------------ 
 GEN my_H90 (GEN L, GEN iJ, GEN sigma) {
-    printf("\nmy_H90\n");
+    printf("\n--------------------------\nStart: my_H90\n--------------------------\n\n");
     pari_sp av = avma;
     GEN H90_ideal, M, B, E, D;
 
@@ -697,6 +699,7 @@ GEN my_H90 (GEN L, GEN iJ, GEN sigma) {
     }
 
     H90_ideal = gerepilecopy(av, H90_ideal);
+    printf("\n--------------------------\nEnd: my_H90\n--------------------------\n\n");
     return H90_ideal;
 }
 
@@ -846,6 +849,7 @@ void my_unramified_p_extensions(GEN K, GEN p, GEN D_prime_vect) {
 
 // Returns vector of tuples (a,J) with div(a)+pJ = 0.
 GEN my_find_Ja_vect(GEN K, GEN J_vect, GEN p, GEN units_mod_p) {
+    printf("\n--------------------------\nStart: my_find_Ja_vect\n--------------------------\n\n");
     pari_sp av = avma;
     int l = glength(J_vect);
     int r_rk = l + glength(units_mod_p);
@@ -864,6 +868,7 @@ GEN my_find_Ja_vect(GEN K, GEN J_vect, GEN p, GEN units_mod_p) {
     }
     
     Ja_vect = gerepilecopy(av, Ja_vect);
+    printf("\n--------------------------\nEnd: my_find_Ja_vect\n--------------------------\n\n");
     return Ja_vect;
 }
 
@@ -911,12 +916,11 @@ GEN my_get_sums (GEN basis) {
 // Returns: a vector of these I's 
 //-------------------------------------------
 GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p) {
-    printf(ANSI_COLOR_CYAN "\nmy_H90_vect\n" ANSI_COLOR_RESET);
+    printf("\n--------------------------\nStart: my_H90_vect\n--------------------------\n\n");
     pari_sp av = avma;
-    int r_rk = glength(Ja_vect), f, j, done = 0;
-    GEN I_vect = zerovec(r_rk), a, iJ, F, ker_T, ker_T_basis, ker_sol, F_ker_T, t, t_rel, Nt, diff, exp, is_princ, is_norm, cyc;
+    int r_rk = glength(Ja_vect), f, i,j, done = 0;
+    GEN I_vect = zerovec(r_rk), a, iJ, F, ker_T, ker_T_basis, ker_sol, F_ker_T, t, t_fact, t_rel, Nt, diff, exp, is_princ, is_norm, cyc;
     cyc = gtocol(bnf_get_cyc(Labs));
-    int i;
     
     for (i = 1; i < r_rk+1; ++i)
     {
@@ -978,14 +982,22 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p) {
                     exit(111);
                 }
 
-                //pari_printf("t (compact): %Ps\n", gel(is_princ, 2));
-                
+                // pari_printf("t (compact) 1: %Ps\n\n", gel(gel(is_princ, 2), 1));
+                // pari_printf("t (compact) 2: %Ps\n\n", gel(gel(is_princ, 2), 2));
+
                 // The corresponding t
-                t = gel(is_princ, 2);
+                t_fact = gel(is_princ, 2);
+                t = t_fact;
+                // for (l = 1; l < glength(gel(t_fact, 2)); l++)
+                // {
+                //     gel(gel(t_fact, 2), l) = modii(gel(gel(t_fact, 2), l), p);
+                // }
+                // pari_printf("t (compact) 1: %Ps\n\n", gel(gel(is_princ, 2), 1));
+                // pari_printf("t (compact) 2: %Ps\n\n", gel(gel(is_princ, 2), 2));
 
                 // nffactorback can be VERY costly. Probably better to use nf_GEN above and keep searching in case prec is to low.
-                //t = nffactorback(Labs, gel(gel(is_princ, 2), 1), gel(gel(is_princ, 2), 2));
-                
+                // t = nffactorback(Labs, gel(t_fact, 1), gel(t_fact, 2));
+                //pari_printf("t: %Ps\n\n", t);
                 // pari_close();
                 // exit(0);
                 //pari_printf("t: %Ps\n", t);
@@ -1044,6 +1056,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p) {
     } 
     
     I_vect = gerepilecopy(av, I_vect);
+    printf("\n--------------------------\nEnd: my_H90_vect\n--------------------------\n\n");
     return I_vect;
 }
 

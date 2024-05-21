@@ -122,6 +122,7 @@ int my_cup_matrix_3 (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, 
 
 int my_relations (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, int r_rk)
 {
+    printf("\n--------------------------\nStart: my_relations\n--------------------------\n\n");
     GEN NIpJ, I_vect, I_rel, Labs, Lrel, sigma, Labs_cup, Lrel_cup, sigma_cup;
 
     //-------------------------------------------------
@@ -296,6 +297,7 @@ int my_relations (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, int
             }
         }
     }
+    printf("\n--------------------------\nEnd: my_relations\n--------------------------\n\n");
     printf("-----------------------------------------------------------------------------------------------\n\n");
     
     return 0;

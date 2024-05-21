@@ -56,6 +56,7 @@ Since k(q)^x is cyclic, it is enough to check that sigma_p(g) = g^N(p) for a gen
 
 
 GEN my_p_Artin_symbol(GEN Labs, GEN Lrel, GEN K, GEN K_factorization, GEN p, GEN Gal_rel, GEN p_exp, GEN sigma_0) {
+    printf("\n--------------------------------\nStart: my_p_artin_symbol\n--------------------------------\n\n");
     pari_sp av = avma;
     GEN p_Artin_symbol, exp, sigma;
     //GEN y=pol_x(fetch_user_var("y"));
@@ -149,12 +150,14 @@ GEN my_p_Artin_symbol(GEN Labs, GEN Lrel, GEN K, GEN K_factorization, GEN p, GEN
         exit(111);
     }
     
-
+    printf("\n--------------------------------\nEnd: my_p_artin_symbol\n--------------------------------\n\n");
     return gerepilecopy(av, p_Artin_symbol);
 }
 
 GEN my_Artin_symbol (GEN Labs, GEN Lrel, GEN K, GEN I_K, int p, GEN sigma) {
+    printf("\n--------------------------------\nStart: my_artin_symbol\n--------------------------------\n\n");
     pari_sp av = avma;
+    setalldebug(1);
     if (my_QV_equal0(gel(bnfisprincipal0(K, I_K, 1),1)))
     {
         //printf(ANSI_COLOR_YELLOW "Principal\n\n" ANSI_COLOR_RESET);
@@ -208,6 +211,7 @@ GEN my_Artin_symbol (GEN Labs, GEN Lrel, GEN K, GEN I_K, int p, GEN sigma) {
     
     GEN ret = stoi(smodis(stoi(Artin_symbol), p));
     ret = gerepilecopy(av, ret);
+    printf("\n--------------------------------\nEnd: my_artin_symbol\n--------------------------------\n\n");
     return ret;
 }
 

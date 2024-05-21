@@ -11,12 +11,12 @@
 #define ANSI_COLOR_CYAN    "\x1b[36m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
 
-#include "misc_functions2.h"
-#include "tests.h"
-#include "artin_symbol.h"
-#include "test_artin.h"
-#include "ext_and_aut2.h"
-#include "find_cup_matrix3.h"
+#include "headers/misc_functions2.h"
+#include "headers/tests.h"
+#include "headers/artin_symbol.h"
+#include "headers/test_artin.h"
+#include "headers/ext_and_aut2.h"
+#include "headers/find_cup_matrix3.h"
 
 
 
@@ -26,7 +26,7 @@ main (int argc, char *argv[])
     //--------
     clock_t start = clock();
     //--------
-    
+    printf("\n------------------------------------------------------------\nStarting program: finding cup products and relations for Q_2\n------------------------------------------------------------\n\n");
     
     int p_int, p_rk, r_rk;
 
@@ -35,6 +35,7 @@ main (int argc, char *argv[])
     int msec;
     
     pari_init(10000000000,500000);
+    
     // printf("Initial adress: %ld\n", avma);
     // pari_sp limit = stack_lim(avma, 1);
     
@@ -66,6 +67,20 @@ main (int argc, char *argv[])
     // Discriminant
     D = nf_get_disc(bnf_get_nf(K));
     pari_printf("Discriminant: %Ps\n\n", D);
+    pari_printf("Root discriminant: %Ps\n\n", gsqrtn(gabs(D, DEFAULTPREC), stoi(nf_get_degree(bnf_get_nf(K))), NULL, DEFAULTPREC));
+    
+    //--------------------------------------------------
+    // Check Galois
+    GEN gal = galoisconj(K, NULL);
+    
+    if (glength(gal)==nf_get_degree(bnf_get_nf(K)))
+    {
+        printf(ANSI_COLOR_GREEN "\n------------------------\nK is Galois over Q\n------------------------\n\n" ANSI_COLOR_RESET);
+    }
+    else {
+        printf(ANSI_COLOR_RED "\n------------------------\nK is not Galois over Q\n------------------------\n\n" ANSI_COLOR_RESET);
+    }
+        
 
     // Factor discriminant
     D_prime_vect = gel(factor(D), 1);
@@ -92,19 +107,50 @@ main (int argc, char *argv[])
         exit(0);
     }
     //--------------------------------------------------
-    //-----------------------------
+    //-------------------------------------------------------------------------------------------------
     // // Uncomment this if you just want the polynomials of the unramified deg p extensions
+    //-------------------------------------------------------------------------------------------------
 
     // my_unramified_p_extensions(K, p, D_prime_vect);
     
     // pari_close();
     // exit(0);
+    //--------------------------------------------------------------------------------------
 
-    //------------------------------
-    //--------------------------------------------------
+
+    //---------------------------------------------------------------------------------------------------------
     // Define polynomials for the generating fields for the part of the Hilbert class field corresp to Cl(K)/p. 
+    //---------------------------------------------------------------------------------------------------------
     p_ClFld_pol = bnrclassfield(K, p, 0, DEFAULTPREC);
-    pari_printf("p Cl Fld: %Ps\n\n", p_ClFld_pol);
+    printf("p Cl Fld: ");
+    printf(ANSI_COLOR_GREEN "Found!\n\n" ANSI_COLOR_RESET);
+    
+    //--------------------------------------------------------------------
+    // To compute absolute polynomials for the class fields, uncomment this
+    //--------------------------------------------------------------------
+    // GEN x = pol_x(fetch_user_var("x"));
+    // GEN y = pol_x(fetch_user_var("y"));
+
+    // GEN q1, p1, p1red, Lrel;
+    // // printf("base l: %ld\n", glength(base_ext));
+    // // pari_printf("Base_clf: %Ps\n\n", base_clf);
+
+    // int i;
+    // for (i=1; i<glength(p_ClFld_pol)+1; ++i) {
+    //     p1 = gel(p_ClFld_pol, i);
+    //     q1 = gsubstpol(p1, x, y);
+        
+    //     /* Define Lrel/Labs */
+    //     p1red = rnfpolredbest(K, mkvec2(q1, D_prime_vect), 0);
+    //     //p1red = q1;
+    //     // printf("Reduced polynomial for relative extension found\n");
+    //     Lrel = rnfinit(K, p1red);
+    //     //printf("Lrel found\n");
+        
+    //     printf("\n----------------------------------------------------------------------\n");
+    //     pari_printf("%Ps\n\n", polredbest(rnf_get_polabs(Lrel), 0));
+    //     printf("----------------------------------------------------------------------\n");
+    // }
     // pari_close();
     // exit(0);
     //--------------------------------------------------
@@ -128,7 +174,7 @@ main (int argc, char *argv[])
     // Find generators for the p-torsion of the class group
     J_vect = my_find_p_gens(K, p);
     p_rk = glength(J_vect);
-    printf("p-rank: %d\n\n", p_rk);
+    printf("p-rank: %d\n", p_rk);
     //--------------------------------------------------
 
     // // 6,7
@@ -153,7 +199,18 @@ main (int argc, char *argv[])
     //--------------------------------------------------
     // Define the extensions generating the p-part of the Hilbert class field corresponding to CL(K)/p
     GEN K_ext = my_ext(K, p_ClFld_pol, s, p, p_rk, D_prime_vect);
-    printf("Extensions found\n\n");
+    // printf("Extensions found\n\n");
+    //--------------------------------------------------
+
+    //--------------------------------------------------
+    // Manual version of the previous
+    // char *fields[3] = {
+    //     "large-fields/eric-bnf-64-a",
+    //     "large-fields/eric-bnf-64-b",
+    //     "large-fields/eric-bnf-64-c"
+    // };
+    // GEN K_ext = my_ext_from_file(K, fields, p_ClFld_pol, s, p, p_rk, D_prime_vect);
+   
     //--------------------------------------------------
 
     //--------------------------------------------------

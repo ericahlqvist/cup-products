@@ -2,7 +2,11 @@
 // ssh v1eahlqv@ssh1.maths.ed.ac.uk
 // ssh v1eahlqv@ssh3.maths.ed.ac.uk
 
-// ssh compute64d.maths.ed.ac.uk
+// ssh compute64d.maths.ed.ac.uk (for MAGMA)
+// ssh compute64x.maths.ed.ac.uk
+
+// ssh v1eahlqv@eddie.ecdf.ed.ac.uk
+// scp -r /path/to/local/data uun@eddie.ecdf.ed.ac.uk:/path/to/eddie/directory 
 
 // magma
 
@@ -257,12 +261,17 @@ Q_2;
 
 //-----------------------------------------------------------------
 
+F<g1,g2> := FreeGroup(2);          
+Q_1, fQ_1 := pQuotient(F, 3, 1 : Print := 1);
+a := Q_K.1;
+b := Q_K.2;
 
+SetVerbose ("GeneratepGroups", 1); 
+Q_2_candidates_all := Descendants(Q_1);
 
-
-
-
-
+l:=LowIndexSubgroups(Q_2_candidates_all[7], 3);
+#l;
+AbelianInvariants(l[5]);
 
 // 5460:
 F<g1,g2,g3,g4> := FreeGroup(4);          

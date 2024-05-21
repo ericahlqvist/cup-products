@@ -126,7 +126,7 @@ GEN my_ext_old(GEN base, GEN base_clf, int disc, GEN s, GEN p, GEN D_prime_vect,
 GEN my_ext(GEN base, GEN base_clf, GEN s, GEN p, int p_rk, GEN D_prime_vect) 
 {   
     pari_sp av = avma;
-    printf("Finding extensions... \n\n");
+    printf("\n--------------------------\nStart: my_ext\n--------------------------\n\n");
     GEN x, y, p1, q1, p1red, Lrel, Labs, s_lift_x, cx, sigma;
 
     x = pol_x(fetch_user_var("x"));
@@ -161,6 +161,15 @@ GEN my_ext(GEN base, GEN base_clf, GEN s, GEN p, int p_rk, GEN D_prime_vect)
 
         s_lift_x = rnfeltup0(Lrel, s, 1);
         cx = galoisconj(Labs, NULL);
+        //pari_printf("\nGalois conj: %Ps\n\n", cx);
+        if (glength(cx)==nf_get_degree(bnf_get_nf(Labs)))
+        {
+            printf(ANSI_COLOR_GREEN "\n------------------------\nLabs is Galois over Q\n------------------------\n\n" ANSI_COLOR_RESET);
+        }
+        else {
+            printf(ANSI_COLOR_RED "\n------------------------\nLabs is not Galois over Q\n------------------------\n\n" ANSI_COLOR_RESET);
+        }
+        
 
         for (j = 1; j < glength(cx)+1; ++j)
         {
@@ -178,6 +187,87 @@ GEN my_ext(GEN base, GEN base_clf, GEN s, GEN p, int p_rk, GEN D_prime_vect)
         gel(base_ext, i) = mkvec3(Labs, Lrel, sigma);
         // my_test_artin_symbol (Labs, Lrel, base, itos(p), sigma);
     }
+    printf(ANSI_COLOR_GREEN "Extensions and generators found\n----------------------------\n\n" ANSI_COLOR_RESET);
     base_ext = gerepilecopy(av, base_ext);
+    printf("\n--------------------------\nEnd: my_ext\n--------------------------\n\n");
+    return base_ext;
+}
+
+GEN my_ext_from_file(GEN base, char *fields[], GEN base_clf, GEN s, GEN p, int p_rk, GEN D_prime_vect) 
+{   
+    pari_sp av = avma;
+    printf("\n--------------------------\nStart: my_ext_from_file\n--------------------------\n\n");
+    GEN x, y, p1, q1, p1red, Lrel, Labs, s_lift_x, cx, sigma;
+
+    x = pol_x(fetch_user_var("x"));
+    y = pol_x(fetch_user_var("y"));
+
+    GEN base_ext = zerovec(p_rk);
+    // printf("base l: %ld\n", glength(base_ext));
+    // pari_printf("Base_clf: %Ps\n\n", base_clf);
+
+    int i, j, check_sigma=0;
+    for (i=1; i<p_rk+1; ++i) {
+
+        Labs = gp_read_file(fields[i-1]);
+        gel(gel(Labs, 7), 1) = gsubstpol(nf_get_pol(bnf_get_nf(Labs)), gpolvar(nf_get_pol(bnf_get_nf(Labs))), y);
+        printf("\n\n------------------------------------\n\nLabs found\n");
+        pari_printf("L_cyc[%d]: %Ps\n", i, bnf_get_cyc(Labs));
+        // pari_printf("rel_pol[%d]: %Ps\n", i, p1red);
+        pari_printf("\nabs pol: %Ps\n\n", nf_get_pol(bnf_get_nf(Labs)));
+        pari_printf("Variable: %Ps\n\n", gpolvar(nf_get_pol(bnf_get_nf(Labs))));
+
+        p1 = gel(base_clf, i);
+        q1 = gsubstpol(p1, x, y);
+        
+        /* Define Lrel/Labs */
+        
+        p1red = rnfpolredbest(base, mkvec2(q1, D_prime_vect), 0);
+        
+        //p1red = q1;
+        
+        
+        printf("\n\n------------------------------------\n\nReduced polynomial for relative extension found\n");
+        Lrel = rnfinit(base, p1red);
+        printf("Lrel found\n");
+        pari_printf("Abs pol: %Ps\n------------------------------------\n", rnf_get_polabs(Lrel));
+        
+        s_lift_x = rnfeltup0(Lrel, s, 1);
+        cx = galoisconj(Labs, NULL);
+        if (glength(cx)==nf_get_degree(bnf_get_nf(Labs)))
+        {
+            printf(ANSI_COLOR_GREEN "\n------------------------\nLabs is Galois over Q\n------------------------\n\n" ANSI_COLOR_RESET);
+        }
+        else {
+            printf(ANSI_COLOR_RED "\n------------------------\nLabs is not Galois over Q\n------------------------\n\n" ANSI_COLOR_RESET);
+        }
+        //printf(ANSI_COLOR_YELLOW "\nGalois group size: %ld\n\n" ANSI_COLOR_RESET, glength(cx));
+        
+        for (j = 1; j < glength(cx)+1; ++j)
+        {
+            if ( (!my_QV_equal(algtobasis(Labs,gel(cx, j)), algtobasis(Labs,y))) && my_QV_equal(galoisapply(Labs, gel(cx,j), s_lift_x), s_lift_x)) 
+            {
+                sigma = algtobasis(Labs, gel(cx, j));
+                pari_printf("sigma: %Ps\n\n", sigma);
+                check_sigma=1;
+                break;
+            }
+        }
+        if (!check_sigma)
+        {
+            printf(ANSI_COLOR_RED "\nERROR: No sigma found\n\n" ANSI_COLOR_RESET);
+            pari_close();
+            exit(111);
+        }
+        
+        //printf(ANSI_COLOR_CYAN "---> sigma <--- \n \n" ANSI_COLOR_RESET);
+        
+        
+
+        gel(base_ext, i) = mkvec3(Labs, Lrel, sigma);
+        // my_test_artin_symbol (Labs, Lrel, base, itos(p), sigma);
+    }
+    base_ext = gerepilecopy(av, base_ext);
+    printf("\n--------------------------\nEnd: my_ext_from_file\n--------------------------\n\n");
     return base_ext;
 }

@@ -1,5 +1,5 @@
 void my_test_artin_symbol (GEN Labs, GEN Lrel, GEN K, int p, GEN sigma) {
-    
+    printf("\n--------------------------\nStart: my_test_artin_symbol\n--------------------------\n\n");
     GEN I = gel(bnf_get_gen(K), 1);
     GEN elem = zerocol(nf_get_degree(bnf_get_nf(K)));
     gel(elem, 2) = gen_1;
@@ -39,6 +39,7 @@ void my_test_artin_symbol (GEN Labs, GEN Lrel, GEN K, int p, GEN sigma) {
         pari_close();
         exit(0);
     }
+    printf("\n--------------------------\nEnd: my_test_artin_symbol\n--------------------------\n\n");
 
 }
 
