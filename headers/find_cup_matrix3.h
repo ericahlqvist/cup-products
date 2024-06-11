@@ -24,7 +24,7 @@ int my_cup_matrix_3 (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, 
 
         // I_vect corresp. to i:th extension
         //I_vect = my_find_I_vect_full(Labs_cup, Lrel_cup, K, sigma_cup, Ja_vect, p_int);
-        I_vect = my_H90_vect(Labs_cup, Lrel_cup, K, sigma_cup, Ja_vect, stoi(p_int));
+        I_vect = my_H90_vect(Labs_cup, Lrel_cup, K, sigma_cup, Ja_vect, stoi(p_int), 1);
         if (gequal(I_vect,stoi(-1)))
         {
             I_vect = my_find_I_vect_full(Labs_cup, Lrel_cup, K, sigma_cup, Ja_vect, p_int);
@@ -152,7 +152,7 @@ int my_relations (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, int
         // I_vect corresp. to i:th extension
         // I_vect = my_find_I_vect_full(Labs_cup, Lrel_cup, K, sigma_cup, Ja_vect, p_int);
 
-        I_vect = my_H90_vect(Labs_cup, Lrel_cup, K, sigma_cup, Ja_vect, stoi(p_int));
+        I_vect = my_H90_vect(Labs_cup, Lrel_cup, K, sigma_cup, Ja_vect, stoi(p_int), 1);
         if (gequal(I_vect,stoi(-1)))
         {
             I_vect = my_find_I_vect_full(Labs_cup, Lrel_cup, K, sigma_cup, Ja_vect, p_int);
@@ -300,7 +300,7 @@ int my_relations (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, int
     printf("\n--------------------------\nEnd: my_relations\n--------------------------\n\n");
     printf("-----------------------------------------------------------------------------------------------\n\n");
     
-    return 0;
+    return mat_rk;
 }
 void my_cup_matrix_and_relators (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, int r_rk)
 {
@@ -324,7 +324,7 @@ void my_cup_matrix_and_relators (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, G
 
         // I_vect corresp. to i:th extension
         //I_vect = my_find_I_vect_full(Labs_cup, Lrel_cup, K, sigma_cup, Ja_vect, p_int);
-        I_vect = my_H90_vect(Labs_cup, Lrel_cup, K, sigma_cup, Ja_vect, stoi(p_int));
+        I_vect = my_H90_vect(Labs_cup, Lrel_cup, K, sigma_cup, Ja_vect, stoi(p_int), 1);
         //pari_printf(ANSI_COLOR_GREEN "-----------\n\n\nI_vect nr: %d\n\n\n-------------\n%Ps\n" ANSI_COLOR_RESET, i, I_vect);
 
         // //Test that we get a correct I
@@ -444,7 +444,7 @@ void my_quaternion_matrix (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_
         sigma_cup = gel(gel(K_ext, i), 3);
 
         // I_vect corresp. to i:th extension
-        I_vect = my_H90_vect(Labs_cup, Lrel_cup, K, sigma_cup, Ja_vect, stoi(p_int));
+        I_vect = my_H90_vect(Labs_cup, Lrel_cup, K, sigma_cup, Ja_vect, stoi(p_int), 1);
         
         //printf("I_vect nr: %d\n\n", i);
 
@@ -629,5 +629,131 @@ int my_cup_matrix_12 (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, int r_rk, GE
     pari_printf(ANSI_COLOR_CYAN "%ld\n\n" ANSI_COLOR_RESET, mat_rk);
 
     
+    return mat_rk;
+} 
+
+int my_massey_matrix (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, int r_rk, int n)
+{
+    GEN NIpJ, I_rel, Labs, Lrel, sigma, Labs_cup, Lrel_cup, sigma_cup, I_prime_vect;
+    int nr_col = p_rk*p_rk;
+    int nr_row = r_rk;
+    GEN massey_matrix = zerovec(nr_row);
+    
+    int i, j, k;
+    for (j=1; j<(nr_row+1); ++j) {
+        gel(massey_matrix, j) = zerovec(nr_col);
+    }
+
+    //pari_printf("cup_mat: %Ps\n\n", cup_matrix);
+    // i:th extension, j:th ideal J, evaluate on k:th extension 
+    for (i=1; i<p_rk+1; ++i) {
+        printf("Start round %d/%d\n\n", i, p_rk);
+        Labs_cup = gel(gel(K_ext, i), 1);
+        Lrel_cup = gel(gel(K_ext, i), 2);
+        sigma_cup = gel(gel(K_ext, i), 3);
+
+        I_prime_vect = my_H90_vect(Labs_cup, Lrel_cup, K, sigma_cup, Ja_vect, stoi(p_int), n);
+        printf("I'_vect found\n\n");
+
+        for (j=1; j<r_rk+1; ++j) {
+            // evaluate cup on j:th basis class (a,J) 
+            // pari_printf("I'_vect[%d]: %Ps\n\n", j, gel(I_prime_vect, j));
+            // printf("j=[%d]\n\n", j);
+            I_rel = rnfidealabstorel(Lrel_cup, gel(I_prime_vect, j));
+            //printf("I, %d to rel\n\n", j);
+            
+            if (p_int == 3) {
+                NIpJ = idealmul(K, gel(gel(Ja_vect, j),2), rnfidealnormrel(Lrel_cup, I_rel));
+            }
+            else {
+                NIpJ = rnfidealnormrel(Lrel_cup, I_rel);
+            }
+            
+            
+            for (k=1; k<p_rk+1; ++k) {
+                printf(ANSI_COLOR_GREEN "Start: [%d,%d,%d]\n" ANSI_COLOR_RESET, i,j,k);
+                // take Artin symbol with resp. to k:th extension
+                Labs = gel(gel(K_ext, k), 1);
+                Lrel = gel(gel(K_ext, k), 2);
+                sigma = gel(gel(K_ext, k), 3);
+                gmael2(massey_matrix, j, p_rk*(i-1)+k) = stoi(smodis(my_Artin_symbol(Labs, Lrel, K, idealred(K,NIpJ), p_int, sigma), p_int));
+                printf(ANSI_COLOR_GREEN "End: [%d,%d,%d]\n\n" ANSI_COLOR_RESET, i,j,k);
+                //pari_printf("ev_j(x_ix_k): %Ps\n\n", stoi(smodis(my_Artin_symbol(Labs, Lrel, K, NIpJ, p_int, sigma), p_int)));
+            }
+            
+        }
+        
+    }
+    pari_printf(ANSI_COLOR_CYAN "%Ps\n\n" ANSI_COLOR_RESET, massey_matrix);
+    printf(ANSI_COLOR_YELLOW "Matrix:  \n\n" ANSI_COLOR_RESET);
+    for (j=1; j<nr_row+1; ++j) {
+        pari_printf(ANSI_COLOR_CYAN "%Ps\n\n" ANSI_COLOR_RESET, gel(massey_matrix, j));
+    }
+    
+    
+    printf(ANSI_COLOR_YELLOW "rank: ");
+    long mat_rk = FpM_rank((ZM_copy(massey_matrix)), p);
+    pari_printf(ANSI_COLOR_CYAN "%ld\n\n" ANSI_COLOR_RESET, mat_rk);
+
+    // FILE *fptr;
+    // fptr = fopen("data/polynomials/ranks_S3_[2,2]", "a");
+
+    // pari_fprintf(fptr, "pol: %Ps,    rel_rk: %d,     mat_rank: %ld\n", nf_get_pol(bnf_get_nf(K)), r_rk, mat_rk);
+
+    // fclose(fptr);
+
+    if (mat_rk > 0) {
+        GEN massey_hnf = FpM_red(hnf((ZM_copy(massey_matrix))),p);
+        printf(ANSI_COLOR_YELLOW "Hermite normal form:  \n\n" ANSI_COLOR_RESET);
+        for (i=1;i<glength(massey_hnf)+1;++i) {
+            pari_printf(ANSI_COLOR_CYAN "%Ps\n\n" ANSI_COLOR_RESET, gel(massey_hnf, i));
+        }
+        
+        printf("\n\n");
+        
+        char letters[] = "abcdefghijklmnopqr";
+        printf(ANSI_COLOR_YELLOW "Massey relations:  \n\n" ANSI_COLOR_RESET);
+        int hnf_r_rk = glength(massey_hnf);
+        printf("{");
+        for (j=1; j<hnf_r_rk+1; j++) {
+            for (i=1; i<p_rk+1; ++i) {
+                for (k=1; k<p_rk+1; k++) {
+                    if (!gequal0(gel(gel(massey_hnf, j), p_rk*(i-1)+k))) {
+                        if (p_int==3) {
+                            if (i==k) {
+                                pari_printf("%c^3*%Ps", letters[i-1], gel(gel(massey_hnf, j), p_rk*(i-1)+k));
+                            }
+                            else {
+                                if (i<k)
+                                {
+                                    pari_printf("((%c,%c), %c)^%Ps", letters[i-1],letters[k-1], letters[i-1], gneg(gel(gel(massey_hnf, j), p_rk*(i-1)+k)));
+                                }
+                                else {
+                                    pari_printf("((%c,%c), %c)^%Ps", letters[i-1],letters[k-1], letters[i-1], gel(gel(massey_hnf, j), p_rk*(i-1)+k));
+                                }
+                                
+                            }
+                        }   
+                        else {
+                            if (i<k)
+                            {
+                                pari_printf("((%c,%c), %c)^%Ps", letters[i-1],letters[k-1], letters[i-1], gneg(gel(gel(massey_hnf, j), p_rk*(i-1)+k)));
+                            }
+                            if (i>k) {
+                                pari_printf("((%c,%c), %c)^%Ps", letters[i-1],letters[k-1], letters[i-1], gel(gel(massey_hnf, j), p_rk*(i-1)+k));
+                            }
+                        } 
+                    }
+                }
+            }
+            if (j==hnf_r_rk) {
+                printf("}\n");
+            }
+            else {
+                printf(", ");
+            }
+        }
+        printf("\n\n");
+    }
     return mat_rk;
 } 

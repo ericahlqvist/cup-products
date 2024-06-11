@@ -160,6 +160,7 @@ GEN my_ext(GEN base, GEN base_clf, GEN s, GEN p, int p_rk, GEN D_prime_vect)
         pari_printf("\nabs pol: %Ps\n\n", gsubstpol(rnf_get_polabs(Lrel),y, s));
 
         s_lift_x = rnfeltup0(Lrel, s, 1);
+        //pari_printf("\nLift: %Ps\n\n", s_lift_x);
         cx = galoisconj(Labs, NULL);
         //pari_printf("\nGalois conj: %Ps\n\n", cx);
         if (glength(cx)==nf_get_degree(bnf_get_nf(Labs)))
@@ -210,9 +211,17 @@ GEN my_ext_from_file(GEN base, char *fields[], GEN base_clf, GEN s, GEN p, int p
     for (i=1; i<p_rk+1; ++i) {
 
         Labs = gp_read_file(fields[i-1]);
-        gel(gel(Labs, 7), 1) = gsubstpol(nf_get_pol(bnf_get_nf(Labs)), gpolvar(nf_get_pol(bnf_get_nf(Labs))), y);
+        // gel(gel(Labs, 7), 1) = gsubstpol(nf_get_pol(bnf_get_nf(Labs)), gpolvar(nf_get_pol(bnf_get_nf(Labs))), y);
         printf("\n\n------------------------------------\n\nLabs found\n");
         pari_printf("L_cyc[%d]: %Ps\n", i, bnf_get_cyc(Labs));
+
+        // Uncomment to test if the GRH can be removed
+        // setalldebug(1);
+        // if (bnfcertify0(Labs, 0))
+        // {
+        //     printf(ANSI_COLOR_GREEN "\n------------------------\nGRH removed\n------------------------\n\n" ANSI_COLOR_RESET);
+        // }
+        
         // pari_printf("rel_pol[%d]: %Ps\n", i, p1red);
         pari_printf("\nabs pol: %Ps\n\n", nf_get_pol(bnf_get_nf(Labs)));
         pari_printf("Variable: %Ps\n\n", gpolvar(nf_get_pol(bnf_get_nf(Labs))));
@@ -233,7 +242,8 @@ GEN my_ext_from_file(GEN base, char *fields[], GEN base_clf, GEN s, GEN p, int p
         pari_printf("Abs pol: %Ps\n------------------------------------\n", rnf_get_polabs(Lrel));
         
         s_lift_x = rnfeltup0(Lrel, s, 1);
-        cx = galoisconj(Labs, NULL);
+        pari_printf("\nLift: %Ps\n\n", s_lift_x);
+        cx = galoisconj0(Labs, 0, NULL, DEFAULTPREC);
         if (glength(cx)==nf_get_degree(bnf_get_nf(Labs)))
         {
             printf(ANSI_COLOR_GREEN "\n------------------------\nLabs is Galois over Q\n------------------------\n\n" ANSI_COLOR_RESET);
@@ -245,6 +255,9 @@ GEN my_ext_from_file(GEN base, char *fields[], GEN base_clf, GEN s, GEN p, int p
         
         for (j = 1; j < glength(cx)+1; ++j)
         {
+            pari_printf("sigma s[%d]: %Ps\n", j, galoisapply(Labs, gel(cx,j), s_lift_x));
+            pari_printf("s[%d]: %Ps\n\n", j, s_lift_x);
+
             if ( (!my_QV_equal(algtobasis(Labs,gel(cx, j)), algtobasis(Labs,y))) && my_QV_equal(galoisapply(Labs, gel(cx,j), s_lift_x), s_lift_x)) 
             {
                 sigma = algtobasis(Labs, gel(cx, j));
@@ -271,3 +284,4 @@ GEN my_ext_from_file(GEN base, char *fields[], GEN base_clf, GEN s, GEN p, int p
     printf("\n--------------------------\nEnd: my_ext_from_file\n--------------------------\n\n");
     return base_ext;
 }
+

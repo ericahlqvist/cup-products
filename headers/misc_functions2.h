@@ -318,24 +318,31 @@ GEN my_find_primes_in_factorization(GEN LyAbs, GEN factorization) {
     return primes_and_es;
 }
 
-GEN my_1MS_operator (GEN L, GEN sigma) {
+GEN my_1MS_operator (GEN L, GEN sigma, int n) {
     printf("my_1MS_operator\n");
     pari_sp av = avma;
-    GEN cyc = bnf_get_cyc(L), col; 
+    GEN cyc = bnf_get_cyc(L), col, ideal; 
     GEN gens = bnf_get_gen(L);
     int l = glength(cyc);
     GEN M = zeromatcopy(l,l);
-    int i;
-    int j;
+    int i, j, k;
+
     for (i = 1; i < l+1; i++)
     {
-        col = bnfisprincipal0(L, my_1MS_ideal(L, sigma, gel(gens, i)), 0);
+        ideal = gel(gens, i);
+        for (k = 1; k < n+1; k++)
+        {
+            ideal = my_1MS_ideal(L, sigma, ideal);
+        }
+        
+        col = bnfisprincipal0(L, ideal, 0);
         for (j = 1; j < l+1; j++)
         {
             gel(col, j) = modii(gel(col, j), gel(cyc, j));
         }
         gel(M, i) = col;
     }
+    
     //pari_printf("my_1MS_operator: %Ps\n", M);
     M = gerepilecopy(av, M);
     return M;
@@ -655,7 +662,7 @@ GEN my_get_unit_group (GEN K, GEN unit_gens, GEN p)
 //------------------------------
 // Returns an ideal I in Div(L) such that iJ = (1-sigma)I in Cl(L)
 //------------------------------ 
-GEN my_H90 (GEN L, GEN iJ, GEN sigma) {
+GEN my_H90 (GEN L, GEN iJ, GEN sigma, int n) {
     printf("\n--------------------------\nStart: my_H90\n--------------------------\n\n");
     pari_sp av = avma;
     GEN H90_ideal, M, B, E, D;
@@ -668,12 +675,11 @@ GEN my_H90 (GEN L, GEN iJ, GEN sigma) {
     // M = zeromatcopy(l,l);
     // finding the matrix M consisting of exponents for the (1-sigma)g_i, Cl(L) = < g_1, ..., g_n > 
     // that is, finding the matrix corresponding to the linear operator (1-sigma)
-    M = my_1MS_operator(L, sigma);
+    M = my_1MS_operator(L, sigma, n);
     //D = zerocol(l);
 
     // finding exponents for iJ when written as a products of ideals in gens
     B = bnfisprincipal0(L, iJ, 0);
-
     
     // int i;
     // for (i = 1; i < l+1; i++)
@@ -689,14 +695,24 @@ GEN my_H90 (GEN L, GEN iJ, GEN sigma) {
     printf(ANSI_COLOR_GREEN "H90_ideal found\n" ANSI_COLOR_RESET);
 
     // Test that nothing went wrong
-    GEN Itest = idealred(L,idealdiv(L, iJ, my_1MS_ideal(L, sigma, H90_ideal)));
-    GEN test_vec = bnfisprincipal0(L, Itest, 0);
+    // GEN Itest;
+    // if (n==1)
+    // {
+    //     Itest = idealred(L,idealdiv(L, iJ, my_1MS_ideal(L, sigma, H90_ideal)));
+    // }
+    // if (n==2)
+    // {
+    //     Itest = idealred(L,idealdiv(L, iJ, my_1MS_ideal(L, sigma, my_1MS_ideal(L, sigma, H90_ideal))));
+    // }
     
-    if (!my_QV_equal0(test_vec)) {
-        printf(ANSI_COLOR_RED "Problem in my_H90\n" ANSI_COLOR_RESET);
-        pari_close();
-        exit(0);
-    }
+    
+    // GEN test_vec = bnfisprincipal0(L, Itest, 0);
+    
+    // if (!my_QV_equal0(test_vec)) {
+    //     printf(ANSI_COLOR_RED "Problem in my_H90\n" ANSI_COLOR_RESET);
+    //     pari_close();
+    //     exit(0);
+    // }
 
     H90_ideal = gerepilecopy(av, H90_ideal);
     printf("\n--------------------------\nEnd: my_H90\n--------------------------\n\n");
@@ -910,12 +926,12 @@ GEN my_get_sums (GEN basis) {
     return gp;
 }
 
-//-------------------------------------------
+//-------------------------------------------------------------------------------------------------
 // The function my_H90_vect finds for each (a, J) in Ja_vect, a fractional ideal I in Div(L) such that 
 // i(J) = (1-sigma)I + div(t), where t in L^x satisfies N(t)*a = 1.  
 // Returns: a vector of these I's 
-//-------------------------------------------
-GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p) {
+//-------------------------------------------------------------------------------------------------
+GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p, int n) {
     printf("\n--------------------------\nStart: my_H90_vect\n--------------------------\n\n");
     pari_sp av = avma;
     int r_rk = glength(Ja_vect), f, i,j, done = 0;
@@ -929,13 +945,21 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p) {
         iJ = rnfidealup0(Lrel, gel(gel(Ja_vect, i),2), 1);
 
         // Find I s.t. (1-sigma)I = iJ in Cl(L)
-        F = my_H90(Labs, iJ, sigma);
+        if (n==1)
+        {
+            F = my_H90(Labs, iJ, sigma, n);
+        }
+        else 
+        {
+            F = my_H90(Labs, idealinv(Labs, iJ), sigma, n);
+        }
+        
         // Then (1-sigma)I+div(t) = iJ for some t in L^x. However, it might be the case that N(t)*a is not 1. 
         // We know from theory that there should be an I and a t s.t (1-sigma)I+div(t) = iJ and N(t)*a=1. 
         // If I' and t' are such, then I-I' is in ker (1-sigma) so in order to find the correct I' we need to go through the kernel of (1-sigma) and for each I'' in there, take I+I'' and check f the corresponding t' satisfies N(t')*a = 1.   
 
         // Find generators for the kernel of (1-sigma)
-        ker_sol = matsolvemod(my_1MS_operator(Labs, sigma), cyc, zerocol(glength(cyc)), 1);
+        ker_sol = matsolvemod(my_1MS_operator(Labs, sigma, n), cyc, zerocol(glength(cyc)), 1);
         ker_T_basis = gtovec(gel(ker_sol, 2));
         // printf(ANSI_COLOR_GREEN "------------------------\n\n\nker_T_basis size: %ld\n\n\n------------------------\n" ANSI_COLOR_RESET, glength(ker_T_basis));
         
@@ -972,7 +996,14 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p) {
 
                 // Now find the corresponding t
                 // (Can possibly be improved by using the flag nf_GENMAT: Return t in factored form (compact representation), as a small product of S-units for a small set of finite places S, possibly with huge exponents. This kind of result can be cheaply mapped to K^*/(K^*)^l or to C or Q_p to bounded accuracy and this is usually enough for applications.)
-                is_princ = bnfisprincipal0(Labs, idealdiv(Labs, iJ, my_1MS_ideal(Labs, sigma, F_ker_T)), nf_GEN);
+                if (n==1)
+                {
+                    is_princ = bnfisprincipal0(Labs, idealdiv(Labs, iJ, my_1MS_ideal(Labs, sigma, F_ker_T)), nf_GEN);
+                }
+                if (n==2)
+                {
+                    is_princ = bnfisprincipal0(Labs, idealmul(Labs, iJ, my_1MS_ideal(Labs, sigma,my_1MS_ideal(Labs, sigma, F_ker_T))), nf_GEN);
+                }
 
                 // Sanity check
                 if (!my_QV_equal0(gel(is_princ, 1)))
@@ -1071,9 +1102,9 @@ GEN my_H90_12 (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN a, GEN J, GEN p) {
 
     done = 0;
     iJ = rnfidealup0(Lrel, J, 1);
-    F = my_H90(Labs, iJ, sigma);
+    F = my_H90(Labs, iJ, sigma, 1);
     // pari_printf("F: %Ps\n", F);
-    ker_sol = matsolvemod(my_1MS_operator(Labs, sigma), cyc, zerocol(glength(cyc)), 1);
+    ker_sol = matsolvemod(my_1MS_operator(Labs, sigma, 1), cyc, zerocol(glength(cyc)), 1);
     ker_T_basis = gtovec(gel(ker_sol, 2));
     printf(ANSI_COLOR_GREEN "------------------------\n\n\nker_T_basis size: %ld\n\n\n------------------------\n" ANSI_COLOR_RESET, glength(ker_T_basis));
     
@@ -1177,7 +1208,7 @@ GEN my_H90_exp_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p) {
         iJ = rnfidealup0(Lrel, gel(gel(Ja_vect, i),2), 1);
         F = my_H90_exp(Labs, iJ, sigma);
         // pari_printf("F: %Ps\n", F);
-        ker_sol = matsolvemod(my_1MS_operator(Labs, sigma), cyc, zerocol(glength(cyc)), 1);
+        ker_sol = matsolvemod(my_1MS_operator(Labs, sigma, 1), cyc, zerocol(glength(cyc)), 1);
         ker_T_basis = gtovec(gel(ker_sol, 2));
         printf(ANSI_COLOR_GREEN "------------------------\n\n\nker_T_basis size: %ld\n\n\n------------------------\n" ANSI_COLOR_RESET, glength(ker_T_basis));
         

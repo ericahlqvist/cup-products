@@ -204,10 +204,14 @@ main (int argc, char *argv[])
 
     //--------------------------------------------------
     // Manual version of the previous
-    // char *fields[3] = {
-    //     "large-fields/eric-bnf-64-a",
-    //     "large-fields/eric-bnf-64-b",
-    //     "large-fields/eric-bnf-64-c"
+    // char *fields[7] = {
+    //     "large-fields/2-cl-fld-5460/eric-bnf-64-R1",
+    //     "large-fields/2-cl-fld-5460/eric-bnf-64-R2",
+    //     "large-fields/2-cl-fld-5460/eric-bnf-64-R3",
+    //     "large-fields/2-cl-fld-5460/eric-bnf-64-R4",
+    //     "large-fields/2-cl-fld-5460/eric-bnf-64-R5",
+    //     "large-fields/2-cl-fld-5460/eric-bnf-64-R6",
+    //     "large-fields/2-cl-fld-5460/eric-bnf-64-R7"
     // };
     // GEN K_ext = my_ext_from_file(K, fields, p_ClFld_pol, s, p, p_rk, D_prime_vect);
    
@@ -232,7 +236,21 @@ main (int argc, char *argv[])
     // Here < - , - > denotes the Artin--Verdier pairing, which may be computed using our cup product formula and the Artin symbol. 
     int mat_rk = my_relations(K_ext, K, p, p_int, p_rk, Ja_vect, r_rk);
     printf("\n");
-
+    int rk_3_fold, rk_5_fold;
+    if (mat_rk<3)
+    {
+        rk_3_fold = my_massey_matrix(K_ext, K, p, p_int, p_rk, Ja_vect, r_rk, 2);
+        if (rk_3_fold==0)
+        {
+            rk_5_fold = my_massey_matrix(K_ext, K, p, p_int, p_rk, Ja_vect, r_rk, 4);
+            if (rk_5_fold==0)
+            {
+                my_massey_matrix(K_ext, K, p, p_int, p_rk, Ja_vect, r_rk, 6);
+            }
+        }
+        
+    }
+    
     //--------------------------------------------------
 
     printf(ANSI_COLOR_GREEN "Done! \n \n" ANSI_COLOR_RESET);
