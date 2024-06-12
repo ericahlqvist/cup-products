@@ -556,7 +556,7 @@ GEN my_get_clgp (GEN K)
 }
 
 GEN my_ideal_from_exp (GEN K, GEN exp) {
-    printf("\nmy_ideal_from_exp\n");
+    printf("\n----------------------------\nSTART: my_ideal_from_exp\n----------------------------\n");
     pari_printf("exp: %Ps\n", exp);
     pari_sp av = avma;
     GEN ideal = idealhnf0(K, gen_1, NULL);
@@ -572,6 +572,7 @@ GEN my_ideal_from_exp (GEN K, GEN exp) {
     
 
     ideal = gerepilecopy(av, ideal);
+    printf("\n----------------------------\nEND: my_ideal_from_exp\n----------------------------\n");
     return ideal;
 
 }
@@ -890,10 +891,10 @@ GEN my_find_Ja_vect(GEN K, GEN J_vect, GEN p, GEN units_mod_p) {
 
 
 
-GEN my_get_sums (GEN basis) {
+GEN my_get_sums (GEN basis, int p) {
     printf("my_get_sums\n");
     pari_sp av = avma;
-    int l = glength(basis), i, ord = 2;
+    int l = glength(basis), i, ord = p;
     int n = pow(ord, l);
     GEN gp = zerovec(n);
     GEN cyc = zerovec(l);
@@ -934,8 +935,8 @@ GEN my_get_sums (GEN basis) {
 GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p, int n) {
     printf("\n--------------------------\nStart: my_H90_vect\n--------------------------\n\n");
     pari_sp av = avma;
-    int r_rk = glength(Ja_vect), f, i,j, done = 0;
-    GEN I_vect = zerovec(r_rk), a, iJ, F, ker_T, ker_T_basis, ker_sol, F_ker_T, t, t_fact, t_rel, Nt, diff, exp, is_princ, is_norm, cyc;
+    int r_rk = glength(Ja_vect), f, i,j, k, done = 0;
+    GEN I_vect = zerovec(r_rk), a, iJ, F, ker_T, ker_T_basis, ker_sol, F_ker_T, t, t_fact, t_rel, Nt, diff, exp, is_princ, is_norm, cyc, ideal;
     cyc = gtocol(bnf_get_cyc(Labs));
     
     for (i = 1; i < r_rk+1; ++i)
@@ -971,7 +972,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p, int n
         }
         else {
             // Generate part of the kernel (or more precisely, the corresponding exponents)
-            ker_T = my_get_sums(ker_T_basis);
+            ker_T = my_get_sums(ker_T_basis, itos(p));
 
             // WARNING: The next line makes it faster but might not find the answer. Switch back to the above ker_T!
             //ker_T = shallowconcat(mkvec(zerocol(glength(gel(ker_T_basis, 1)))), ker_T_basis);
@@ -996,14 +997,21 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p, int n
 
                 // Now find the corresponding t
                 // (Can possibly be improved by using the flag nf_GENMAT: Return t in factored form (compact representation), as a small product of S-units for a small set of finite places S, possibly with huge exponents. This kind of result can be cheaply mapped to K^*/(K^*)^l or to C or Q_p to bounded accuracy and this is usually enough for applications.)
+                ideal = F_ker_T;
+                for (k = 1; k < n+1; k++)
+                {
+                    ideal = my_1MS_ideal(Labs, sigma, ideal);
+                }
                 if (n==1)
                 {
-                    is_princ = bnfisprincipal0(Labs, idealdiv(Labs, iJ, my_1MS_ideal(Labs, sigma, F_ker_T)), nf_GEN);
+                    is_princ = bnfisprincipal0(Labs, idealdiv(Labs, iJ, ideal), nf_GEN);
                 }
-                if (n==2)
-                {
-                    is_princ = bnfisprincipal0(Labs, idealmul(Labs, iJ, my_1MS_ideal(Labs, sigma,my_1MS_ideal(Labs, sigma, F_ker_T))), nf_GEN);
+                else {
+                    is_princ = bnfisprincipal0(Labs, idealmul(Labs, iJ, ideal), nf_GEN);
                 }
+                
+                
+                
 
                 // Sanity check
                 if (!my_QV_equal0(gel(is_princ, 1)))
@@ -1091,7 +1099,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p, int n
     return I_vect;
 }
 
-GEN my_H90_12 (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN a, GEN J, GEN p) {
+GEN my_H90_12 (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN a, GEN J, GEN p, int n) {
     printf(ANSI_COLOR_CYAN "\nmy_H90_vect\n" ANSI_COLOR_RESET);
     pari_sp av = avma;
     int f, j, done = 0;
@@ -1114,7 +1122,7 @@ GEN my_H90_12 (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN a, GEN J, GEN p) {
         done = 1;
     }
     else {
-        ker_T = my_get_sums(ker_T_basis);
+        ker_T = my_get_sums(ker_T_basis, itos(p));
 
         // WARNING: This makes it faster but might not find the answer. Switch back to the above ker_T
         //ker_T = shallowconcat(mkvec(zerocol(glength(gel(ker_T_basis, 1)))), ker_T_basis);
@@ -1192,7 +1200,7 @@ GEN my_H90_12 (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN a, GEN J, GEN p) {
     return I;
 }
 
-GEN my_H90_exp_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p) {
+GEN my_H90_exp_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p, int n) {
     // This function is not ready to be used
     printf(ANSI_COLOR_CYAN "\nmy_H90_exp_vect\n" ANSI_COLOR_RESET);
     pari_sp av = avma;
@@ -1218,7 +1226,7 @@ GEN my_H90_exp_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p) {
             done = 1;
         }
         else {
-            ker_T = my_get_sums(ker_T_basis);
+            ker_T = my_get_sums(ker_T_basis, itos(p));
 
             // WARNING: This makes it faster but might not find the answer. Switch back to the above ker_T
             //ker_T = shallowconcat(mkvec(zerocol(glength(gel(ker_T_basis, 1)))), ker_T_basis);

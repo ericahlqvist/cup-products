@@ -593,7 +593,7 @@ int my_cup_matrix_12 (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, int r_rk, GE
                 
                 a = rnfeltdown0(Lrel_x, rnfeltabstorel(Lrel_x, nfpow(Labs_x, b, stoi(-2))), 1);
                 J = rnfidealdown(Lrel_x, rnfidealabstorel(Lrel_x, idealhnf0(Labs_x, b, NULL)));
-                I = my_H90_12(Labs_y, Lrel_y, K, sigma_y, a, J, p);
+                I = my_H90_12(Labs_y, Lrel_y, K, sigma_y, a, J, p, 1);
                 if (gequal(I, stoi(-1)))
                 {
                     class_group = my_get_clgp(Labs_y);
@@ -684,6 +684,7 @@ int my_massey_matrix (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect,
         }
         
     }
+    printf(ANSI_COLOR_MAGENTA "\n-------------------------------------------------------\n %d-fold Massey products of the form < x, x, ..., x, y >\n-------------------------------------------------------\n\n" ANSI_COLOR_RESET, n+1);
     pari_printf(ANSI_COLOR_CYAN "%Ps\n\n" ANSI_COLOR_RESET, massey_matrix);
     printf(ANSI_COLOR_YELLOW "Matrix:  \n\n" ANSI_COLOR_RESET);
     for (j=1; j<nr_row+1; ++j) {
@@ -754,6 +755,53 @@ int my_massey_matrix (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect,
             }
         }
         printf("\n\n");
+    }
+
+    int is_zero = 1;
+    GEN next_col = zerocol(r_rk);
+    if (mat_rk > 0) {
+        for (i=1; i<p_rk+1; ++i) {
+            for (k=1; k<p_rk+1; ++k) {
+                for (j=1; j<r_rk+1; ++j) {
+                    if (!gequal0(gmael2(massey_matrix, j, p_rk*(i-1)+k)))
+                    {
+                        is_zero = 0;
+                        break;
+                    }
+                }
+                if (i!=k && is_zero)
+                {
+                    printf("Start round %d/%d\n\n", i, p_rk);
+                    Labs_cup = gel(gel(K_ext, i), 1);
+                    Lrel_cup = gel(gel(K_ext, i), 2);
+                    sigma_cup = gel(gel(K_ext, i), 3);
+
+                    I_prime_vect = my_H90_vect(Labs_cup, Lrel_cup, K, sigma_cup, Ja_vect, stoi(p_int), n+2);
+                    printf("I'_vect found\n\n");
+   
+                    // take Artin symbol with resp. to k:th extension
+                    Labs = gel(gel(K_ext, k), 1);
+                    Lrel = gel(gel(K_ext, k), 2);
+                    sigma = gel(gel(K_ext, k), 3);
+                    for (j=1; j<r_rk+1; ++j) {
+                        I_rel = rnfidealabstorel(Lrel_cup, gel(I_prime_vect, j));
+                        //printf("I, %d to rel\n\n", j);
+                        
+                        if (p_int == 3) {
+                            NIpJ = idealmul(K, gel(gel(Ja_vect, j),2), rnfidealnormrel(Lrel_cup, I_rel));
+                        }
+                        else {
+                            NIpJ = rnfidealnormrel(Lrel_cup, I_rel);
+                        }
+                        gel(next_col, j) = stoi(smodis(my_Artin_symbol(Labs, Lrel, K, idealred(K,NIpJ), p_int, sigma), p_int));
+                    }
+                    printf(ANSI_COLOR_YELLOW "\n-------------------------\n%d-fold Massey < x, x, ..., x, y >: \n-------------------------\n\n" ANSI_COLOR_RESET, n+3); 
+                    pari_printf(ANSI_COLOR_CYAN "%Ps\n" ANSI_COLOR_RESET, next_col);
+                }
+                
+            }
+        }
+        
     }
     return mat_rk;
 } 
