@@ -757,11 +757,12 @@ int my_massey_matrix (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect,
         printf("\n\n");
     }
 
-    int is_zero = 1;
+    int is_zero;
     GEN next_col = zerocol(r_rk);
     if (mat_rk > 0) {
         for (i=1; i<p_rk+1; ++i) {
             for (k=1; k<p_rk+1; ++k) {
+                is_zero = 1;
                 for (j=1; j<r_rk+1; ++j) {
                     if (!gequal0(gmael2(massey_matrix, j, p_rk*(i-1)+k)))
                     {
@@ -769,6 +770,7 @@ int my_massey_matrix (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect,
                         break;
                     }
                 }
+                //printf("< %d, %d > is zero: %d\n", i, k, is_zero);
                 if (i!=k && is_zero)
                 {
                     printf("Start round %d/%d\n\n", i, p_rk);
@@ -795,8 +797,8 @@ int my_massey_matrix (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect,
                         }
                         gel(next_col, j) = stoi(smodis(my_Artin_symbol(Labs, Lrel, K, idealred(K,NIpJ), p_int, sigma), p_int));
                     }
-                    printf(ANSI_COLOR_YELLOW "\n-------------------------\n%d-fold Massey < x, x, ..., x, y >: \n-------------------------\n\n" ANSI_COLOR_RESET, n+3); 
-                    pari_printf(ANSI_COLOR_CYAN "%Ps\n" ANSI_COLOR_RESET, next_col);
+                    printf(ANSI_COLOR_YELLOW "\n-----------------------------------------\n%d-fold Massey < x, x, ..., x, y >: \n-----------------------------------------\n\n" ANSI_COLOR_RESET, n+3); 
+                    pari_printf(ANSI_COLOR_CYAN "%Ps\n\n-------------------------\n\n" ANSI_COLOR_RESET, next_col);
                 }
                 
             }
