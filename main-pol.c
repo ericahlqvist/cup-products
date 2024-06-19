@@ -34,7 +34,7 @@
 #include "headers/ext_and_aut2.h"
 #include "headers/find_cup_matrix3.h"
 
-GEN compute_my_relations(long i, GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, int r_rk);
+GEN compute_my_relations(long i, GEN args);
 
 int
 main (int argc, char *argv[])	  
@@ -54,13 +54,13 @@ main (int argc, char *argv[])
     int sec;
     int msec;
     
-    pari_init(1L<<30,500000);
-    // entree ep = {"_worker",0,(void*)compute_my_relations,20,"GL",""};
-    // pari_init_opts(1L<<30,500000, INIT_JMPm|INIT_SIGm|INIT_DFTm|INIT_noIMTm);
-    // pari_add_function(&ep); /* add Cworker function to gp */
-    // pari_mt_init(); /* ... THEN initialize parallelism */
+    //pari_init(1L<<30,500000);
+    entree ep = {"_worker",0,(void*)compute_my_relations,20,"LG",""};
+    pari_init_opts(1L<<30,500000, INIT_JMPm|INIT_SIGm|INIT_DFTm|INIT_noIMTm);
+    pari_add_function(&ep); /* add Cworker function to gp */
+    pari_mt_init(); /* ... THEN initialize parallelism */
     paristack_setsize(1L<<30, 1L<<33);
-    //sd_threadsizemax("8589934592", 0);
+    sd_threadsizemax("8589934592", 0);
     
     // printf("Initial adress: %ld\n", avma);
     // pari_sp limit = stack_lim(avma, 1);
@@ -258,7 +258,13 @@ main (int argc, char *argv[])
     // < x_i\cup x_k, (a_j, J_j) > if i is not equal to j and
     // < B(x_i), (a_j, J_j) > if i=j. 
     // Here < - , - > denotes the Artin--Verdier pairing, which may be computed using our cup product formula and the Artin symbol. 
-    int mat_rk = my_relations(K_ext, K, p, p_int, p_rk, Ja_vect, r_rk);
+    //int mat_rk = my_relations(K_ext, K, p, p_int, p_rk, Ja_vect, r_rk);
+
+    //---------------------
+    // Parallell version
+    int mat_rk = my_relations_par(K_ext, K, p, p_rk, Ja_vect, r_rk);
+    //---------------------
+
     printf("\n");
     int rk_3_fold, rk_5_fold;
     if (mat_rk<3)

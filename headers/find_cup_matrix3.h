@@ -819,21 +819,32 @@ int my_massey_matrix (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect,
 GP;install("compute_my_relations","Gp","./stdin.so");
 */
 // Define the function prototype
-int my_relations_par(GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, int r_rk);
+int my_relations_par(GEN K_ext, GEN K, GEN p, int p_rk, GEN Ja_vect, int r_rk);
 
 // Wrapper function for parallel computation
-GEN compute_my_relations(long i, GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, int r_rk) {
+GEN compute_my_relations(long i, GEN args) {
     printf("\n--------------------------\nStart: compute_my_relations\n--------------------------\n\n");
+
+    GEN K_ext   = gel(args, 1);
+    GEN K       = gel(args, 2);
+    GEN p       = gel(args, 3); 
+    GEN gp_rk   = gel(args, 4);
+    GEN Ja_vect = gel(args, 5);
+    GEN gr_rk   = gel(args, 6);
+
     pari_sp av = avma;
-    GEN result = cgetg(2, t_VEC); // A vector to store results
+    GEN result = zerovec(2); // A vector to store results
+    
+    int p_rk = itos(gp_rk), r_rk = itos(gr_rk);
+    
     
     GEN s_cup_matrix = zerovec(r_rk);
     GEN s_cup_matrix_full = zerovec(r_rk);
 
     GEN Labs_cup, Lrel_cup, sigma_cup, I_vect, I_rel, NIpJ, Labs, Lrel, sigma;
-    int j, k;
+    long j, k;
 
-    for (j = 1; j < r_rk + 1; ++j) {
+    for (j = 1; j <= r_rk; ++j) {
         gel(s_cup_matrix, j) = zerovec((p_rk * (p_rk + 1)) / 2);
         gel(s_cup_matrix_full, j) = zerovec(p_rk * p_rk);
     }
@@ -841,48 +852,57 @@ GEN compute_my_relations(long i, GEN K_ext, GEN K, GEN p, int p_int, int p_rk, G
     Labs_cup = gmael(K_ext, i, 1);
     Lrel_cup = gmael(K_ext, i, 2);
     sigma_cup = gmael(K_ext, i, 3);
-
+    
     // Artin symbol test
-    my_test_artin_symbol(Labs_cup, Lrel_cup, K, p_int, sigma_cup);
-    I_vect = my_H90_vect(Labs_cup, Lrel_cup, K, sigma_cup, Ja_vect, stoi(p_int), 1);
+    //my_test_artin_symbol(Labs_cup, Lrel_cup, K, itos(p), sigma_cup);
+    I_vect = my_H90_vect(Labs_cup, Lrel_cup, K, sigma_cup, Ja_vect, p, 1);
     if (gequal(I_vect, gen_m1)) {
-        I_vect = my_find_I_vect_full(Labs_cup, Lrel_cup, K, sigma_cup, Ja_vect, p_int);
+        I_vect = my_find_I_vect_full(Labs_cup, Lrel_cup, K, sigma_cup, Ja_vect, itos(p));
     }
 
     for (j = 1; j < r_rk + 1; ++j) {
+        
         I_rel = rnfidealabstorel(Lrel_cup, gel(I_vect, j));
-        if (p_int == 2) {
+        if (itos(p) == 2) {
             NIpJ = idealmul(K, gel(gel(Ja_vect, j), 2), rnfidealnormrel(Lrel_cup, I_rel));
         } else {
             NIpJ = rnfidealnormrel(Lrel_cup, I_rel);
         }
         for (k = 1; k < p_rk + 1; ++k) {
+            
             Labs = gel(gel(K_ext, k), 1);
             Lrel = gel(gel(K_ext, k), 2);
             sigma = gel(gel(K_ext, k), 3);
             if (i < k) {
-                gmael2(s_cup_matrix, j, (2 * p_rk - (i - 2)) * (i - 1) / 2 + k - (i - 1)) = stoi(smodis(my_Artin_symbol(Labs, Lrel, K, idealred0(K, NIpJ, NULL), p_int, sigma), p_int));
+                
+                gmael2(s_cup_matrix, j, (2 * p_rk - (i - 2)) * (i - 1) / 2 + k - (i - 1)) = stoi(smodis(my_Artin_symbol(Labs, Lrel, K, idealred0(K, NIpJ, NULL), itos(p), sigma), itos(p)));
                 gmael2(s_cup_matrix_full, j, p_rk * (k - 1) + i) = gmael2(s_cup_matrix, j, (2 * p_rk - (i - 2)) * (i - 1) / 2 + k - (i - 1));
+                
             }
             if (i == k) {
-                gmael2(s_cup_matrix, j, (2 * p_rk - (i - 2)) * (i - 1) / 2 + k - (i - 1)) = stoi(smodis(my_Artin_symbol(Labs, Lrel, K, gel(gel(Ja_vect, j), 2), p_int, sigma), p_int));
+                
+                gmael2(s_cup_matrix, j, (2 * p_rk - (i - 2)) * (i - 1) / 2 + k - (i - 1)) = stoi(smodis(my_Artin_symbol(Labs, Lrel, K, gel(gel(Ja_vect, j), 2), itos(p), sigma), itos(p)));
                 gmael2(s_cup_matrix_full, j, p_rk * (k - 1) + i) = gmael2(s_cup_matrix, j, (2 * p_rk - (i - 2)) * (i - 1) / 2 + k - (i - 1));
+                
             }
             if (i > k) {
-                gmael2(s_cup_matrix_full, j, p_rk * (k - 1) + i) = stoi(smodis(gneg(my_Artin_symbol(Labs, Lrel, K, idealred0(K, NIpJ, NULL), p_int, sigma)), p_int));
+                
+                gmael2(s_cup_matrix_full, j, p_rk * (k - 1) + i) = stoi(smodis(gneg(my_Artin_symbol(Labs, Lrel, K, idealred0(K, NIpJ, NULL), itos(p), sigma)), itos(p)));
+                
             }
         }
     }
 
     gel(result, 1) = s_cup_matrix;
-    pari_printf("col: %Ps\n", s_cup_matrix);
+    
     gel(result, 2) = s_cup_matrix_full;
+    
     printf("\n--------------------------\nEnd: compute_my_relations\n--------------------------\n\n");
     result = gerepilecopy(av, result);
     return result;
 }
 
-int my_relations_par(GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, int r_rk) {
+int my_relations_par(GEN K_ext, GEN K, GEN p, int p_rk, GEN Ja_vect, int r_rk) {
     printf("\n--------------------------\nStart: my_relations_par\n--------------------------\n\n");
     //GEN NIpJ, I_vect, I_rel, Labs, Lrel, sigma, Labs_cup, Lrel_cup, sigma_cup;
 
@@ -900,26 +920,26 @@ int my_relations_par(GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, 
 
     struct pari_mt pt;
     
-    GEN args = mkvecn(7, K_ext, K, p, stoi(p_int), stoi(p_rk), Ja_vect, stoi(r_rk));
-    pari_printf("strtoclosure: %ld\n", lg(strtoclosure("_worker", 1, args))-1);
+    GEN args = mkvecn(6, K_ext, K, p, stoi(p_rk), Ja_vect, stoi(r_rk));
+    //pari_printf("strtoclosure: %Ps\n", strtoclosure("_worker", 1, args));
     mt_queue_start(&pt, strtoclosure("_worker", 1, args));
     
     for (i = 1; i <= p_rk || pending; i++)
     { /* submit job (in) and get result (out) */
-        printf("for i=%ld\n", i);
-        mt_queue_submit(&pt, i, i<=p_rk? stoi(i): NULL);
+        
+        mt_queue_submit(&pt, i, i<=p_rk? mkvecs(i): NULL);
         done = mt_queue_get(&pt, &taskid, &pending);
         if (done) {
             res = gel(done, 1);
             res_full = gel(done, 2);
-            //printf("Done %ld\n", i);
+            
             for (int j = 1; j <= r_rk; ++j) {
                 for (int k = 1; k <= nr_col; ++k) {
                     
-                    gmael2(cup_matrix, j, k) = gadd(gmael2(cup_matrix, j, k), gel(res, j));
+                    gmael2(cup_matrix, j, k) = gadd(gmael2(cup_matrix, j, k), gmael2(res, j, k));
                 }
                 for (int k = 1; k <= nr_col_full; ++k) {
-                    gmael2(cup_matrix_full, j, k) = gadd(gmael2(cup_matrix_full, j, k), gel(res_full, j));
+                    gmael2(cup_matrix_full, j, k) = gadd(gmael2(cup_matrix_full, j, k), gmael2(res_full, j, k));
                 }
             }
         }
@@ -989,10 +1009,10 @@ int my_relations_par(GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, 
                 for (int k = i; k <= p_rk; k++) {
                     if (!gequal0(gel(gel(cup_hnf, j), (2 * p_rk - (i - 2)) * (i - 1) / 2 + k - (i - 1)))) {
                         if (i == k) {
-                            printf("%c^%ld", letters[i - 1], p_int * smodis(gneg(gmael2(cup_hnf, j, (2 * p_rk - (i - 2)) * (i - 1) / 2 + k - (i - 1))), p_int));
+                            printf("%c^%ld", letters[i - 1], itos(p) * smodis(gneg(gmael2(cup_hnf, j, (2 * p_rk - (i - 2)) * (i - 1) / 2 + k - (i - 1))), itos(p)));
                         }
                         if (i < k) {
-                            printf("%c_%c^%ld", letters[i - 1], letters[k - 1], smodis(gneg(gmael2(cup_hnf, j, (2 * p_rk - (i - 2)) * (i - 1) / 2 + k - (i - 1))), p_int));
+                            printf("%c_%c^%ld", letters[i - 1], letters[k - 1], smodis(gneg(gmael2(cup_hnf, j, (2 * p_rk - (i - 2)) * (i - 1) / 2 + k - (i - 1))), itos(p)));
                         }
                     }
                 }

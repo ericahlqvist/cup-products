@@ -103,7 +103,7 @@ GEN my_p_Artin_symbol(GEN Labs, GEN Lrel, GEN K, GEN K_factorization, GEN p, GEN
     GEN prinit = nfmodprinit(Labs, gel(gel(idealfactor(Labs, prime_lift_1), 1), 1));
 
     // Define the generator (lifting a primitive element from the residue field)
-    generator = nfmodprlift(Labs,ffprimroot(nfmodpr(Labs,algtobasis(Labs, gp_read_str("y")),prinit), NULL),prinit);
+    generator = nfmodprlift(Labs,ffprimroot(nfmodpr(Labs,algtobasis(Labs, gpolvar(nf_get_pol(bnf_get_nf(Labs)))),prinit), NULL),prinit);
    
     
     
@@ -157,6 +157,7 @@ GEN my_p_Artin_symbol(GEN Labs, GEN Lrel, GEN K, GEN K_factorization, GEN p, GEN
 GEN my_Artin_symbol (GEN Labs, GEN Lrel, GEN K, GEN I_K, int p, GEN sigma) {
     printf("\n--------------------------------\nStart: my_artin_symbol\n--------------------------------\n\n");
     pari_sp av = avma;
+    
     setalldebug(1);
     if (my_QV_equal0(gel(bnfisprincipal0(K, I_K, 1),1)))
     {
@@ -165,12 +166,14 @@ GEN my_Artin_symbol (GEN Labs, GEN Lrel, GEN K, GEN I_K, int p, GEN sigma) {
     }
     
     int Artin_symbol = 0;
-
+    
     // Factorize the fractional ideal into primes
     GEN factorization = idealfactor(K, I_K);
     //pari_printf("factorization: %Ps\n\n", factorization);
+    
     GEN primes_and_es_in_factorization = my_find_primes_in_factorization(K, factorization);
     //pari_printf("primes_and_es: %Ps\n\n", primes_and_es_in_factorization);
+    
     GEN prime_vect = gel(primes_and_es_in_factorization,1);
     //pari_printf("Prime_vect: %Ps\n\n", prime_vect);
     

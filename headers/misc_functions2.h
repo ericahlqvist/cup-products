@@ -55,7 +55,7 @@ int my_QV_equal1 (GEN v) {
     if (!gequal1(gel(v,1))) {
             output = 0;
         }
-    for (i=2; i<glength(v)+1; ++i) {
+    for (i=2; i<lg(v); ++i) {
         if (!gequal0(gel(v,i))) {
             output = 0;
         }
@@ -66,7 +66,7 @@ int my_QV_equal1 (GEN v) {
 int my_QV_equal0 (GEN v) {
     int output = 1;
     int i;
-    for (i=1; i<glength(v)+1; ++i) {
+    for (i=1; i<lg(v); ++i) {
         if (!gequal0(gel(v,i))) {
             output = 0;
         }

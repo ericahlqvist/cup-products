@@ -243,7 +243,7 @@ GEN my_ext_from_file(GEN base, char *fields[], GEN base_clf, GEN s, GEN p, int p
         pari_printf("Abs pol: %Ps\n------------------------------------\n", rnf_get_polabs(Lrel));
         
         s_lift_x = rnfeltup0(Lrel, s, 1);
-        pari_printf("\nLift: %Ps\n\n", s_lift_x);
+        pari_printf("\nLift: %Ps\n\n%Ps\n\n", s_lift_x, basistoalg(Labs, s_lift_x));
         cx = galoisconj0(Labs, 0, NULL, DEFAULTPREC);
         if (glength(cx)==nf_get_degree(bnf_get_nf(Labs)))
         {
@@ -254,7 +254,7 @@ GEN my_ext_from_file(GEN base, char *fields[], GEN base_clf, GEN s, GEN p, int p
         }
         //printf(ANSI_COLOR_YELLOW "\nGalois group size: %ld\n\n" ANSI_COLOR_RESET, glength(cx));
         
-        for (j = 1; j < glength(cx)+1; ++j)
+        for (j = 1; j < lg(cx); ++j)
         {
             pari_printf("sigma s[%d]: %Ps\n", j, galoisapply(Labs, gel(cx,j), s_lift_x));
             pari_printf("s[%d]: %Ps\n\n", j, s_lift_x);
