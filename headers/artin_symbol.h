@@ -181,7 +181,8 @@ GEN my_Artin_symbol (GEN Labs, GEN Lrel, GEN K, GEN I_K, int p, GEN sigma) {
     GEN Gal_rel = my_Gal_rel(Labs, Lrel, K, sigma, p);
     
     int i;
-    for (i = 1; i < glength(prime_vect)+1; i++)
+    long l = lg(prime_vect);
+    for (i = 1; i < l; i++)
     {
         // The prime in "prid" format
         prime = idealfactor(K, gel(prime_vect, i));

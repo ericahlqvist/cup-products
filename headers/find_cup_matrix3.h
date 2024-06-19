@@ -16,7 +16,7 @@ int my_cup_matrix_3 (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, 
 
     //pari_printf("cup_mat: %Ps\n\n", cup_matrix);
     // i:th extension, j:th ideal J, evaluate on k:th extension 
-    for (i=1; i<p_rk+1; ++i) {
+    for (i=1; i<=p_rk; ++i) {
         printf(ANSI_COLOR_MAGENTA "-----------\n\n\nStarting i = %d\n\n\n-------------\n" ANSI_COLOR_RESET, i);
         Labs_cup = gel(gel(K_ext, i), 1);
         Lrel_cup = gel(gel(K_ext, i), 2);
@@ -45,7 +45,7 @@ int my_cup_matrix_3 (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, 
         // }
         // //----- test done
         
-        for (j=1; j<r_rk+1; ++j) {
+        for (j=1; j<=r_rk; ++j) {
             // evaluate cup on j:th basis class (a,J) 
             printf(ANSI_COLOR_MAGENTA "-----------\n\n\nStarting [i,j] = [%d, %d]\n\n\n-------------\n" ANSI_COLOR_RESET,i, j);
             I_rel = rnfidealabstorel(Lrel_cup, gel(I_vect, j));
@@ -58,7 +58,7 @@ int my_cup_matrix_3 (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, 
                 NIpJ = rnfidealnormrel(Lrel_cup, I_rel);
             }
             
-            for (k=i; k<p_rk+1; ++k) {
+            for (k=i; k<=p_rk; ++k) {
                 printf(ANSI_COLOR_YELLOW "----------------\n\n\n\nStarting [i,j,k] = [%d, %d, %d]\n\n\n\n----------------\n" ANSI_COLOR_RESET, i,j,k);
                 // take Artin symbol with resp. to k:th extension
                 Labs = gel(gel(K_ext, k), 1);
@@ -74,7 +74,7 @@ int my_cup_matrix_3 (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, 
     }
 
     printf(ANSI_COLOR_YELLOW "Cup Matrix:  \n\n" ANSI_COLOR_RESET);
-    for (j=1; j<nr_row+1; ++j) {
+    for (j=1; j<=nr_row; ++j) {
         pari_printf(ANSI_COLOR_CYAN "%Ps\n\n" ANSI_COLOR_RESET, gel(cup_matrix, j));
     }
     
@@ -86,7 +86,7 @@ int my_cup_matrix_3 (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, 
     if (mat_rk > 0) {
         GEN cup_hnf = FpM_red(hnf((ZM_copy(cup_matrix))),p);
         printf(ANSI_COLOR_YELLOW "Hermite normal form:  \n\n" ANSI_COLOR_RESET);
-        for (i=1;i<glength(cup_hnf)+1;++i) {
+        for (i=1;i<lg(cup_hnf);++i) {
             pari_printf(ANSI_COLOR_CYAN "%Ps\n\n" ANSI_COLOR_RESET, gel(cup_hnf, i));
         }
         
@@ -96,9 +96,9 @@ int my_cup_matrix_3 (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, 
         printf(ANSI_COLOR_YELLOW "Cup relations:  \n\n" ANSI_COLOR_RESET);
         int hnf_r_rk = glength(cup_hnf);
         printf("{");
-        for (j=1; j<hnf_r_rk+1; j++) {
-            for (i=1; i<p_rk+1; ++i) {
-                for (k=i; k<p_rk+1; k++) {
+        for (j=1; j<=hnf_r_rk; j++) {
+            for (i=1; i<=p_rk; ++i) {
+                for (k=i; k<=p_rk; k++) {
                     if (!gequal0(gel(gel(cup_hnf, j), (2*p_rk-(i-2))*(i-1)/2+k-(i-1)))) {
                         if (i==k && p_int==2) {
                             pari_printf("%c^(%d*%Ps)", letters[i-1], p_int, gel(gel(cup_hnf, j), (2*p_rk-(i-2))*(i-1)/2+k-(i-1)));
@@ -133,18 +133,18 @@ int my_relations (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, int
     GEN cup_matrix = zerovec(nr_row), cup_matrix_full = zerovec(nr_row);
     
     int i, j, k;
-    for (j=1; j<(nr_row+1); ++j) {
+    for (j=1; j<=nr_row; ++j) {
         gel(cup_matrix, j) = zerovec(nr_col);
         gel(cup_matrix_full, j) = zerovec(nr_col_full);
     }
     //-------------------------------------------------
 
     // <x_i cup x_k, (a_j, J_j)> = < x_k , ... > ( = Artin symbol) ----->  i:th extension, j:th ideal J, evaluate on k:th extension 
-    for (i=1; i<p_rk+1; ++i) {
+    for (i=1; i<=p_rk; ++i) {
         //printf(ANSI_COLOR_MAGENTA "-----------\n\n\nStarting i = %d\n\n\n-------------\n" ANSI_COLOR_RESET, i);
-        Labs_cup = gel(gel(K_ext, i), 1);
-        Lrel_cup = gel(gel(K_ext, i), 2);
-        sigma_cup = gel(gel(K_ext, i), 3);
+        Labs_cup = gmael(K_ext, i, 1);
+        Lrel_cup = gmael(K_ext, i, 2);
+        sigma_cup = gmael(K_ext, i, 3);
 
         // Artin symbol test
         my_test_artin_symbol(Labs_cup, Lrel_cup, K, p_int, sigma_cup);
@@ -153,7 +153,7 @@ int my_relations (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, int
         // I_vect = my_find_I_vect_full(Labs_cup, Lrel_cup, K, sigma_cup, Ja_vect, p_int);
 
         I_vect = my_H90_vect(Labs_cup, Lrel_cup, K, sigma_cup, Ja_vect, stoi(p_int), 1);
-        if (gequal(I_vect,stoi(-1)))
+        if (gequal(I_vect,gen_m1))
         {
             I_vect = my_find_I_vect_full(Labs_cup, Lrel_cup, K, sigma_cup, Ja_vect, p_int);
             // return 111;
@@ -173,7 +173,7 @@ int my_relations (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, int
         // }
         // //----- test done
         
-        for (j=1; j<r_rk+1; ++j) {
+        for (j=1; j<=r_rk; ++j) {
             // evaluate cup on j:th basis class (a,J) 
             // printf(ANSI_COLOR_MAGENTA "-----------\n\n\nStarting [i,j] = [%d, %d]\n\n\n-------------\n" ANSI_COLOR_RESET,i, j);
             I_rel = rnfidealabstorel(Lrel_cup, gel(I_vect, j));
@@ -186,7 +186,7 @@ int my_relations (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, int
                 NIpJ = rnfidealnormrel(Lrel_cup, I_rel);
             }
             
-            for (k=1; k<p_rk+1; ++k) {
+            for (k=1; k<=p_rk; ++k) {
                 // printf(ANSI_COLOR_YELLOW "----------------\n\n\n\nStarting [i,j,k] = [%d, %d, %d]\n\n\n\n----------------\n" ANSI_COLOR_RESET, i,j,k);
                 // take Artin symbol with resp. to k:th extension
                 Labs = gel(gel(K_ext, k), 1);
@@ -218,17 +218,19 @@ int my_relations (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, int
         pari_printf(ANSI_COLOR_CYAN "%Ps\n\n" ANSI_COLOR_RESET, gel(cup_matrix_full, j));
     }
     int sym_check = 1;
-    GEN fail = zerovec(2);
-    for (i = 1; i < p_rk+1; i++)
+    GEN fail;
+    for (i = 1; i <= p_rk; i++)
     {
         for (j = 1; j < r_rk; j++)
         {
-            for (k = 1; k < p_rk+1; k++)
+            for (k = 1; k <= p_rk; k++)
             {
                 if (!gequal(gmael2(cup_matrix_full, j, p_rk*(k-1)+i), gmael2(cup_matrix_full, j, p_rk*(i-1)+k)))
                 {
-                    gel(fail, 1) = stoi(i);
-                    gel(fail, 2) = stoi(k);
+                    // gel(fail, 1) = stoi(i);
+                    // gel(fail, 2) = stoi(k);
+                    fail = mkvec2s(i, k);
+                    
                     sym_check = 0;
                     break;
                 }
@@ -252,7 +254,7 @@ int my_relations (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, int
     
     printf("-----------------------------------------------------------------------------------------------\n\n");
     printf(ANSI_COLOR_YELLOW "Cup Matrix:  \n\n" ANSI_COLOR_RESET);
-    for (j=1; j<nr_row+1; ++j) {
+    for (j=1; j<=nr_row; ++j) {
         pari_printf(ANSI_COLOR_CYAN "%Ps\n\n" ANSI_COLOR_RESET, gel(cup_matrix, j));
     }
     printf(ANSI_COLOR_RED "For indices (i,i) we have B(x_i) instead of x_i cup x_i to get the correct presentation of Q_2.\n\n" ANSI_COLOR_RESET);
@@ -276,9 +278,9 @@ int my_relations (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, int
         printf(ANSI_COLOR_YELLOW "Cup relations:  \n\n" ANSI_COLOR_RESET);
         int hnf_r_rk = glength(cup_hnf);
         printf("\"\"\"[");
-        for (j=1; j<hnf_r_rk+1; j++) {
-            for (i=1; i<p_rk+1; ++i) {
-                for (k=i; k<p_rk+1; k++) {
+        for (j=1; j<=hnf_r_rk; j++) {
+            for (i=1; i<=p_rk; ++i) {
+                for (k=i; k<=p_rk; k++) {
                     if (!gequal0(gel(gel(cup_hnf, j), (2*p_rk-(i-2))*(i-1)/2+k-(i-1)))) {
                         if (i==k) {
                             printf("%c^%ld", letters[i-1], p_int*smodis(gneg(gmael2(cup_hnf, j, (2*p_rk-(i-2))*(i-1)/2+k-(i-1))), p_int));
@@ -310,13 +312,13 @@ void my_cup_matrix_and_relators (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, G
     GEN cup_matrix = zerovec(nr_row);
     
     int i, j, k;
-    for (j=1; j<(nr_row+1); ++j) {
+    for (j=1; j<=nr_row; ++j) {
         gel(cup_matrix, j) = zerovec(nr_col);
     }
 
     //pari_printf("cup_mat: %Ps\n\n", cup_matrix);
     // i:th extension, j:th ideal J, evaluate on k:th extension 
-    for (i=1; i<p_rk+1; ++i) {
+    for (i=1; i<=p_rk; ++i) {
         //printf(ANSI_COLOR_MAGENTA "-----------\n\n\nStarting i = %d\n\n\n-------------\n" ANSI_COLOR_RESET, i);
         Labs_cup = gel(gel(K_ext, i), 1);
         Lrel_cup = gel(gel(K_ext, i), 2);
@@ -339,7 +341,7 @@ void my_cup_matrix_and_relators (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, G
         // }
         // //----- test done
         
-        for (j=1; j<r_rk+1; ++j) {
+        for (j=1; j<=r_rk; ++j) {
             // evaluate cup on j:th basis class (a,J) 
             //printf(ANSI_COLOR_MAGENTA "-----------\n\n\nStarting [i,j] = [%d, %d]\n\n\n-------------\n" ANSI_COLOR_RESET,i, j);
             I_rel = rnfidealabstorel(Lrel_cup, gel(I_vect, j));
@@ -352,12 +354,12 @@ void my_cup_matrix_and_relators (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, G
                 NIpJ = rnfidealnormrel(Lrel_cup, I_rel);
             }
             
-            for (k=i; k<p_rk+1; ++k) {
+            for (k=i; k<=p_rk; ++k) {
                 //printf(ANSI_COLOR_YELLOW "----------------\n\n\n\nStarting [i,j,k] = [%d, %d, %d]\n\n\n\n----------------\n" ANSI_COLOR_RESET, i,j,k);
                 // take Artin symbol with resp. to k:th extension
-                Labs = gel(gel(K_ext, k), 1);
-                Lrel = gel(gel(K_ext, k), 2);
-                sigma = gel(gel(K_ext, k), 3);
+                Labs = gmael(K_ext, k, 1);
+                Lrel = gmael(K_ext, k, 2);
+                sigma = gmael(K_ext, k, 3);
                 gmael2(cup_matrix, j, (2*p_rk-(i-2))*(i-1)/2+k-(i-1)) = stoi(smodis(my_Artin_symbol(Labs, Lrel, K, idealred0(K,NIpJ, NULL), p_int, sigma), p_int));
                 
                 //pari_printf("ev_j(x_ix_k): %Ps\n\n", stoi(smodis(my_Artin_symbol(Labs, Lrel, K, NIpJ, p_int, sigma), p_int)));
@@ -397,9 +399,9 @@ void my_cup_matrix_and_relators (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, G
         int hnf_r_rk = glength(cup_hnf);
         pari_fprintf(fptr, "{\"pol\": \"%Ps\",\"2-rk\": \"%d\", \"relations\": \"[", nf_get_pol(bnf_get_nf(K)), hnf_r_rk);
         
-        for (j=1; j<hnf_r_rk+1; j++) {
-            for (i=1; i<p_rk+1; ++i) {
-                for (k=i; k<p_rk+1; k++) {
+        for (j=1; j<=hnf_r_rk; j++) {
+            for (i=1; i<=p_rk; ++i) {
+                for (k=i; k<=p_rk; k++) {
                     if (gequal1(gel(gel(cup_hnf, j), (2*p_rk-(i-2))*(i-1)/2+k-(i-1)))) {
                         if (i==k) {
                             pari_fprintf(fptr, "%c^2*", letters[i-1]);
@@ -807,3 +809,203 @@ int my_massey_matrix (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect,
     }
     return mat_rk;
 } 
+
+
+//------------------------------------------------
+// Parallel version of my_relations
+//------------------------------------------------
+
+/*
+GP;install("compute_my_relations","Gp","./stdin.so");
+*/
+// Define the function prototype
+int my_relations_par(GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, int r_rk);
+
+// Wrapper function for parallel computation
+GEN compute_my_relations(long i, GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, int r_rk) {
+    printf("\n--------------------------\nStart: compute_my_relations\n--------------------------\n\n");
+    pari_sp av = avma;
+    GEN result = cgetg(2, t_VEC); // A vector to store results
+    
+    GEN s_cup_matrix = zerovec(r_rk);
+    GEN s_cup_matrix_full = zerovec(r_rk);
+
+    GEN Labs_cup, Lrel_cup, sigma_cup, I_vect, I_rel, NIpJ, Labs, Lrel, sigma;
+    int j, k;
+
+    for (j = 1; j < r_rk + 1; ++j) {
+        gel(s_cup_matrix, j) = zerovec((p_rk * (p_rk + 1)) / 2);
+        gel(s_cup_matrix_full, j) = zerovec(p_rk * p_rk);
+    }
+
+    Labs_cup = gmael(K_ext, i, 1);
+    Lrel_cup = gmael(K_ext, i, 2);
+    sigma_cup = gmael(K_ext, i, 3);
+
+    // Artin symbol test
+    my_test_artin_symbol(Labs_cup, Lrel_cup, K, p_int, sigma_cup);
+    I_vect = my_H90_vect(Labs_cup, Lrel_cup, K, sigma_cup, Ja_vect, stoi(p_int), 1);
+    if (gequal(I_vect, gen_m1)) {
+        I_vect = my_find_I_vect_full(Labs_cup, Lrel_cup, K, sigma_cup, Ja_vect, p_int);
+    }
+
+    for (j = 1; j < r_rk + 1; ++j) {
+        I_rel = rnfidealabstorel(Lrel_cup, gel(I_vect, j));
+        if (p_int == 2) {
+            NIpJ = idealmul(K, gel(gel(Ja_vect, j), 2), rnfidealnormrel(Lrel_cup, I_rel));
+        } else {
+            NIpJ = rnfidealnormrel(Lrel_cup, I_rel);
+        }
+        for (k = 1; k < p_rk + 1; ++k) {
+            Labs = gel(gel(K_ext, k), 1);
+            Lrel = gel(gel(K_ext, k), 2);
+            sigma = gel(gel(K_ext, k), 3);
+            if (i < k) {
+                gmael2(s_cup_matrix, j, (2 * p_rk - (i - 2)) * (i - 1) / 2 + k - (i - 1)) = stoi(smodis(my_Artin_symbol(Labs, Lrel, K, idealred0(K, NIpJ, NULL), p_int, sigma), p_int));
+                gmael2(s_cup_matrix_full, j, p_rk * (k - 1) + i) = gmael2(s_cup_matrix, j, (2 * p_rk - (i - 2)) * (i - 1) / 2 + k - (i - 1));
+            }
+            if (i == k) {
+                gmael2(s_cup_matrix, j, (2 * p_rk - (i - 2)) * (i - 1) / 2 + k - (i - 1)) = stoi(smodis(my_Artin_symbol(Labs, Lrel, K, gel(gel(Ja_vect, j), 2), p_int, sigma), p_int));
+                gmael2(s_cup_matrix_full, j, p_rk * (k - 1) + i) = gmael2(s_cup_matrix, j, (2 * p_rk - (i - 2)) * (i - 1) / 2 + k - (i - 1));
+            }
+            if (i > k) {
+                gmael2(s_cup_matrix_full, j, p_rk * (k - 1) + i) = stoi(smodis(gneg(my_Artin_symbol(Labs, Lrel, K, idealred0(K, NIpJ, NULL), p_int, sigma)), p_int));
+            }
+        }
+    }
+
+    gel(result, 1) = s_cup_matrix;
+    pari_printf("col: %Ps\n", s_cup_matrix);
+    gel(result, 2) = s_cup_matrix_full;
+    printf("\n--------------------------\nEnd: compute_my_relations\n--------------------------\n\n");
+    result = gerepilecopy(av, result);
+    return result;
+}
+
+int my_relations_par(GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, int r_rk) {
+    printf("\n--------------------------\nStart: my_relations_par\n--------------------------\n\n");
+    //GEN NIpJ, I_vect, I_rel, Labs, Lrel, sigma, Labs_cup, Lrel_cup, sigma_cup;
+
+    int nr_col = (p_rk * (p_rk + 1) / 2), nr_col_full = p_rk * p_rk;
+    int nr_row = r_rk;
+    GEN cup_matrix = zerovec(nr_row), cup_matrix_full = zerovec(nr_row);
+    
+    for (int j = 1; j < nr_row + 1; ++j) {
+        gel(cup_matrix, j) = zerovec(nr_col);
+        gel(cup_matrix_full, j) = zerovec(nr_col_full);
+    }
+
+    long i, taskid, pending;
+    GEN done, res, res_full;
+
+    struct pari_mt pt;
+    
+    GEN args = mkvecn(7, K_ext, K, p, stoi(p_int), stoi(p_rk), Ja_vect, stoi(r_rk));
+    pari_printf("strtoclosure: %ld\n", lg(strtoclosure("_worker", 1, args))-1);
+    mt_queue_start(&pt, strtoclosure("_worker", 1, args));
+    
+    for (i = 1; i <= p_rk || pending; i++)
+    { /* submit job (in) and get result (out) */
+        printf("for i=%ld\n", i);
+        mt_queue_submit(&pt, i, i<=p_rk? stoi(i): NULL);
+        done = mt_queue_get(&pt, &taskid, &pending);
+        if (done) {
+            res = gel(done, 1);
+            res_full = gel(done, 2);
+            //printf("Done %ld\n", i);
+            for (int j = 1; j <= r_rk; ++j) {
+                for (int k = 1; k <= nr_col; ++k) {
+                    
+                    gmael2(cup_matrix, j, k) = gadd(gmael2(cup_matrix, j, k), gel(res, j));
+                }
+                for (int k = 1; k <= nr_col_full; ++k) {
+                    gmael2(cup_matrix_full, j, k) = gadd(gmael2(cup_matrix_full, j, k), gel(res_full, j));
+                }
+            }
+        }
+        
+    }
+    mt_queue_end(&pt); /* end parallelism */
+
+
+    printf(ANSI_COLOR_YELLOW "Full Cup Matrix:  (for (i,k) with i>k we have - (x_i cup x_k) instead of x_i cup x_k in order to see the symmetry).\n\n" ANSI_COLOR_RESET);
+    for (int j = 1; j < nr_row + 1; ++j) {
+        pari_printf(ANSI_COLOR_CYAN "%Ps\n\n" ANSI_COLOR_RESET, gel(cup_matrix_full, j));
+    }
+
+    int sym_check = 1;
+    GEN fail;
+    for (i = 1; i <= p_rk; i++) {
+        for (int j = 1; j < r_rk; j++) {
+            for (int k = 1; k <= p_rk; k++) {
+                if (!gequal(gmael2(cup_matrix_full, j, p_rk * (k - 1) + i), gmael2(cup_matrix_full, j, p_rk * (i - 1) + k))) {
+                    fail = mkvec2s(i, k);
+                    sym_check = 0;
+                    break;
+                }
+            }
+        }
+    }
+    switch (sym_check) {
+    case 1:
+        printf(ANSI_COLOR_GREEN "\nSymmetry test passed\n\n" ANSI_COLOR_RESET);
+        break;
+    case 0:
+        pari_printf(ANSI_COLOR_RED "\nSymmetry test failed at: %Ps\n\n" ANSI_COLOR_RESET, fail);
+        pari_close();
+        exit(111);
+        break;
+    default:
+        break;
+    }
+    
+    printf("-----------------------------------------------------------------------------------------------\n\n");
+    printf(ANSI_COLOR_YELLOW "Cup Matrix:  \n\n" ANSI_COLOR_RESET);
+    for (int j = 1; j <= nr_row; ++j) {
+        pari_printf(ANSI_COLOR_CYAN "%Ps\n\n" ANSI_COLOR_RESET, gel(cup_matrix, j));
+    }
+    printf(ANSI_COLOR_RED "For indices (i,i) we have B(x_i) instead of x_i cup x_i to get the correct presentation of Q_2.\n\n" ANSI_COLOR_RESET);
+    printf(ANSI_COLOR_CYAN "This determines the second quotient Q_2 for the lower p-central series and not only the Zassenhaus quotient ZQ_2.\n\n" ANSI_COLOR_RESET);
+    printf("———————————————————————————————–\n\n");
+    printf(ANSI_COLOR_YELLOW "rank: ");
+    long mat_rk = FpM_rank((ZM_copy(cup_matrix)), p);
+    pari_printf(ANSI_COLOR_CYAN "%ld\n\n" ANSI_COLOR_RESET, mat_rk);
+
+    if (mat_rk > 0) {
+        GEN cup_hnf = FpM_red(hnf((ZM_copy(cup_matrix))), p);
+        printf(ANSI_COLOR_YELLOW "Hermite normal form:  \n\n" ANSI_COLOR_RESET);
+        for (int i = 1; i < glength(cup_hnf) + 1; ++i) {
+            pari_printf(ANSI_COLOR_CYAN "%Ps\n\n" ANSI_COLOR_RESET, gel(cup_hnf, i));
+        }
+        
+        printf("\n\n");
+        
+        char letters[] = "abcdefghijklmnopqr";
+        printf(ANSI_COLOR_YELLOW "Cup relations:  \n\n" ANSI_COLOR_RESET);
+        int hnf_r_rk = glength(cup_hnf);
+        printf("\"\"\"[");
+        for (int j = 1; j <= hnf_r_rk; j++) {
+            for (int i = 1; i <= p_rk; ++i) {
+                for (int k = i; k <= p_rk; k++) {
+                    if (!gequal0(gel(gel(cup_hnf, j), (2 * p_rk - (i - 2)) * (i - 1) / 2 + k - (i - 1)))) {
+                        if (i == k) {
+                            printf("%c^%ld", letters[i - 1], p_int * smodis(gneg(gmael2(cup_hnf, j, (2 * p_rk - (i - 2)) * (i - 1) / 2 + k - (i - 1))), p_int));
+                        }
+                        if (i < k) {
+                            printf("%c_%c^%ld", letters[i - 1], letters[k - 1], smodis(gneg(gmael2(cup_hnf, j, (2 * p_rk - (i - 2)) * (i - 1) / 2 + k - (i - 1))), p_int));
+                        }
+                    }
+                }
+            }
+            if (j == hnf_r_rk) {
+                printf("]\"\"\"\n");
+            } else {
+                printf(", ");
+            }
+        }
+    }
+    printf("\n--------------------------\nEnd: my_relations_par\n--------------------------\n\n");
+    printf("-----------------------------------------------------------------------------------------------\n\n");
+
+    return mat_rk;
+}

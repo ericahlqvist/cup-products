@@ -132,7 +132,8 @@ GEN my_ext(GEN base, GEN base_clf, GEN s, GEN p, int p_rk, GEN D_prime_vect)
     x = pol_x(fetch_user_var("x"));
     y = pol_x(fetch_user_var("y"));
 
-    GEN base_ext = zerovec(p_rk);
+    GEN base_ext = cgetg(p_rk+1,t_VEC);
+
     // printf("base l: %ld\n", glength(base_ext));
     // pari_printf("Base_clf: %Ps\n\n", base_clf);
 

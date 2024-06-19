@@ -586,7 +586,7 @@ GEN my_vect_from_exp (GEN basis, GEN exp) {
     int l = glength(exp);
 
     int i;
-    for (i = 1; i < l+1; i++)
+    for (i = 1; i <= l; i++)
     {
         
         vect = ZC_add(vect, ZC_Z_mul(gel(basis, i), gel(exp, i)));
@@ -606,7 +606,7 @@ GEN my_get_unit_group (GEN K, GEN unit_gens, GEN p)
 
     int i;
     
-    for (i = 1; i < nr_comp+1; i++)
+    for (i = 1; i <= nr_comp; i++)
     {
         gel(cyc, i) = p;
     }
@@ -631,13 +631,13 @@ GEN my_get_unit_group (GEN K, GEN unit_gens, GEN p)
     GEN current_u, exponents, pow;
     
     
-    for (n = 1; n < nr + 1; ++n) {
+    for (n = 1; n <= nr; ++n) {
         exponents = gel(group_exp, n);
         
         int i;
         current_u = gen_1;
         
-        for ( i = 1; i < nr_comp + 1; ++i ) {
+        for ( i = 1; i <= nr_comp; ++i ) {
             
             pow = nfpow(K, gel(unit_gens, i), gel(exponents, i));
             
@@ -670,7 +670,7 @@ GEN my_H90 (GEN L, GEN iJ, GEN sigma, int n) {
 
 
     // Cycle type of Cl(L) as a column vector
-    D = gtocol(bnf_get_cyc(L));
+    D = shallowtrans(bnf_get_cyc(L));
     
     // l x l zero matrix
     // M = zeromatcopy(l,l);
@@ -735,7 +735,7 @@ GEN my_H90_exp (GEN L, GEN iJ, GEN sigma) {
 
     // finding the matrix M consisting of exponents for the (1-s)g_i, Cl(L) = < g_1, ..., g_n > 
     int i;
-    for (i = 1; i < l+1; i++)
+    for (i = 1; i <= l; i++)
     {
         gel(M, i) = bnfisprincipal0(L, idealred0(L, my_1MS_ideal(L, sigma, gel(gens, i)), NULL), 0);
     }
@@ -791,7 +791,7 @@ GEN my_norm_operator (GEN Labs, GEN Lrel, GEN K, GEN p) {
     Klength = glength(bnf_get_fu(K));
     M = zeromatcopy(Klength, Llength);
 
-    for (i = 1; i < Llength+1; i++)
+    for (i = 1; i <= Llength; i++)
     {
         g = gel(Lgens, i);
         g_rel = rnfeltabstorel(Lrel, g);
@@ -811,7 +811,7 @@ GEN my_find_p_gens (GEN K, GEN p)
     int i;
     GEN p_gens = cgetg(1, t_VEC), current_gen, my_gens = bnf_get_gen(K);
 
-    for (i = 1; i < glength(my_n)+1; i++)
+    for (i = 1; i < lg(my_n); i++)
     {
         if (dvdii(gel(my_n, i), p))
         {
@@ -839,7 +839,7 @@ void my_unramified_p_extensions(GEN K, GEN p, GEN D_prime_vect) {
     //GEN Rcb = bnrclassfield(K, subgrouplist0(bnf_get_cyc(K), mkvec(gpow(p,stoi(3), DEFAULTPREC)), 2), 2, DEFAULTPREC);
     GEN abs_pol;
     printf("[p]-extensions:\n\n");
-    for (i=1;i<glength(R)+1;i++) {
+    for (i=1;i<lg(R);i++) {
         //printf("i: %d\n", i);
         abs_pol = polredabs0(mkvec2(gel(R, i), D_prime_vect), 0);
         //abs_pol = polredabs(gel(R, i));
@@ -874,12 +874,12 @@ GEN my_find_Ja_vect(GEN K, GEN J_vect, GEN p, GEN units_mod_p) {
     GEN a;
     int i;
     
-    for (i=1; i<l+1; ++i) {
+    for (i=1; i<=l; ++i) {
         a = nfinv(K, gel(bnfisprincipal0(K, idealpow(K, gel(J_vect, i), p), 1), 2));
         gel(Ja_vect, i) = mkvec2(a, gel(J_vect, i));
     }
     
-    for (i = l+1; i < r_rk+1; i++)
+    for (i = l+1; i <= r_rk; i++)
     {
         gel(Ja_vect, i) = mkvec2(gel(units_mod_p, i-l), idealhnf0(K, gen_1, NULL));
     }
@@ -909,14 +909,14 @@ GEN my_get_sums (GEN basis, int p) {
     
 
     else {
-        for (i = 1; i < l+1; i++)
+        for (i = 1; i <= l; i++)
         {
             gel(cyc, i) = stoi(ord);
         }
         
         GEN exp = my_get_vect( l - 1, cyc );
         //pari_printf(ANSI_COLOR_MAGENTA "exp_list: %Ps\n" ANSI_COLOR_RESET, exp);
-        for (i = 1; i < n+1; i++)
+        for (i = 1; i <= n; i++)
         {
             gel(gp, i) = my_vect_from_exp(basis, gel(exp, i));
         }
@@ -937,9 +937,9 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p, int n
     pari_sp av = avma;
     int r_rk = glength(Ja_vect), f, i,j, k, done = 0;
     GEN I_vect = zerovec(r_rk), a, iJ, F, ker_T, ker_T_basis, ker_sol, F_ker_T, t, t_fact, t_rel, Nt, diff, exp, is_princ, is_norm, cyc, ideal;
-    cyc = gtocol(bnf_get_cyc(Labs));
+    cyc = shallowtrans(bnf_get_cyc(Labs));
     
-    for (i = 1; i < r_rk+1; ++i)
+    for (i = 1; i <= r_rk; ++i)
     {
         done = 0;
         a = gel(gel(Ja_vect, i), 1);
@@ -985,7 +985,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p, int n
                 Find F_ker_T --------------------
             */
             
-            for (j = 1; j < f+1; j++)
+            for (j = 1; j <= f; j++)
             {
                 printf("\nSearching: %d/%d\n", j, f);
                 // pari_printf("Adding the exp: %Ps\n", gel(ker_T, j));
@@ -998,7 +998,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p, int n
                 // Now find the corresponding t
                 // (Can possibly be improved by using the flag nf_GENMAT: Return t in factored form (compact representation), as a small product of S-units for a small set of finite places S, possibly with huge exponents. This kind of result can be cheaply mapped to K^*/(K^*)^l or to C or Q_p to bounded accuracy and this is usually enough for applications.)
                 ideal = F_ker_T;
-                for (k = 1; k < n+1; k++)
+                for (k = 1; k <= n; k++)
                 {
                     ideal = my_1MS_ideal(Labs, sigma, ideal);
                 }
@@ -1065,9 +1065,17 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p, int n
                 pari_printf(ANSI_COLOR_MAGENTA "exp: %Ps\n" ANSI_COLOR_RESET, exp);
 
                 // Check if N(t)*a is the norm of a unit. If it is, we may modify t by this unit without effecting the equality 
-                // (1-sigma)I=iJ and hence we are done. Returns zero if not a norm (which should never happen).
+                // (1-sigma)I = iJ and hence we are done. Returns zero if not a norm (which should never happen).
+
+                // Use ZM_gauss instead?
+                
                 is_norm = matsolvemod(my_norm_operator(Labs, Lrel, K, p), zerocol(glength(exp)), gtocol(exp), 0);
+
+                // Modify to check "if norm" modulo p. Use compact representation, take modulo p, then "factorback"
+
                 pari_printf(ANSI_COLOR_CYAN "is_norm: %Ps\n" ANSI_COLOR_RESET, is_norm);
+
+                // Use ZV_equal0 or gequal0
 
                 // if N(t)*a = 1 or if N(t)*a is a norm
                 if (my_QV_equal0(exp) || !gequal0(is_norm))
@@ -1135,7 +1143,7 @@ GEN my_H90_12 (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN a, GEN J, GEN p, int n)
             Find F_ker_T --------------------
         */
         
-        for (j = 1; j < f+1; j++)
+        for (j = 1; j <= f; j++)
         {
             printf("\nSearching: %d/%d\n", j, f);
             // pari_printf("Adding the exp: %Ps\n", gel(ker_T, j));
@@ -1206,10 +1214,10 @@ GEN my_H90_exp_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p, i
     pari_sp av = avma;
     int r_rk = glength(Ja_vect), f, j, done = 0;
     GEN I_vect = zerovec(r_rk), a, iJ, F, ker_T, ker_T_basis, ker_sol, F_ker_T, t, t_rel, Nt, diff, exp, is_princ, is_norm, cyc;
-    cyc = gtocol(bnf_get_cyc(Labs));
+    cyc = shallowtrans(bnf_get_cyc(Labs));
     int i;
     
-    for (i = 1; i < r_rk+1; ++i)
+    for (i = 1; i <= r_rk; ++i)
     {
         done = 0;
         a = gel(gel(Ja_vect, i), 1);
@@ -1240,7 +1248,7 @@ GEN my_H90_exp_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p, i
                 Find F_ker_T --------------------
             */
             
-            for (j = 1; j < f+1; j++)
+            for (j = 1; j <= f; j++)
             {
                 printf("%d/%d\n", j, f);
                 // pari_printf("Adding the exp: %Ps\n", gel(ker_T, j));
@@ -1311,7 +1319,7 @@ void my_compute_unit_norms(GEN Lrel, GEN K, GEN units_group) {
     int l = glength(units_group);
     
     int i;
-    for (i = 1; i < l+1; i++)
+    for (i = 1; i <= l; i++)
     {
         rel_unit = rnfeltabstorel(Lrel, gel(units_group, i));
         norm = rnfeltnorm(Lrel, rel_unit);
@@ -1341,7 +1349,7 @@ void my_compute_unit_diffs(GEN Labs, GEN sigma, GEN units_group) {
     int l = glength(units_group);
     
     int i;
-    for (i = 1; i < l+1; i++)
+    for (i = 1; i <= l; i++)
     {
         diff = my_1MS_elt(Labs, sigma, gel(units_group, i));
 
@@ -1354,7 +1362,7 @@ void my_diffs(GEN K_ext, GEN p) {
     GEN Labs, unit_group, sigma;
     int l = glength(K_ext);
     int i;
-    for (i = 1; i < l+1; i++)
+    for (i = 1; i <= l; i++)
     {
         Labs = gel(gel(K_ext, i), 1);
         sigma = gel(gel(K_ext, i), 3);
@@ -1372,7 +1380,7 @@ void my_compute_matrices(GEN Labs, GEN sigma, GEN units_group) {
     
     int i;
     printf("1:\n\n");
-    for (i = 1; i < l+1; i++)
+    for (i = 1; i <= l; i++)
     {
         image = bnfisunit0(Labs, gel(units_group, i), NULL);
 
@@ -1380,7 +1388,7 @@ void my_compute_matrices(GEN Labs, GEN sigma, GEN units_group) {
 
     }
     printf("\nsigma:\n\n");
-    for (i = 1; i < l+1; i++)
+    for (i = 1; i <= l; i++)
     {
         image = bnfisunit0(Labs, galoisapply(Labs, sigma, gel(units_group, i)), NULL);
 
@@ -1388,7 +1396,7 @@ void my_compute_matrices(GEN Labs, GEN sigma, GEN units_group) {
 
     }
     printf("\nsigma^2:\n\n");
-    for (i = 1; i < l+1; i++)
+    for (i = 1; i <= l; i++)
     {
         image = bnfisunit0(Labs, galoisapply(Labs, sigma, galoisapply(Labs, sigma, gel(units_group, i))), NULL);
 
@@ -1401,7 +1409,7 @@ void my_matrices(GEN K_ext, GEN p) {
     GEN Labs, unit_group, sigma;
     int l = glength(K_ext);
     int i;
-    for (i = 1; i < l+1; i++)
+    for (i = 1; i <= l; i++)
     {
         Labs = gel(gel(K_ext, i), 1);
         sigma = gel(gel(K_ext, i), 3);
@@ -1454,14 +1462,14 @@ GEN my_find_I_full (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN i_xJ, GEN a, GEN c
     l = glength(L_unit_group);
     norms = zerovec(l);
     
-    for (n = 1; n < l+1; n++)
+    for (n = 1; n <= l; n++)
     {
         gel(norms, n) = algtobasis(K, rnfeltnorm(Lrel, rnfeltabstorel(Lrel, gel(L_unit_group, n))));
     }
     // pari_close();
     // exit(0);
     int i;
-    for (n = 1; n < clnr + 1; ++n) {
+    for (n = 1; n <= clnr; ++n) {
         printf("%d/%d\n", n, clnr);
         current_I = gel(class_group, n);
         Itest = idealdiv(Labs, i_xJ, my_1MS_ideal(Labs, sigma, current_I));
@@ -1481,7 +1489,7 @@ GEN my_find_I_full (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN i_xJ, GEN a, GEN c
                 t_rel = rnfeltabstorel(Lrel, t);
                 norm_t = rnfeltnorm(Lrel, t_rel);
                 diff = nfmul(K, norm_t, a);
-                for ( i = 1; i < l+1; i++)
+                for ( i = 1; i <= l; i++)
                 {
                     exponents = bnfisunit0(K, nfdiv(K, diff, gel(norms, i)), NULL);
                     if (l%1000==0)
@@ -1523,7 +1531,7 @@ GEN my_find_I_vect_full (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, int 
    
     int i;
     
-    for (i = 1; i < r_rk+1; ++i)
+    for (i = 1; i <= r_rk; ++i)
     {
         a = gel(gel(Ja_vect, i), 1);
         i_xJ = rnfidealup0(Lrel, gel(gel(Ja_vect, i),2), 1);

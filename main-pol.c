@@ -1,7 +1,10 @@
 
+#include <pthread.h>
 #include <pari/pari.h>
 #include <stdio.h>
 #include <time.h>
+
+#define NUM_THREADS 4
 
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_GREEN   "\x1b[32m"
@@ -11,6 +14,19 @@
 #define ANSI_COLOR_CYAN    "\x1b[36m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
 
+// typedef struct {
+//     GEN K_ext;
+//     GEN K;
+//     GEN p;
+//     int p_int;
+//     int p_rk;
+//     GEN Ja_vect;
+//     int r_rk;
+//     int i;
+//     GEN cup_matrix;
+//     GEN cup_matrix_full;
+// } thread_data_t;
+
 #include "headers/misc_functions2.h"
 #include "headers/tests.h"
 #include "headers/artin_symbol.h"
@@ -18,13 +34,17 @@
 #include "headers/ext_and_aut2.h"
 #include "headers/find_cup_matrix3.h"
 
-
+GEN compute_my_relations(long i, GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, int r_rk);
 
 int
 main (int argc, char *argv[])	  
 {
     //--------
     clock_t start = clock();
+    //  pari_timer ti;
+    //  timer_start(&ti);
+    //  timer_printf(&ti,"   %Ps ");
+    // timer_delay
     //--------
     printf("\n------------------------------------------------------------\nStarting program: finding cup products and relations for Q_2\n------------------------------------------------------------\n\n");
     
@@ -34,12 +54,18 @@ main (int argc, char *argv[])
     int sec;
     int msec;
     
-    pari_init(10000000000,500000);
+    pari_init(1L<<30,500000);
+    // entree ep = {"_worker",0,(void*)compute_my_relations,20,"GL",""};
+    // pari_init_opts(1L<<30,500000, INIT_JMPm|INIT_SIGm|INIT_DFTm|INIT_noIMTm);
+    // pari_add_function(&ep); /* add Cworker function to gp */
+    // pari_mt_init(); /* ... THEN initialize parallelism */
+    paristack_setsize(1L<<30, 1L<<33);
+    //sd_threadsizemax("8589934592", 0);
     
     // printf("Initial adress: %ld\n", avma);
     // pari_sp limit = stack_lim(avma, 1);
     
-    GEN p = cgeti(DEFAULTPREC);
+    GEN p;
     GEN s = pol_x(fetch_user_var("s"));
     GEN K, f, Kcyc, p_ClFld_pol, J_vect, Ja_vect, D, D_prime_vect;
 
@@ -55,7 +81,7 @@ main (int argc, char *argv[])
     //--------------------------------------------------
     // Define base field K
     // Use flag nf_FORCE
-    K = Buchall(f, nf_GEN, DEFAULTPREC);
+    K = Buchall(f, nf_FORCE, DEFAULTPREC);
     //--------------------------------------------------
 
     // Other possible precisions
@@ -95,13 +121,11 @@ main (int argc, char *argv[])
     // pari_close();
     // exit(0);
 
-    // Class number of K
-    int Knr = itos(bnf_get_no(K));
 
     // Test if p divides the class number. If not, then H^1(X, Z/pZ) = 0 and there is nothing to compute. 
-    if (Knr%p_int != 0)
+    if (!dvdiu(bnf_get_no(K), p_int))
     {
-        pari_printf("%Ps does not divide the class number %d\n", p, Knr);
+        pari_printf("%Ps does not divide the class number %Ps\n", p, bnf_get_no(K));
         pari_printf("Disc: %Ps\n", D);
         pari_close();
         exit(0);
