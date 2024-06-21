@@ -925,11 +925,12 @@ int my_relations_par(GEN K_ext, GEN K, GEN p, int p_rk, GEN Ja_vect, int r_rk) {
     mt_queue_start(&pt, strtoclosure("_worker", 1, args));
     
     for (i = 1; i <= p_rk || pending; i++)
-    { /* submit job (in) and get result (out) */
-        
+    { 
+        printf("for i = %ld <= %d\n", i, p_rk);
         mt_queue_submit(&pt, i, i<=p_rk? mkvecs(i): NULL);
         done = mt_queue_get(&pt, &taskid, &pending);
         if (done) {
+            printf("Done i = %ld \n", i);
             res = gel(done, 1);
             res_full = gel(done, 2);
             
@@ -948,7 +949,7 @@ int my_relations_par(GEN K_ext, GEN K, GEN p, int p_rk, GEN Ja_vect, int r_rk) {
     mt_queue_end(&pt); /* end parallelism */
 
 
-    printf(ANSI_COLOR_YELLOW "Full Cup Matrix:  (for (i,k) with i>k we have - (x_i cup x_k) instead of x_i cup x_k in order to see the symmetry).\n\n" ANSI_COLOR_RESET);
+    printf(ANSI_COLOR_YELLOW "\n\nFull Cup Matrix:  (for (i,k) with i>k we have - (x_i cup x_k) instead of x_i cup x_k in order to see the symmetry).\n\n" ANSI_COLOR_RESET);
     for (int j = 1; j < nr_row + 1; ++j) {
         pari_printf(ANSI_COLOR_CYAN "%Ps\n\n" ANSI_COLOR_RESET, gel(cup_matrix_full, j));
     }

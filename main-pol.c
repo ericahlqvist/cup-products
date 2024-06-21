@@ -267,7 +267,7 @@ main (int argc, char *argv[])
 
     printf("\n");
     int rk_3_fold, rk_5_fold;
-    if (mat_rk<3)
+    if ((mat_rk<3 && p_int>2) || (mat_rk==0 && p_int==2))
     {
         rk_3_fold = my_massey_matrix(K_ext, K, p, p_int, p_rk, Ja_vect, r_rk, 2);
         if (rk_3_fold==0)
