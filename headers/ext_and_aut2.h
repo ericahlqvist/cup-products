@@ -136,7 +136,8 @@ GEN my_ext(GEN base, GEN base_clf, GEN s, GEN p, int p_rk, GEN D_prime_vect)
 
     // printf("base l: %ld\n", glength(base_ext));
     // pari_printf("Base_clf: %Ps\n\n", base_clf);
-
+    char filename[100];
+    
     int i, j;
     for (i=1; i<p_rk+1; ++i) {
         p1 = gel(base_clf, i);
@@ -184,9 +185,13 @@ GEN my_ext(GEN base, GEN base_clf, GEN s, GEN p, int p_rk, GEN D_prime_vect)
         }
         //printf(ANSI_COLOR_CYAN "---> sigma <--- \n \n" ANSI_COLOR_RESET);
         
-        
-
+    
         gel(base_ext, i) = mkvec3(Labs, Lrel, sigma);
+
+        sprintf(filename, "/Users/eric/Documents/Matematik/cup-products/large-fields/test/ext_%d", i);
+        writebin(filename, gel(base_ext, i));
+        
+        
         // my_test_artin_symbol (Labs, Lrel, base, itos(p), sigma);
     }
     printf(ANSI_COLOR_GREEN "Extensions and generators found\n----------------------------\n\n" ANSI_COLOR_RESET);

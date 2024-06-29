@@ -41,8 +41,7 @@ main (int argc, char *argv[])
 {
     //--------
     clock_t start = clock();
-    //  pari_timer ti;
-    //  timer_start(&ti);
+    // pari_timer ti;
     //  timer_printf(&ti,"   %Ps ");
     // timer_delay
     //--------
@@ -61,7 +60,7 @@ main (int argc, char *argv[])
     pari_mt_init(); /* ... THEN initialize parallelism */
     paristack_setsize(1L<<30, 1L<<33);
     sd_threadsizemax("8589934592", 0);
-    
+    // timer_start(&ti);
     // printf("Initial adress: %ld\n", avma);
     // pari_sp limit = stack_lim(avma, 1);
     
@@ -239,8 +238,18 @@ main (int argc, char *argv[])
     // };
     // GEN K_ext = my_ext_from_file(K, fields, p_ClFld_pol, s, p, p_rk, D_prime_vect);
    
+    // Even more manual input
     //--------------------------------------------------
-
+    // char *exts[7] = {
+    //     "ext_1",
+    //     "ext_2",
+    //     "ext_3",
+    //     "ext_4",
+    //     "ext_5",
+    //     "ext_6",
+    //     "ext_7"
+    // };
+    // GEN K_ext = mkvecn(p_rk, gp_read_file(exts[1], exts[2], exts[3], exts[4], exts[5], exts[6], exts[7]));
     //--------------------------------------------------
     // Find generators for H^1(X, mu_p), which is dual to H^2(X, Z/pZ)
     Ja_vect = my_find_Ja_vect(K, J_vect, p, units_mod_p);
@@ -283,9 +292,13 @@ main (int argc, char *argv[])
     
     //--------------------------------------------------
 
-    printf(ANSI_COLOR_GREEN "Done! \n \n" ANSI_COLOR_RESET);
+    printf(ANSI_COLOR_GREEN "Done! \n \n" ANSI_COLOR_YELLOW);
 
     // Close pari
+    // printf(ANSI_COLOR_YELLOW "Time taken: %ld ms\n\n" ANSI_COLOR_RESET, timer_delay(&ti));
+    // timer_printf(&ti,  " ");
+    
+    // printf(ANSI_COLOR_MAGENTA "\n-----------------------------------------\nClosing pari\n-----------------------------------------\n\n" ANSI_COLOR_RESET);
     pari_close();
 
     //--------
