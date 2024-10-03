@@ -319,8 +319,8 @@ GEN my_find_primes_in_factorization(GEN LyAbs, GEN factorization) {
 }
 
 GEN my_1MS_operator (GEN L, GEN sigma, int n) {
-    printf("my_1MS_operator\n");
-    pari_sp av = avma;
+    pari_printf("\n------------------------\nStart: my_1MS_operator\n------------------------\n\n");
+    //pari_sp av = avma;
     GEN cyc = bnf_get_cyc(L), col, ideal; 
     GEN gens = bnf_get_gen(L);
     int l = glength(cyc);
@@ -329,6 +329,8 @@ GEN my_1MS_operator (GEN L, GEN sigma, int n) {
 
     for (i = 1; i < l+1; i++)
     {
+        pari_printf("i: %d\n", i);
+        pari_sp av = avma;
         ideal = gel(gens, i);
         for (k = 1; k < n+1; k++)
         {
@@ -336,21 +338,24 @@ GEN my_1MS_operator (GEN L, GEN sigma, int n) {
         }
         
         col = bnfisprincipal0(L, ideal, 0);
+        pari_printf("ideal[%d] in basis: %Ps\n", i, col);
         for (j = 1; j < l+1; j++)
         {
             gel(col, j) = modii(gel(col, j), gel(cyc, j));
         }
+        col = gerepilecopy(av, col);
         gel(M, i) = col;
     }
     
     //pari_printf("my_1MS_operator: %Ps\n", M);
-    M = gerepilecopy(av, M);
+    //M = gerepilecopy(av, M);
+    pari_printf("\n------------------------\nEnd: my_1MS_operator\n------------------------\n\n");
     return M;
 }
 
 GEN my_1MS_elt_operator (GEN L, GEN sigma) {
-    printf("my_1MS_elt_operator\n");
-    pari_sp av = avma;
+    pari_printf("\n------------------------\nStart: my_1MS_elt_operator\n------------------------\n\n");
+    //pari_sp av = avma;
     GEN int_basis = nf_get_zk(bnf_get_nf(L)), col, basis_vec;
     //pari_printf("int_basis: %Ps\n", int_basis);
     int l = glength(int_basis);
@@ -359,12 +364,15 @@ GEN my_1MS_elt_operator (GEN L, GEN sigma) {
     
     for (i = 1; i < l+1; i++)
     {
+        pari_sp av = avma;
         basis_vec = algtobasis(L, gel(int_basis, i));
         col = algtobasis(L, my_1MS_elt(L, sigma, basis_vec));
         //pari_printf("col: %Ps\n", col);
+        col = gerepilecopy(av, col);
         gel(M, i) = col;
     }
-    M = gerepilecopy(av, M);
+    //M = gerepilecopy(av, M);
+    pari_printf("\n------------------------\nEnd: my_1MS_elt_operator\n------------------------\n\n");
     return M;
 }
 
@@ -432,7 +440,7 @@ GEN my_find_ext_pol(GEN K_ext) {
 }
 
 GEN my_Gal_rel (GEN Labs, GEN Lrel, GEN K, GEN sigma, int p) {
-    printf("\n------------------------\nStart: my_Gal_rel\n------------------------\n\n");
+    pari_printf("\n------------------------\nStart: my_Gal_rel\n------------------------\n\n");
     setalldebug(1);
     GEN Gal_rel = zerovec(p);
     pari_printf("\nsigma: %Ps\n\n", sigma);
@@ -445,7 +453,7 @@ GEN my_Gal_rel (GEN Labs, GEN Lrel, GEN K, GEN sigma, int p) {
         current_sigma = galoisapply(Labs, sigma, current_sigma); 
         
     }
-    printf("\n------------------------\nEnd: my_Gal_rel\n------------------------\n\n");
+    pari_printf("\n------------------------\nEnd: my_Gal_rel\n------------------------\n\n");
     return Gal_rel;
 }
 
@@ -558,7 +566,7 @@ GEN my_get_clgp (GEN K)
 GEN my_ideal_from_exp (GEN K, GEN exp) {
     printf("\n----------------------------\nSTART: my_ideal_from_exp\n----------------------------\n");
     pari_printf("exp: %Ps\n", exp);
-    pari_sp av = avma;
+    //pari_sp av = avma;
     GEN ideal = idealhnf0(K, gen_1, NULL);
     GEN gens = bnf_get_gen(K);
     int l = glength(exp);
@@ -566,12 +574,14 @@ GEN my_ideal_from_exp (GEN K, GEN exp) {
     for (i = 1; i < l+1; i++)
     {
         printf("%d/%d\n", i, l);
+        pari_sp av = avma;
         ideal = idealred0(K, idealmul(K, ideal, idealred0(K, idealpow(K, gel(gens, i), gel(exp, i)), NULL)), NULL);
+        ideal = gerepilecopy(av, ideal);
         //printf("%d/%d\n", i, l);
     }
     
 
-    ideal = gerepilecopy(av, ideal);
+    //ideal = gerepilecopy(av, ideal);
     printf("\n----------------------------\nEND: my_ideal_from_exp\n----------------------------\n");
     return ideal;
 
@@ -783,7 +793,8 @@ GEN my_find_units_mod_p (GEN K, GEN p) {
 }
 
 GEN my_norm_operator (GEN Labs, GEN Lrel, GEN K, GEN p) {
-    pari_sp av = avma;
+    printf("\n--------------------------\nStart: my_norm_operator\n--------------------------\n\n");
+    //pari_sp av = avma;
     GEN M, g, g_rel, Ng, Lgens;
     int Klength, Llength, i;
     Lgens = shallowconcat(bnf_get_fu(Labs), bnf_get_tuU(Labs));
@@ -793,14 +804,17 @@ GEN my_norm_operator (GEN Labs, GEN Lrel, GEN K, GEN p) {
 
     for (i = 1; i <= Llength; i++)
     {
+        pari_sp av = avma;
         g = gel(Lgens, i);
         g_rel = rnfeltabstorel(Lrel, g);
         Ng = rnfeltnorm(Lrel, g_rel);
         gel(M, i) = bnfisunit0(K, Ng, NULL);
+        M = gerepilecopy(av, M);
     }
     
 
-    M = gerepilecopy(av, M);
+    //M = gerepilecopy(av, M);
+    printf("\n--------------------------\nEnd: my_norm_operator\n--------------------------\n\n");
     return M;
 }
 
@@ -1062,6 +1076,13 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p, int n
                 // Since div(a)+pJ = 0 and div(N(t))-pJ = 0, we get that div(N(t)*a) = 0 and therefore N(t)*a must be a unit.
                 // Next we find its exponents in terms of the fixed generators of the unit group 
                 exp = bnfisunit0(K, diff, NULL);
+                if (glength(exp)==0)
+                {
+                    pari_printf(ANSI_COLOR_RED "PROBLEM in my_H90_vect: no exp???\n" ANSI_COLOR_RESET);
+                    pari_close();
+                    exit(111);
+                }
+                
                 pari_printf(ANSI_COLOR_MAGENTA "exp: %Ps\n" ANSI_COLOR_RESET, exp);
 
                 // Check if N(t)*a is the norm of a unit. If it is, we may modify t by this unit without effecting the equality 

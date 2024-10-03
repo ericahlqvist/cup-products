@@ -53,19 +53,19 @@ main (int argc, char *argv[])
     int sec;
     int msec;
     
-    //pari_init(1L<<30,500000);
-    entree ep = {"_worker",0,(void*)compute_my_relations,20,"LG",""};
-    pari_init_opts(1L<<30,500000, INIT_JMPm|INIT_SIGm|INIT_DFTm|INIT_noIMTm);
-    pari_add_function(&ep); /* add Cworker function to gp */
-    pari_mt_init(); /* ... THEN initialize parallelism */
+    pari_init(1L<<30,500000);
+    // entree ep = {"_worker",0,(void*)compute_my_relations,20,"LG",""};
+    // pari_init_opts(1L<<30,500000, INIT_JMPm|INIT_SIGm|INIT_DFTm|INIT_noIMTm);
+    // pari_add_function(&ep); /* add Cworker function to gp */
+    // pari_mt_init(); /* ... THEN initialize parallelism */
     paristack_setsize(1L<<30, 1L<<33);
-    sd_threadsizemax("8589934592", 0);
+    //sd_threadsizemax("8589934592", 0);
     // timer_start(&ti);
     // printf("Initial adress: %ld\n", avma);
     // pari_sp limit = stack_lim(avma, 1);
     
-    GEN p;
-    GEN s = pol_x(fetch_user_var("s"));
+    GEN p, s=pol_x(fetch_user_var("s"));
+    
     GEN K, f, Kcyc, p_ClFld_pol, J_vect, Ja_vect, D, D_prime_vect;
 
     // Read the prime number p from arguments
@@ -249,7 +249,12 @@ main (int argc, char *argv[])
     //     "ext_6",
     //     "ext_7"
     // };
-    // GEN K_ext = mkvecn(p_rk, gp_read_file(exts[1], exts[2], exts[3], exts[4], exts[5], exts[6], exts[7]));
+    // GEN K_ext = mkvecn(p_rk, gp_read_file(exts[0]), gp_read_file(exts[1]), gp_read_file(exts[2]), gp_read_file(exts[3]), gp_read_file(exts[4]), gp_read_file(exts[5]), gp_read_file(exts[6]));
+    // for (int i = 1; i < 8; i++)
+    // {
+    //     pari_printf("cyc[%d]: %Ps\n", i, bnf_get_cyc(gel(gel(K_ext, i), 1)));
+    // }
+
     //--------------------------------------------------
     // Find generators for H^1(X, mu_p), which is dual to H^2(X, Z/pZ)
     Ja_vect = my_find_Ja_vect(K, J_vect, p, units_mod_p);
@@ -267,11 +272,11 @@ main (int argc, char *argv[])
     // < x_i\cup x_k, (a_j, J_j) > if i is not equal to j and
     // < B(x_i), (a_j, J_j) > if i=j. 
     // Here < - , - > denotes the Artin--Verdier pairing, which may be computed using our cup product formula and the Artin symbol. 
-    //int mat_rk = my_relations(K_ext, K, p, p_int, p_rk, Ja_vect, r_rk);
+    int mat_rk = my_relations(K_ext, K, p, p_int, p_rk, Ja_vect, r_rk);
 
     //---------------------
     // Parallell version
-    int mat_rk = my_relations_par(K_ext, K, p, p_rk, Ja_vect, r_rk);
+    //int mat_rk = my_relations_par(K_ext, K, p, p_rk, Ja_vect, r_rk);
     //---------------------
 
     printf("\n");

@@ -60,13 +60,13 @@ GEN my_p_Artin_symbol(GEN Labs, GEN Lrel, GEN K, GEN K_factorization, GEN p, GEN
     pari_sp av = avma;
     GEN p_Artin_symbol, exp, sigma;
     //GEN y=pol_x(fetch_user_var("y"));
-    
+    // printf("1\n");
     // Define the prime from factorization
     GEN prime = idealhnf0(K, gel(gel(gel(K_factorization, 1), 1), 1), gel(gel(gel(K_factorization, 1), 1), 2));
 
     // Lift the prime. This gives a fractional ideal.
     GEN prime_lift = rnfidealup0(Lrel, prime, 1);
-
+    // printf("2\n");
     // Factorize the fractional ideal
     GEN factorization = idealfactor(Labs, prime_lift);
     
@@ -84,10 +84,10 @@ GEN my_p_Artin_symbol(GEN Labs, GEN Lrel, GEN K, GEN K_factorization, GEN p, GEN
         
         //printf(ANSI_COLOR_YELLOW "Inert\n\n" ANSI_COLOR_RESET);
     }
-
+    // printf("3\n");
     // Define the prime from the factorization
     GEN prime_lift_1 = idealhnf0(Labs, gel(gel(gel(factorization, 1), 1), 1), gel(gel(gel(factorization, 1), 1), 2));
-    
+    // printf("4\n");
     // GEN inertia_index = gel(gel(gel(K_factorization, 1), 1), 4); // Always 1
     // pari_printf("Inertia: %Ps\n\n", inertia_index);
     
@@ -101,7 +101,7 @@ GEN my_p_Artin_symbol(GEN Labs, GEN Lrel, GEN K, GEN K_factorization, GEN p, GEN
 
     
     GEN prinit = nfmodprinit(Labs, gel(gel(idealfactor(Labs, prime_lift_1), 1), 1));
-
+    // printf("5\n");
     // Define the generator (lifting a primitive element from the residue field)
     generator = nfmodprlift(Labs,ffprimroot(nfmodpr(Labs,algtobasis(Labs, gpolvar(nf_get_pol(bnf_get_nf(Labs)))),prinit), NULL),prinit);
    

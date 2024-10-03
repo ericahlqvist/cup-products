@@ -147,7 +147,7 @@ int my_relations (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect, int
         sigma_cup = gmael(K_ext, i, 3);
 
         // Artin symbol test
-        my_test_artin_symbol(Labs_cup, Lrel_cup, K, p_int, sigma_cup);
+        //my_test_artin_symbol(Labs_cup, Lrel_cup, K, p_int, sigma_cup);
         // my_test_artin_on_norms(Labs_cup, Lrel_cup, K, p_int, sigma_cup);
         // I_vect corresp. to i:th extension
         // I_vect = my_find_I_vect_full(Labs_cup, Lrel_cup, K, sigma_cup, Ja_vect, p_int);
