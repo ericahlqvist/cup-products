@@ -685,7 +685,7 @@ GEN my_H90 (GEN L, GEN iJ, GEN sigma, int n) {
     // l x l zero matrix
     // M = zeromatcopy(l,l);
     // finding the matrix M consisting of exponents for the (1-sigma)g_i, Cl(L) = < g_1, ..., g_n > 
-    // that is, finding the matrix corresponding to the linear operator (1-sigma)
+    // that is, finding the matrix corresponding to the linear operator (1-sigma)^n
     M = my_1MS_operator(L, sigma, n);
     //D = zerocol(l);
 
@@ -1010,7 +1010,8 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p, int n
                 //pari_printf("F_ker_T: %Ps\n", F_ker_T);
 
                 // Now find the corresponding t
-                // (Can possibly be improved by using the flag nf_GENMAT: Return t in factored form (compact representation), as a small product of S-units for a small set of finite places S, possibly with huge exponents. This kind of result can be cheaply mapped to K^*/(K^*)^l or to C or Q_p to bounded accuracy and this is usually enough for applications.)
+                // Can possibly be improved by using the flag nf_GENMAT: Return t in factored form (compact representation), as a small product of S-units for a small set of finite places S, possibly with huge exponents. This kind of result can be cheaply mapped to K^*/(K^*)^l or to C or Q_p to bounded accuracy and this is usually enough for applications.
+
                 ideal = F_ker_T;
                 for (k = 1; k <= n; k++)
                 {
@@ -1023,8 +1024,6 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p, int n
                 else {
                     is_princ = bnfisprincipal0(Labs, idealmul(Labs, iJ, ideal), nf_GEN);
                 }
-                
-                
                 
 
                 // Sanity check

@@ -801,12 +801,45 @@ int my_massey_matrix (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect,
                     }
                     printf(ANSI_COLOR_YELLOW "\n-----------------------------------------\n%d-fold Massey < x, x, ..., x, y >: \n-----------------------------------------\n\n" ANSI_COLOR_RESET, n+3); 
                     pari_printf(ANSI_COLOR_CYAN "%Ps\n\n-------------------------\n\n" ANSI_COLOR_RESET, next_col);
+
+                    if (my_QV_equal0(next_col))
+                    {
+                        printf("Start round %d/%d\n\n", i, p_rk);
+                        Labs_cup = gel(gel(K_ext, i), 1);
+                        Lrel_cup = gel(gel(K_ext, i), 2);
+                        sigma_cup = gel(gel(K_ext, i), 3);
+
+                        I_prime_vect = my_H90_vect(Labs_cup, Lrel_cup, K, sigma_cup, Ja_vect, stoi(p_int), n+4);
+                        printf("I'_vect found\n\n");
+    
+                        // take Artin symbol with resp. to k:th extension
+                        Labs = gel(gel(K_ext, k), 1);
+                        Lrel = gel(gel(K_ext, k), 2);
+                        sigma = gel(gel(K_ext, k), 3);
+                        for (j=1; j<r_rk+1; ++j) {
+                            I_rel = rnfidealabstorel(Lrel_cup, gel(I_prime_vect, j));
+                            //printf("I, %d to rel\n\n", j);
+                            
+                            if (p_int == 3) {
+                                NIpJ = idealmul(K, gel(gel(Ja_vect, j),2), rnfidealnormrel(Lrel_cup, I_rel));
+                            }
+                            else {
+                                NIpJ = rnfidealnormrel(Lrel_cup, I_rel);
+                            }
+                            gel(next_col, j) = stoi(smodis(my_Artin_symbol(Labs, Lrel, K, idealred(K,NIpJ), p_int, sigma), p_int));
+                        }
+                        printf(ANSI_COLOR_YELLOW "\n-----------------------------------------\n%d-fold Massey < x, x, ..., x, y >: \n-----------------------------------------\n\n" ANSI_COLOR_RESET, n+5); 
+                        pari_printf(ANSI_COLOR_CYAN "%Ps\n\n-------------------------\n\n" ANSI_COLOR_RESET, next_col);
+                    }
+                    
                 }
                 
             }
         }
         
     }
+    
+
     return mat_rk;
 } 
 

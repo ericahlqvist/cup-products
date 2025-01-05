@@ -76,19 +76,21 @@
 # 	$(CC) -c $(CFLAGS) $(EXTRACFLAGS) $(CPPFLAGS) $(DLCFLAGS) $<
 # clean:
 # 	-$(RM) *.o $(ALL) main-pol-sta
-
-
+#--------------------------------------------------------------
+#--------------------------------------------------------------
+#------ Non-parallelized----------------------------------
+#--------------------------------------------------------------
 # Compilation target.
 TARGET = main-pol
 
 # Compiler.
 CC = clang
 
-# Compiler flags.
-CPPFLAGS   = -I. -I/usr/local/include -I/opt/homebrew/Cellar/pari/2.15.5/include
+# Compiler flags. /Users/eric/Documents/Matematik/pari/GPDIR/include /Users/eric/Documents/Matematik/pari/GPDIR/lib
+CPPFLAGS   = -I. -I/usr/local/include -I/Users/eric/Documents/Matematik/pari/GPDIR/include #-I/opt/homebrew/Cellar/pari/2.17.1/include
 CFLAGS = -O3 -Wall -fno-strict-aliasing -fomit-frame-pointer -pipe -flto=thin -march=native
 LDFLAGS = -Wl,-O3 
-LIBS = -lm -L/opt/homebrew/Cellar/pari/2.15.5/lib -lpari 
+LIBS = -lm -L/Users/eric/Documents/Matematik/pari/GPDIR/lib -lpari  #-L/opt/homebrew/Cellar/pari/2.17.1/lib -lpari 
 #STATIC = -static
 
 # Compilation.
@@ -97,3 +99,26 @@ $(TARGET): $(TARGET).c
 
 clean:
 	-$(RM) *.o $(ALL) main-pol
+
+# #--------------------------------------------------------------
+# #------ Parallelized----------------------------------
+# #--------------------------------------------------------------
+# # Compilation target.
+# TARGET = main-pol
+
+# # Compiler.
+# CC = clang
+
+# # Compiler flags.
+# CPPFLAGS   = -I. -I/usr/local/include -I/opt/homebrew/Cellar/pari/2.15.5/include
+# CFLAGS = -O3 -Wall -fno-strict-aliasing -fomit-frame-pointer -pipe -flto=thin -march=native -pthread
+# LDFLAGS = -Wl,-O3 -pthread
+# LIBS = -lm -L/opt/homebrew/Cellar/pari/2.15.5/lib -lpari 
+# #STATIC = -static
+
+# # Compilation.
+# $(TARGET): $(TARGET).c
+# 	$(CC) -o $@ $< $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) $(LIBS)
+
+# clean:
+# 	-$(RM) *.o $(ALL) $(TARGET)

@@ -53,13 +53,18 @@ main (int argc, char *argv[])
     int sec;
     int msec;
     
-    pari_init(1L<<30,500000);
-    // entree ep = {"_worker",0,(void*)compute_my_relations,20,"LG",""};
-    // pari_init_opts(1L<<30,500000, INIT_JMPm|INIT_SIGm|INIT_DFTm|INIT_noIMTm);
-    // pari_add_function(&ep); /* add Cworker function to gp */
-    // pari_mt_init(); /* ... THEN initialize parallelism */
+    // pari_init(1L<<30,500000);
+    entree ep = {"_worker",0,(void*)compute_my_relations,20,"LG",""};
+    pari_init_opts(1L<<30,500000, INIT_JMPm|INIT_SIGm|INIT_DFTm|INIT_noIMTm);
+    pari_add_function(&ep); /* add Cworker function to gp */
+    pari_mt_init(); /* ... THEN initialize parallelism */
     paristack_setsize(1L<<30, 1L<<33);
-    //sd_threadsizemax("8589934592", 0);
+    sd_threadsizemax("8589934592", 0);
+
+
+
+
+
     // timer_start(&ti);
     // printf("Initial adress: %ld\n", avma);
     // pari_sp limit = stack_lim(avma, 1);
@@ -272,11 +277,11 @@ main (int argc, char *argv[])
     // < x_i\cup x_k, (a_j, J_j) > if i is not equal to j and
     // < B(x_i), (a_j, J_j) > if i=j. 
     // Here < - , - > denotes the Artin--Verdier pairing, which may be computed using our cup product formula and the Artin symbol. 
-    int mat_rk = my_relations(K_ext, K, p, p_int, p_rk, Ja_vect, r_rk);
+    //int mat_rk = my_relations(K_ext, K, p, p_int, p_rk, Ja_vect, r_rk);
 
     //---------------------
     // Parallell version
-    //int mat_rk = my_relations_par(K_ext, K, p, p_rk, Ja_vect, r_rk);
+    int mat_rk = my_relations_par(K_ext, K, p, p_rk, Ja_vect, r_rk);
     //---------------------
 
     printf("\n");
