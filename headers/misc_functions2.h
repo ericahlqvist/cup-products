@@ -1,4 +1,19 @@
 
+
+GEN concatenate_rows(GEN M1, GEN M2) {
+    pari_sp av = avma;
+
+    // Create a new matrix with (rows1 + rows2) rows and the same number of columns
+    GEN M = cgetg(lg(M1), t_MAT);
+    for (long i = 1; i < lg(M1); i++)
+    {
+        gel(M, i) = shallowconcat(gel(M1, i), gel(M2, i));
+    }
+
+    return gerepilecopy(av, M);
+}
+
+
 GEN my_xvector (int l, int x) {
     GEN vec = zerovec(l);
     int i; 
@@ -376,6 +391,22 @@ GEN my_1MS_elt_operator (GEN L, GEN sigma) {
     return M;
 }
 
+
+GEN my_rel_norm_compact(GEN Labs, GEN Lrel, GEN K, GEN compact_elt) {
+    pari_printf("\n------------------------\nStart: my_rel_norm_compact\n------------------------\n\n");
+    pari_sp av = avma;
+    int i;
+    GEN norm = gcopy(compact_elt), rel_elt;
+    pari_printf("%Ps\n", norm);
+    for (i = 1; i < lg(gel(compact_elt, 1)); i++)
+    {
+        rel_elt = rnfeltabstorel(Lrel, gmael(compact_elt, 1, i));
+        gmael(norm, 1, i) = algtobasis(K, rnfeltnorm(Lrel, rel_elt));
+    }
+    
+    pari_printf("\n------------------------\nEnd: my_rel_norm_compact\n------------------------\n\n");
+    return gerepilecopy(av, norm);
+}
 
 GEN my_find_ext_ranks(GEN K_ext) {
     int l = glength(K_ext);
@@ -950,7 +981,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p, int n
     printf("\n--------------------------\nStart: my_H90_vect\n--------------------------\n\n");
     pari_sp av = avma;
     int r_rk = glength(Ja_vect), f, i,j, k, done = 0;
-    GEN I_vect = zerovec(r_rk), a, iJ, F, ker_T, ker_T_basis, ker_sol, F_ker_T, t, t_fact, t_rel, Nt, diff, exp, is_princ, is_norm, cyc, ideal;
+    GEN I_vect = zerovec(r_rk), a, iJ, F, ker_T, ker_T_basis, ker_sol, F_ker_T, t, t_fact, Nt, diff, exp, is_princ, is_norm, Nt_a, cyc, ideal;
     cyc = shallowtrans(bnf_get_cyc(Labs));
     
     for (i = 1; i <= r_rk; ++i)
@@ -1019,12 +1050,17 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p, int n
                 }
                 if (n==1)
                 {
-                    is_princ = bnfisprincipal0(Labs, idealdiv(Labs, iJ, ideal), nf_GEN);
+                    is_princ = bnfisprincipal0(Labs, idealdiv(Labs, iJ, ideal), nf_GENMAT);
                 }
                 else {
-                    is_princ = bnfisprincipal0(Labs, idealmul(Labs, iJ, ideal), nf_GEN);
+                    is_princ = bnfisprincipal0(Labs, idealmul(Labs, iJ, ideal), nf_GENMAT);
                 }
-                
+
+                //is_princ: [[0, 0, 0]~, [[755, -55, 75, -43]~, 1; 185, -1]]
+                // 
+                // pari_printf("is_princ: %Ps\n\n", gel(gel(is_princ, 2), 1));
+                // pari_close();
+                // exit(0);
 
                 // Sanity check
                 if (!my_QV_equal0(gel(is_princ, 1)))
@@ -1063,14 +1099,29 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p, int n
                     //return stoi(-1);
                 }
                 
-                // In relative coordinates
-                t_rel = rnfeltabstorel(Lrel, t);
+                // ------- Compact form  ----------------
+                Nt = my_rel_norm_compact(Labs, Lrel, K, t);
+                pari_printf("Nt: %Ps\n", Nt);
 
-                // N(t)
-                Nt = rnfeltnorm(Lrel, t_rel);
+                // create [a, 1] 
+                Nt_a = cgetg(3, t_MAT);
+                gel(Nt_a, 1) = mkcol(a);
+                gel(Nt_a, 2) = mkcol(gen_1);
 
                 // N(t)*a
-                diff = nfmul(K, Nt, a);
+                diff = concatenate_rows(Nt, Nt_a);
+                // --------------------------------------
+                
+                // --------------- Non-compact form ------
+                // // In relative coordinates
+                // t_rel = rnfeltabstorel(Lrel, t);
+
+                // // N(t)
+                // Nt = rnfeltnorm(Lrel, t_rel);
+
+                // // N(t)*a
+                // diff = nfmul(K, Nt, a);
+                //------------------------------------
 
                 // Since div(a)+pJ = 0 and div(N(t))-pJ = 0, we get that div(N(t)*a) = 0 and therefore N(t)*a must be a unit.
                 // Next we find its exponents in terms of the fixed generators of the unit group 

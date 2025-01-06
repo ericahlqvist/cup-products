@@ -54,11 +54,12 @@ The element sigma_p is independent of the choice of q since we assume L/K to be 
 Since k(q)^x is cyclic, it is enough to check that sigma_p(g) = g^N(p) for a generator g of k(q)^x.
 */
 
-
+// see: cyclicrelfrob 
 GEN my_p_Artin_symbol(GEN Labs, GEN Lrel, GEN K, GEN K_factorization, GEN p, GEN Gal_rel, GEN p_exp, GEN sigma_0) {
     printf("\n--------------------------------\nStart: my_p_artin_symbol\n--------------------------------\n\n");
     pari_sp av = avma;
     GEN p_Artin_symbol, exp, sigma;
+    
     //GEN y=pol_x(fetch_user_var("y"));
     // printf("1\n");
     // Define the prime from factorization

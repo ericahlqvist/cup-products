@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <time.h>
 
-#define NUM_THREADS 4
+// #define NUM_THREADS 4
 
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_GREEN   "\x1b[32m"
@@ -13,19 +13,6 @@
 #define ANSI_COLOR_MAGENTA "\x1b[35m"
 #define ANSI_COLOR_CYAN    "\x1b[36m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
-
-// typedef struct {
-//     GEN K_ext;
-//     GEN K;
-//     GEN p;
-//     int p_int;
-//     int p_rk;
-//     GEN Ja_vect;
-//     int r_rk;
-//     int i;
-//     GEN cup_matrix;
-//     GEN cup_matrix_full;
-// } thread_data_t;
 
 #include "headers/misc_functions2.h"
 #include "headers/tests.h"
@@ -53,7 +40,7 @@ main (int argc, char *argv[])
     int sec;
     int msec;
     
-    // pari_init(1L<<30,500000);
+    //pari_init(1L<<30,500000);
     entree ep = {"_worker",0,(void*)compute_my_relations,20,"LG",""};
     pari_init_opts(1L<<30,500000, INIT_JMPm|INIT_SIGm|INIT_DFTm|INIT_noIMTm);
     pari_add_function(&ep); /* add Cworker function to gp */
@@ -277,7 +264,7 @@ main (int argc, char *argv[])
     // < x_i\cup x_k, (a_j, J_j) > if i is not equal to j and
     // < B(x_i), (a_j, J_j) > if i=j. 
     // Here < - , - > denotes the Artin--Verdier pairing, which may be computed using our cup product formula and the Artin symbol. 
-    //int mat_rk = my_relations(K_ext, K, p, p_int, p_rk, Ja_vect, r_rk);
+    // int mat_rk = my_relations(K_ext, K, p, p_int, p_rk, Ja_vect, r_rk);
 
     //---------------------
     // Parallell version
