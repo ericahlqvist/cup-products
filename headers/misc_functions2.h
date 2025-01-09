@@ -56,7 +56,7 @@ GEN my_int_to_frac_vec (GEN v) {
 GEN my_QC_add (GEN v1, GEN v2) {
     pari_sp av = avma;
     if (!(glength(v1)==glength(v2))) {
-        printf(ANSI_COLOR_RED "ERROR in my_ZC_add: vectors has different lengths\n\n" ANSI_COLOR_RESET);
+        pari_printf(ANSI_COLOR_RED "ERROR in my_ZC_add: vectors has different lengths\n\n" ANSI_COLOR_RESET);
         pari_printf("v1: %Ps\n\nv2: %Ps\n\n", v1, v2);
         exit(111);
     }
@@ -121,7 +121,7 @@ int my_QV_equal (GEN v1, GEN v2) {
 
 int my_SQ_MAT_equal (GEN M1, GEN M2) {
     
-    // printf(ANSI_COLOR_CYAN "my_SQ_MAT_equal\n\n" ANSI_COLOR_RESET);
+    // pari_printf(ANSI_COLOR_CYAN "my_SQ_MAT_equal\n\n" ANSI_COLOR_RESET);
     int output = 1;
     int i;
     int j;
@@ -145,7 +145,7 @@ int my_SQ_MAT_equal (GEN M1, GEN M2) {
 
 int my_SQ_MAT_equal0 (GEN M) {
     
-    // printf(ANSI_COLOR_CYAN "my_SQ_MAT_equal\n\n" ANSI_COLOR_RESET);
+    // pari_printf(ANSI_COLOR_CYAN "my_SQ_MAT_equal\n\n" ANSI_COLOR_RESET);
     int output = 1;
     int i;
     int j;
@@ -191,7 +191,7 @@ GEN my_norm_ideal (GEN Labs, GEN Lrel, GEN L, GEN I, GEN sigma, int p) {
     }
     
     GEN norm = rnfidealdown(Lrel, rnfidealabstorel(Lrel, new_ideal));
-    // printf("Hoooj\n\n");
+    // pari_printf("Hoooj\n\n");
     norm = gerepilecopy(av, norm);
     return norm;
 }
@@ -202,7 +202,7 @@ GEN my_i (GEN Labs, GEN Lrel, GEN sigma, GEN elem) {
     output(lift);
     GEN mod_lift = galoisapply(Labs, sigma, lift);
     output(mod_lift);
-    printf("\n");
+    pari_printf("\n");
     return gerepilecopy(av, mod_lift);
 }
 
@@ -577,13 +577,13 @@ GEN my_get_vect (int n, GEN cyc)
         next_vect = zerovec(b*l);
         //pari_printf("%Ps\n", next_vect);
         
-        //printf("%ld\n", glength(next_vect));
+        //pari_printf("%ld\n", glength(next_vect));
         int i;
         for (i = 0; i < b*l; ++i) {
             double num = i+1;
             double den = b;
             int first_index = ceil(num/den);
-            //printf("%d\n",first_index);
+            //pari_printf("%d\n",first_index);
             gel(next_vect, i+1) = gconcat(gel(prev_vect, first_index), mkvec(stoi((i+1)%b)));
             
         }
@@ -604,7 +604,7 @@ GEN my_get_vect (int n, GEN cyc)
 GEN my_get_clgp (GEN K)
 {
     pari_sp av0 = avma;
-    printf("-------\n\nComputing the class group\n\n---------\n");
+    pari_printf("-------\n\nComputing the class group\n\n---------\n");
     GEN Kcyc = bnf_get_cyc(K);
     GEN Kgen = bnf_get_gen(K);
     GEN class_number = bnf_get_no(K);
@@ -637,12 +637,12 @@ GEN my_get_clgp (GEN K)
             pow = idealpow(K, gel(Kgen, i), gel(exponents, i));
             
             current_I = idealmul(K, current_I, pow);
-            // printf("ideal norm: ");
+            // pari_printf("ideal norm: ");
             // output(idealnorm(K, current_I));
-            // printf("\n");
+            // pari_printf("\n");
         }
         if (n%1000 == 0) {
-            printf("%d/%d\n", n, clnr);
+            pari_printf("%d/%d\n", n, clnr);
         }
         
         gel(class_group, n) = idealred0(K, current_I, NULL); 
@@ -653,7 +653,7 @@ GEN my_get_clgp (GEN K)
 }
 
 // GEN my_ideal_from_exp (GEN K, GEN exp) {
-//     printf("\n----------------------------\nSTART: my_ideal_from_exp\n----------------------------\n");
+//     pari_printf("\n----------------------------\nSTART: my_ideal_from_exp\n----------------------------\n");
 //     pari_printf("exp: %Ps\n", exp);
 //     //pari_sp av = avma;
 //     GEN ideal = idealhnf0(K, gen_1, NULL);
@@ -662,22 +662,22 @@ GEN my_get_clgp (GEN K)
 //     int i;
 //     for (i = 1; i < l+1; i++)
 //     {
-//         printf("%d/%d\n", i, l);
+//         pari_printf("%d/%d\n", i, l);
 //         pari_sp av = avma;
 //         ideal = idealred0(K, idealmul(K, ideal, idealred0(K, idealpow(K, gel(gens, i), gel(exp, i)), NULL)), NULL);
 //         ideal = gerepilecopy(av, ideal);
-//         //printf("%d/%d\n", i, l);
+//         //pari_printf("%d/%d\n", i, l);
 //     }
     
 
 //     //ideal = gerepilecopy(av, ideal);
-//     printf("\n----------------------------\nEND: my_ideal_from_exp\n----------------------------\n");
+//     pari_printf("\n----------------------------\nEND: my_ideal_from_exp\n----------------------------\n");
 //     return ideal;
 
 // }
 
 GEN my_vect_from_exp (GEN basis, GEN exp) {
-    //printf("\nmy_vect_from_exp\n");
+    //pari_printf("\nmy_vect_from_exp\n");
     pari_sp av = avma;
     int n = glength(gel(basis, 1));
     GEN vect = zerocol(n);
@@ -699,7 +699,7 @@ GEN my_vect_from_exp (GEN basis, GEN exp) {
 GEN my_get_unit_group (GEN K, GEN unit_gens, GEN p)
 {
     pari_sp av = avma;
-    printf("-------\n\nComputing the unit group\n\n---------\n");
+    pari_printf("-------\n\nComputing the unit group\n\n---------\n");
     int nr_comp = glength(unit_gens);
     GEN cyc = zerovec(nr_comp);
 
@@ -741,13 +741,13 @@ GEN my_get_unit_group (GEN K, GEN unit_gens, GEN p)
             pow = nfpow(K, gel(unit_gens, i), gel(exponents, i));
             
             current_u = nfmul(K, current_u, pow);
-            // printf("ideal norm: ");
+            // pari_printf("ideal norm: ");
             // output(idealnorm(K, current_I));
-            // printf("\n");
+            // pari_printf("\n");
         }
         
         if (n%1000 == 0) {
-            printf("%d/%d\n", n, nr);
+            pari_printf("%d/%d\n", n, nr);
         }
         
         gel(group, n) = algtobasis(K, current_u); 
@@ -763,7 +763,7 @@ GEN my_get_unit_group (GEN K, GEN unit_gens, GEN p)
 // Returns an ideal I in Div(L) such that iJ = (1-sigma)I in Cl(L)
 //------------------------------ 
 GEN my_H90 (GEN L, GEN iJ, GEN oneMS_operator, int n) {
-    printf("\n--------------------------\nStart: my_H90\n--------------------------\n\n");
+    pari_printf("\n--------------------------\nStart: my_H90\n--------------------------\n\n");
     pari_sp av = avma;
     GEN H90_ideal, B, E, D;
 
@@ -780,15 +780,15 @@ GEN my_H90 (GEN L, GEN iJ, GEN oneMS_operator, int n) {
     // Defining the ideal I from the exponents E
     // H90_ideal = my_ideal_from_exp(L, E);
     H90_ideal = idealfactorback(L, mkmat2(gtocol(bnf_get_gen(L)), gtocol(E)), NULL, 0);
-    printf(ANSI_COLOR_GREEN "H90_ideal found\n" ANSI_COLOR_RESET);
+    pari_printf(ANSI_COLOR_GREEN "H90_ideal found\n" ANSI_COLOR_RESET);
 
     H90_ideal = gerepilecopy(av, H90_ideal);
-    printf("\n--------------------------\nEnd: my_H90\n--------------------------\n\n");
+    pari_printf("\n--------------------------\nEnd: my_H90\n--------------------------\n\n");
     return H90_ideal;
 }
 
 GEN my_H90_exp (GEN L, GEN iJ, GEN sigma) {
-    printf("\nmy_H90_exp\n");
+    pari_printf("\nmy_H90_exp\n");
     pari_sp av = avma;
     GEN H90_exp, gens, M, B, D;
     gens = bnf_get_gen(L);
@@ -809,9 +809,9 @@ GEN my_H90_exp (GEN L, GEN iJ, GEN sigma) {
     // Gauss
     // pari_printf("M: %Ps\n", M);
     // pari_printf("B: %Ps\n", B);
-    //printf("Gauss start\n");
+    //pari_printf("Gauss start\n");
     H90_exp = matsolvemod(M,D,B,0);
-    //printf("Gauss done\n");
+    //pari_printf("Gauss done\n");
 
     H90_exp = gerepilecopy(av, H90_exp);
     return H90_exp;
@@ -829,18 +829,18 @@ GEN my_find_units_mod_p (GEN K, GEN p) {
     // pari_printf("B: %Ps\n", nfpow(K, tors_unit, gpow(p, stoi(4), DEFAULTPREC)));
     // pari_printf("tors_unit: %Ps\n", tors_unit);
     // pari_printf("fund_units: %Ps\n", fund_units);
-    // printf("torsion order: %d\n\n", tors_gp_ord);
+    // pari_printf("torsion order: %d\n\n", tors_gp_ord);
 
     if (tors_gp_ord%itos(p)==0) {
         units_mod_p = shallowconcat(units_mod_p, mkvec(tors_unit));
     }
     
-    // printf("Units:\n\n");
+    // pari_printf("Units:\n\n");
     // for (i=1;i<glength(units_mod_p)+1;++i) {
     //     pari_printf("u %d: %Ps\n", i, algtobasis(K, gel(units_mod_p, i)));
     //     pari_printf("u^-1 %d: %Ps\n", i, nfinv(K, algtobasis(K, gel(units_mod_p, i))));
     // }
-    // printf("\n");
+    // pari_printf("\n");
 
     // ad-hoc modification
     // gel(units_mod_p, 2) = nfmul(K, gel(units_mod_p, 1), gel(units_mod_p, 4));
@@ -850,7 +850,7 @@ GEN my_find_units_mod_p (GEN K, GEN p) {
 }
 
 GEN my_norm_operator (GEN Labs, GEN Lrel, GEN K, GEN p) {
-    printf("\n--------------------------\nStart: my_norm_operator\n--------------------------\n\n");
+    pari_printf("\n--------------------------\nStart: my_norm_operator\n--------------------------\n\n");
     pari_sp av0 = avma;
     GEN M, g, g_rel, Ng, Lgens;
     int Klength, Llength, i;
@@ -871,7 +871,7 @@ GEN my_norm_operator (GEN Labs, GEN Lrel, GEN K, GEN p) {
     
 
     M = gerepilecopy(av0, M);
-    printf("\n--------------------------\nEnd: my_norm_operator\n--------------------------\n\n");
+    pari_printf("\n--------------------------\nEnd: my_norm_operator\n--------------------------\n\n");
     return M;
 }
 
@@ -910,36 +910,36 @@ void my_unramified_p_extensions(GEN K, GEN p, GEN D_prime_vect) {
     //GEN Rsq = bnrclassfield(K, subgrouplist0(bnf_get_cyc(K), mkvec(gpow(p,gen_2, DEFAULTPREC)), 2), 2, DEFAULTPREC);
     //GEN Rcb = bnrclassfield(K, subgrouplist0(bnf_get_cyc(K), mkvec(gpow(p,stoi(3), DEFAULTPREC)), 2), 2, DEFAULTPREC);
     GEN abs_pol;
-    printf("[p]-extensions:\n\n");
+    pari_printf("[p]-extensions:\n\n");
     for (i=1;i<lg(R);i++) {
-        //printf("i: %d\n", i);
+        //pari_printf("i: %d\n", i);
         abs_pol = polredabs0(mkvec2(gel(R, i), D_prime_vect), 0);
         //abs_pol = polredabs(gel(R, i));
         pari_printf("%Ps, cyc: %Ps\n", gsubstpol(abs_pol, x, s), bnf_get_cyc(Buchall(abs_pol, nf_GEN, DEFAULTPREC)));
         
     }
-    printf("\n");
-    // printf("[p,p]-extensions:\n\n");
+    pari_printf("\n");
+    // pari_printf("[p,p]-extensions:\n\n");
     // for (i=1;i<glength(Rsq)+1;i++) {
     //     abs_pol = polredabs0(mkvec2(gel(Rsq, i), D_prime_vect), 0);
     //     //abs_pol = polredabs(gel(R, i));
     //     pari_printf("%Ps, cyc: %Ps\n", gsubstpol(abs_pol, x, s), bnf_get_cyc(Buchall(abs_pol, nf_FORCE, DEFAULTPREC)));
     // }
-    // printf("\n");
-    // printf("[p,p,p]-extensions:\n\n");
+    // pari_printf("\n");
+    // pari_printf("[p,p,p]-extensions:\n\n");
     // for (i=1;i<glength(Rcb)+1;i++) {
     //     abs_pol = polredabs0(mkvec2(gel(Rcb, i), D_prime_vect), 0);
     //     //abs_pol = polredabs(gel(R, i));
     //     pari_printf("%Ps, cyc: %Ps\n", gsubstpol(abs_pol, x, s), bnf_get_cyc(Buchall(abs_pol, nf_FORCE, DEFAULTPREC)));
     // }
-    // printf("\n");
+    // pari_printf("\n");
     avma = av;
 }
 
 
 // Returns vector of tuples (a,J) with div(a)+pJ = 0.
 GEN my_find_Ja_vect(GEN K, GEN J_vect, GEN p, GEN units_mod_p) {
-    printf("\n--------------------------\nStart: my_find_Ja_vect\n--------------------------\n\n");
+    pari_printf("\n--------------------------\nStart: my_find_Ja_vect\n--------------------------\n\n");
     pari_sp av = avma;
     int l = glength(J_vect);
     int r_rk = l + glength(units_mod_p);
@@ -958,14 +958,14 @@ GEN my_find_Ja_vect(GEN K, GEN J_vect, GEN p, GEN units_mod_p) {
     }
     
     Ja_vect = gerepilecopy(av, Ja_vect);
-    printf("\n--------------------------\nEnd: my_find_Ja_vect\n--------------------------\n\n");
+    pari_printf("\n--------------------------\nEnd: my_find_Ja_vect\n--------------------------\n\n");
     return Ja_vect;
 }
 
 
 
 GEN my_get_sums (GEN basis, int p) {
-    printf("my_get_sums\n");
+    pari_printf("my_get_sums\n");
     pari_sp av = avma;
     int l = glength(basis), i, ord = p;
     int n = pow(ord, l);
@@ -1006,7 +1006,7 @@ GEN my_get_sums (GEN basis, int p) {
 // Returns: a vector of these I's 
 //-------------------------------------------------------------------------------------------------
 GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GEN p, int n) {
-    printf("\n--------------------------\nStart: my_H90_vect\n--------------------------\n\n");
+    pari_printf("\n--------------------------\nStart: my_H90_vect\n--------------------------\n\n");
     pari_sp av0 = avma;
     int r_rk = glength(Ja_vect), f, i,j, k, done = 0;
     GEN I_vect = zerovec(r_rk), a, iJ, F, ker_T, ker_T_basis, ker_sol, F_ker_T, t, t_fact, Nt, diff, exp, is_princ, is_norm, Nt_a, cyc, ideal, norm_operator, my_1MS_operator = my_1MS_operator_2(Labs, Lbnr, sigma, n);
@@ -1037,7 +1037,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GE
         // ker_sol = matsolvemod(my_1MS_operator_2(Labs, Lrel, K, sigma, n), cyc, zerocol(glength(cyc)), 1);
         ker_sol = matsolvemod(my_1MS_operator, cyc, zerocol(glength(cyc)), 1);
         ker_T_basis = gtovec(gel(ker_sol, 2));
-        // printf(ANSI_COLOR_GREEN "------------------------\n\n\nker_T_basis size: %ld\n\n\n------------------------\n" ANSI_COLOR_RESET, glength(ker_T_basis));
+        // pari_printf(ANSI_COLOR_GREEN "------------------------\n\n\nker_T_basis size: %ld\n\n\n------------------------\n" ANSI_COLOR_RESET, glength(ker_T_basis));
         
         // If the kernel is trivial, then we are done. 
         if (glength(ker_T_basis)==0)
@@ -1055,7 +1055,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GE
             //pari_printf(ANSI_COLOR_CYAN "ker_T: %Ps\n" ANSI_COLOR_RESET, ker_T);
             // pari_printf("ker_T[2]: %Ps\n", gel(ker_T, 2));
             f = glength(ker_T);
-            printf("Searching a chunk of ker (1-sigma) of size: %d\n", f);
+            pari_printf("Searching a chunk of ker (1-sigma) of size: %d\n", f);
             /*
                 Find F_ker_T --------------------
             */
@@ -1063,7 +1063,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GE
             for (j = 1; j <= f; j++)
             {
                 pari_sp av2 = avma;
-                printf("\nSearching: %d/%d\n", j, f);
+                pari_printf("\nSearching: %d/%d\n", j, f);
                 // idealfactorback(Labs, mkmat2(gtocol(bnf_get_gen(L)), gtocol(gel(ker_T, j))), NULL, 0);
                 // This is our I+I'' as explained above
                 F_ker_T = idealred0(Labs, idealmul(Labs, F, idealred0(Labs, idealfactorback(Labs, mkmat2(gtocol(bnf_get_gen(Labs)), gtocol(gel(ker_T, j))), NULL, 0), NULL)), NULL);
@@ -1087,7 +1087,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GE
                 // Sanity check
                 if (!my_QV_equal0(gel(is_princ, 1)))
                 {
-                    printf(ANSI_COLOR_RED "Problem in my_H90_vect\n" ANSI_COLOR_RESET);
+                    pari_printf(ANSI_COLOR_RED "Problem in my_H90_vect\n" ANSI_COLOR_RESET);
                     pari_close();
                     exit(111);
                 }
@@ -1162,7 +1162,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GE
                     // Nw = rnfeltnorm(Lrel, w_rel);
                     // pari_printf("Norm w: %Ps\n", Nw);
                     gel(I_vect, i) = F_ker_T;
-                    printf(ANSI_COLOR_GREEN "\nI found\n\n" ANSI_COLOR_RESET);
+                    pari_printf(ANSI_COLOR_GREEN "\nI found\n\n" ANSI_COLOR_RESET);
                     done = 1;
                     break;
                 }
@@ -1172,7 +1172,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GE
         // If some of the I's were never found, then we return -1 and another (slower) function will take over.  
         if (!done)
         {
-            printf(ANSI_COLOR_RED "my_H90_vect ended with a problem \n" ANSI_COLOR_RESET);
+            pari_printf(ANSI_COLOR_RED "my_H90_vect ended with a problem \n" ANSI_COLOR_RESET);
             return stoi(-1);
             // pari_close();
             // exit(111);
@@ -1181,12 +1181,12 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GE
     } 
     
     I_vect = gerepilecopy(av0, I_vect);
-    printf("\n--------------------------\nEnd: my_H90_vect\n--------------------------\n\n");
+    pari_printf("\n--------------------------\nEnd: my_H90_vect\n--------------------------\n\n");
     return I_vect;
 }
 
 // GEN my_H90_12 (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN a, GEN J, GEN p, int n) {
-//     printf(ANSI_COLOR_CYAN "\nmy_H90_vect\n" ANSI_COLOR_RESET);
+//     pari_printf(ANSI_COLOR_CYAN "\nmy_H90_vect\n" ANSI_COLOR_RESET);
 //     pari_sp av = avma;
 //     int f, j, done = 0;
 //     GEN I, iJ, F, ker_T, ker_T_basis, ker_sol, F_ker_T, t, t_rel, Nt, diff, exp, is_princ, is_norm, cyc;
@@ -1200,7 +1200,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GE
 //     // pari_printf("F: %Ps\n", F);
 //     ker_sol = matsolvemod(my_1MS_operator(Labs, sigma, 1), cyc, zerocol(glength(cyc)), 1);
 //     ker_T_basis = gtovec(gel(ker_sol, 2));
-//     printf(ANSI_COLOR_GREEN "------------------------\n\n\nker_T_basis size: %ld\n\n\n------------------------\n" ANSI_COLOR_RESET, glength(ker_T_basis));
+//     pari_printf(ANSI_COLOR_GREEN "------------------------\n\n\nker_T_basis size: %ld\n\n\n------------------------\n" ANSI_COLOR_RESET, glength(ker_T_basis));
     
 //     if (glength(ker_T_basis)==0)
 //     {
@@ -1216,14 +1216,14 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GE
 //         //pari_printf(ANSI_COLOR_CYAN "ker_T: %Ps\n" ANSI_COLOR_RESET, ker_T);
 //         // pari_printf("ker_T[2]: %Ps\n", gel(ker_T, 2));
 //         f = glength(ker_T);
-//         printf("Searching a chunk of ker (1-sigma) of size: %d\n", f);
+//         pari_printf("Searching a chunk of ker (1-sigma) of size: %d\n", f);
 //         /*
 //             Find F_ker_T --------------------
 //         */
         
 //         for (j = 1; j <= f; j++)
 //         {
-//             printf("\nSearching: %d/%d\n", j, f);
+//             pari_printf("\nSearching: %d/%d\n", j, f);
 //             // pari_printf("Adding the exp: %Ps\n", gel(ker_T, j));
 //             // pari_printf("And the ideal: %Ps\n", my_ideal_from_exp(Labs, gel(ker_T, j)));
 //             F_ker_T = idealred0(Labs, idealmul(Labs, F, idealred0(Labs, my_ideal_from_exp(Labs, gel(ker_T, j)), NULL)), NULL);
@@ -1231,13 +1231,13 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GE
 //             is_princ = bnfisprincipal0(Labs, idealdiv(Labs, iJ, my_1MS_ideal(Labs, sigma, F_ker_T)), 1);
 //             if (!my_QV_equal0(gel(is_princ, 1)))
 //             {
-//                 printf(ANSI_COLOR_RED "Problem in my_H90_vect\n" ANSI_COLOR_RESET);
+//                 pari_printf(ANSI_COLOR_RED "Problem in my_H90_vect\n" ANSI_COLOR_RESET);
 //                 pari_close();
 //                 exit(111);
 //             }
             
 //             t = gel(is_princ, 2);
-//             printf("t: %ld\n", glength(t));
+//             pari_printf("t: %ld\n", glength(t));
 //             if (glength(t)==0)
 //             {
 //                 return stoi(-1);
@@ -1275,7 +1275,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GE
 //     }
 //     if (!done)
 //     {
-//         printf(ANSI_COLOR_RED "my_H90_vect ended with a problem \n" ANSI_COLOR_RESET);
+//         pari_printf(ANSI_COLOR_RED "my_H90_vect ended with a problem \n" ANSI_COLOR_RESET);
 //         return stoi(-1);
 //         // pari_close();
 //         // exit(111);
@@ -1288,7 +1288,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GE
 
 // GEN my_H90_exp_vect (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN Ja_vect, GEN p, int n) {
 //     // This function is not ready to be used
-//     printf(ANSI_COLOR_CYAN "\nmy_H90_exp_vect\n" ANSI_COLOR_RESET);
+//     pari_printf(ANSI_COLOR_CYAN "\nmy_H90_exp_vect\n" ANSI_COLOR_RESET);
 //     pari_sp av = avma;
 //     int r_rk = glength(Ja_vect), f, j, done = 0;
 //     GEN I_vect = zerovec(r_rk), a, iJ, F, ker_T, ker_T_basis, ker_sol, F_ker_T, t, t_rel, Nt, diff, exp, is_princ, is_norm, cyc;
@@ -1304,7 +1304,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GE
 //         // pari_printf("F: %Ps\n", F);
 //         ker_sol = matsolvemod(my_1MS_operator(Labs, sigma, 1), cyc, zerocol(glength(cyc)), 1);
 //         ker_T_basis = gtovec(gel(ker_sol, 2));
-//         printf(ANSI_COLOR_GREEN "------------------------\n\n\nker_T_basis size: %ld\n\n\n------------------------\n" ANSI_COLOR_RESET, glength(ker_T_basis));
+//         pari_printf(ANSI_COLOR_GREEN "------------------------\n\n\nker_T_basis size: %ld\n\n\n------------------------\n" ANSI_COLOR_RESET, glength(ker_T_basis));
         
 //         if (glength(ker_T_basis)==0)
 //         {
@@ -1320,7 +1320,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GE
 //             //pari_printf(ANSI_COLOR_CYAN "ker_T: %Ps\n" ANSI_COLOR_RESET, ker_T);
 //             // pari_printf("ker_T[2]: %Ps\n", gel(ker_T, 2));
 //             f = glength(ker_T);
-//             printf("Searching a chunk of ker (1-sigma) of size: %d\n", f);
+//             pari_printf("Searching a chunk of ker (1-sigma) of size: %d\n", f);
             
 //             /*
 //                 Find F_ker_T --------------------
@@ -1328,7 +1328,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GE
             
 //             for (j = 1; j <= f; j++)
 //             {
-//                 printf("%d/%d\n", j, f);
+//                 pari_printf("%d/%d\n", j, f);
 //                 // pari_printf("Adding the exp: %Ps\n", gel(ker_T, j));
 //                 // pari_printf("And the ideal: %Ps\n", my_ideal_from_exp(Labs, gel(ker_T, j)));
 //                 F_ker_T = ZC_add(F, gel(ker_T, j));
@@ -1339,7 +1339,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GE
 //                 //-----------------------------------
 //                 if (!my_QV_equal0(gel(is_princ, 1)))
 //                 {
-//                     printf(ANSI_COLOR_RED "Problem in my_H90_exp_vect\n" ANSI_COLOR_RESET);
+//                     pari_printf(ANSI_COLOR_RED "Problem in my_H90_exp_vect\n" ANSI_COLOR_RESET);
 //                     pari_close();
 //                     exit(111);
 //                 }
@@ -1378,7 +1378,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GE
 //         }
 //         if (!done)
 //         {
-//             printf(ANSI_COLOR_RED "my_H90_exp_vect ended with a problem \n" ANSI_COLOR_RESET);
+//             pari_printf(ANSI_COLOR_RED "my_H90_exp_vect ended with a problem \n" ANSI_COLOR_RESET);
 //             pari_close();
 //             exit(111);
 //         }
@@ -1386,7 +1386,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GE
          
         
 //     } 
-//     printf("Finished search\n");
+//     pari_printf("Finished search\n");
 //     I_vect = gerepilecopy(av, I_vect);
 //     return I_vect;
 // }
@@ -1457,7 +1457,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GE
 //     int l = glength(units_group);
     
 //     int i;
-//     printf("1:\n\n");
+//     pari_printf("1:\n\n");
 //     for (i = 1; i <= l; i++)
 //     {
 //         image = bnfisunit0(Labs, gel(units_group, i), NULL);
@@ -1465,7 +1465,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GE
 //         pari_printf("%Ps\n", image);
 
 //     }
-//     printf("\nsigma:\n\n");
+//     pari_printf("\nsigma:\n\n");
 //     for (i = 1; i <= l; i++)
 //     {
 //         image = bnfisunit0(Labs, galoisapply(Labs, sigma, gel(units_group, i)), NULL);
@@ -1473,7 +1473,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GE
 //         pari_printf("%Ps\n", image);
 
 //     }
-//     printf("\nsigma^2:\n\n");
+//     pari_printf("\nsigma^2:\n\n");
 //     for (i = 1; i <= l; i++)
 //     {
 //         image = bnfisunit0(Labs, galoisapply(Labs, sigma, galoisapply(Labs, sigma, gel(units_group, i))), NULL);
@@ -1492,7 +1492,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GE
 //         Labs = gel(gel(K_ext, i), 1);
 //         sigma = gel(gel(K_ext, i), 3);
 //         unit_group = my_find_units_mod_p(Labs, p);
-//         printf("Field ext [%d]:\n\n", i);
+//         pari_printf("Field ext [%d]:\n\n", i);
 //         my_compute_matrices(Labs, sigma, unit_group);
 //     }
     
@@ -1500,14 +1500,14 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GE
 
 GEN my_find_I_full (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN i_xJ, GEN a, GEN class_group, int p_int)
 {
-    printf("\n--------------------------\nStart: my_find_I_full\n--------------------------\n\n");
+    pari_printf("\n--------------------------\nStart: my_find_I_full\n--------------------------\n\n");
     pari_sp av = avma;
     GEN diff, current_I, test_vec, class_number = bnf_get_no(Labs), Itest, t, t_rel, norm_t, exponents, norms, L_units, L_unit_group, ret, is_princ;
     int clnr = itos(class_number), n, roots_of_unity_nr = bnf_get_tuN(K), l;
     
     
     // for (n = 1; n < clnr + 1; ++n) {
-    //     printf("%d/%d\n", n, clnr);
+    //     pari_printf("%d/%d\n", n, clnr);
     //     current_I = gel(class_group, n);
     //     Itest = idealdiv(Labs, i_xJ, my_1MS_ideal(Labs, sigma, current_I));
     //     test_vec = bnfisprincipal0(Labs, Itest, 1);
@@ -1521,7 +1521,7 @@ GEN my_find_I_full (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN i_xJ, GEN a, GEN c
     //         pari_printf("exponents: %Ps\n", exponents);
     //         if (my_is_p_power(exponents, p_int, roots_of_unity_nr))
     //         {
-    //             printf("I found\n\n");
+    //             pari_printf("I found\n\n");
     //             ret = mkvec2(gel(test_vec, 2), current_I);
     //             ret = gerepilecopy(av, ret);
     //             return ret;
@@ -1531,12 +1531,12 @@ GEN my_find_I_full (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN i_xJ, GEN a, GEN c
 
     // }
 
-    //printf("Entering the slow round\n\n");
-    printf("roots of unity L: %d\n\n", roots_of_unity_nr);
+    //pari_printf("Entering the slow round\n\n");
+    pari_printf("roots of unity L: %d\n\n", roots_of_unity_nr);
     L_units = my_find_units_mod_p(Labs, stoi(p_int));
-    printf("nr of L_units mod p: %ld\n\n", glength(L_units));
+    pari_printf("nr of L_units mod p: %ld\n\n", glength(L_units));
     L_unit_group = my_get_unit_group(Labs, L_units, stoi(p_int));
-    printf("size of L_unit_group: %ld\n\n", glength(L_unit_group));
+    pari_printf("size of L_unit_group: %ld\n\n", glength(L_unit_group));
     
     l = glength(L_unit_group);
     norms = zerovec(l);
@@ -1549,7 +1549,7 @@ GEN my_find_I_full (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN i_xJ, GEN a, GEN c
     // exit(0);
     int i;
     for (n = 1; n <= clnr; ++n) {
-        printf("%d/%d\n", n, clnr);
+        pari_printf("%d/%d\n", n, clnr);
         current_I = gel(class_group, n);
         Itest = idealdiv(Labs, i_xJ, my_1MS_ideal(Labs, sigma, current_I));
         test_vec = bnfisprincipal0(Labs, Itest, nf_GEN);
@@ -1561,7 +1561,7 @@ GEN my_find_I_full (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN i_xJ, GEN a, GEN c
             t = nffactorback(Labs, gel(gel(is_princ, 2), 1), gel(gel(is_princ, 2), 2));
             //t = gel(test_vec, 2);
             pari_printf("t: %Ps\n", t);
-            printf("length t: %ld\n", glength(t));
+            pari_printf("length t: %ld\n", glength(t));
             if (glength(t)!=0)
             {
 
@@ -1578,10 +1578,10 @@ GEN my_find_I_full (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN i_xJ, GEN a, GEN c
                     
                     if (my_is_p_power(exponents, p_int, roots_of_unity_nr))
                     {
-                        printf(ANSI_COLOR_GREEN "\nI found\n\n" ANSI_COLOR_RESET);
+                        pari_printf(ANSI_COLOR_GREEN "\nI found\n\n" ANSI_COLOR_RESET);
                         ret = mkvec2(gel(test_vec, 2), current_I);
                         ret = gerepilecopy(av, ret);
-                        printf("\n--------------------------\nEnd: my_find_I_full\n--------------------------\n\n");
+                        pari_printf("\n--------------------------\nEnd: my_find_I_full\n--------------------------\n\n");
                         return ret;
                     }
                     
@@ -1592,9 +1592,9 @@ GEN my_find_I_full (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN i_xJ, GEN a, GEN c
         } 
 
     }
-    printf(ANSI_COLOR_RED "my_find_I_full ended with a problem\n" ANSI_COLOR_RESET);
+    pari_printf(ANSI_COLOR_RED "my_find_I_full ended with a problem\n" ANSI_COLOR_RESET);
    
-    printf(ANSI_COLOR_RED "No I found in my_find_I\n\n" ANSI_COLOR_RESET);
+    pari_printf(ANSI_COLOR_RED "No I found in my_find_I\n\n" ANSI_COLOR_RESET);
     pari_close();
     exit(111);
 

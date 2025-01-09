@@ -29,7 +29,7 @@ main (int argc, char *argv[])
     //--------
     clock_t start = clock();
     // pari_timer ti;
-    //  timer_printf(&ti,"   %Ps ");
+    //  timer_pari_printf(&ti,"   %Ps ");
     // timer_delay
     //--------
     printf("\n------------------------------------------------------------\nStarting program: finding cup products and relations for Q_2\n------------------------------------------------------------\n\n");
@@ -53,7 +53,7 @@ main (int argc, char *argv[])
 
 
     // timer_start(&ti);
-    // printf("Initial adress: %ld\n", avma);
+    // pari_printf("Initial adress: %ld\n", avma);
     // pari_sp limit = stack_lim(avma, 1);
     
     GEN p, s=pol_x(fetch_user_var("s"));
@@ -66,7 +66,7 @@ main (int argc, char *argv[])
     
     // Read the defining polynomial for K
     f = gp_read_str(argv[2]);
-    printf("\n-------------------------------------------------------------------\n\n");
+    pari_printf("\n-------------------------------------------------------------------\n\n");
     pari_printf("\nPOL: %Ps\n\n", f);
     
     //--------------------------------------------------
@@ -92,10 +92,10 @@ main (int argc, char *argv[])
     
     if (glength(gal)==nf_get_degree(bnf_get_nf(K)))
     {
-        printf(ANSI_COLOR_GREEN "\n------------------------\nK is Galois over Q\n------------------------\n\n" ANSI_COLOR_RESET);
+        pari_printf(ANSI_COLOR_GREEN "\n------------------------\nK is Galois over Q\n------------------------\n\n" ANSI_COLOR_RESET);
     }
     else {
-        printf(ANSI_COLOR_RED "\n------------------------\nK is not Galois over Q\n------------------------\n\n" ANSI_COLOR_RESET);
+        pari_printf(ANSI_COLOR_RED "\n------------------------\nK is not Galois over Q\n------------------------\n\n" ANSI_COLOR_RESET);
     }
         
 
@@ -137,8 +137,8 @@ main (int argc, char *argv[])
     // Define polynomials for the generating fields for the part of the Hilbert class field corresp to Cl(K)/p. 
     //---------------------------------------------------------------------------------------------------------
     p_ClFld_pol = bnrclassfield(K, p, 0, DEFAULTPREC);
-    printf("p Cl Fld: ");
-    printf(ANSI_COLOR_GREEN "Found!\n\n" ANSI_COLOR_RESET);
+    pari_printf("p Cl Fld: ");
+    pari_printf(ANSI_COLOR_GREEN "Found!\n\n" ANSI_COLOR_RESET);
     
     //--------------------------------------------------------------------
     // To compute absolute polynomials for the class fields, uncomment this
@@ -147,7 +147,7 @@ main (int argc, char *argv[])
     // GEN y = pol_x(fetch_user_var("y"));
 
     // GEN q1, p1, p1red, Lrel;
-    // // printf("base l: %ld\n", glength(base_ext));
+    // // pari_printf("base l: %ld\n", glength(base_ext));
     // // pari_printf("Base_clf: %Ps\n\n", base_clf);
 
     // int i;
@@ -158,13 +158,13 @@ main (int argc, char *argv[])
     //     /* Define Lrel/Labs */
     //     p1red = rnfpolredbest(K, mkvec2(q1, D_prime_vect), 0);
     //     //p1red = q1;
-    //     // printf("Reduced polynomial for relative extension found\n");
+    //     // pari_printf("Reduced polynomial for relative extension found\n");
     //     Lrel = rnfinit(K, p1red);
-    //     //printf("Lrel found\n");
+    //     //pari_printf("Lrel found\n");
         
-    //     printf("\n----------------------------------------------------------------------\n");
+    //     pari_printf("\n----------------------------------------------------------------------\n");
     //     pari_printf("%Ps\n\n", polredbest(rnf_get_polabs(Lrel), 0));
-    //     printf("----------------------------------------------------------------------\n");
+    //     pari_printf("----------------------------------------------------------------------\n");
     // }
     // pari_close();
     // exit(0);
@@ -189,13 +189,13 @@ main (int argc, char *argv[])
     // Find generators for the p-torsion of the class group
     J_vect = my_find_p_gens(K, p);
     p_rk = glength(J_vect);
-    printf("p-rank: %d\n", p_rk);
+    pari_printf("p-rank: %d\n", p_rk);
     //--------------------------------------------------
 
     // // 6,7
     // if (p_rk<2)
     // {
-    //     printf("p-rank less than 2 --> finite tower\n\n");
+    //     pari_printf("p-rank less than 2 --> finite tower\n\n");
         
     //     pari_close();
     //     exit(0);
@@ -204,17 +204,17 @@ main (int argc, char *argv[])
     //--------------------------------------------------
     // find generators for the group of units modulo p
     GEN units_mod_p = my_find_units_mod_p(K, p);
-    printf("Nr of units mod p: %ld\n", glength(units_mod_p));
+    pari_printf("Nr of units mod p: %ld\n", glength(units_mod_p));
 
     // Define r_rk -- the rank of H^2(X, Z/pZ)
     r_rk = glength(J_vect)+glength(units_mod_p);
-    printf("r-rank: %d\n\n", r_rk);
+    pari_printf("r-rank: %d\n\n", r_rk);
     //--------------------------------------------------
 
     //--------------------------------------------------
     // Define the extensions generating the p-part of the Hilbert class field corresponding to CL(K)/p
     GEN K_ext = my_ext(K, p_ClFld_pol, s, p, p_rk, D_prime_vect);
-    // printf("Extensions found\n\n");
+    // pari_printf("Extensions found\n\n");
     //--------------------------------------------------
 
     //--------------------------------------------------
@@ -256,7 +256,7 @@ main (int argc, char *argv[])
     // GEN p_power_units = my_find_p_power_units(K, units_mod_p, p);
     // // GEN p_power_units_2 = my_get_unit_group(K, units_mod_p, p);
     // // GEN p_power_units = gconcat(p_power_units_1, p_power_units_2);
-    // printf("Unit group, size: %ld\n\n", glength(p_power_units));
+    // pari_printf("Unit group, size: %ld\n\n", glength(p_power_units));
     
     
     //--------------------------------------------------
@@ -271,7 +271,7 @@ main (int argc, char *argv[])
     my_relations_par(K_ext, K, p, p_rk, Ja_vect, r_rk);
     //---------------------
 
-    // printf("\n");
+    // pari_printf("\n");
     // int rk_3_fold, rk_5_fold;
     // if ((mat_rk<3 && p_int>2) || (mat_rk==0 && p_int==2))
     // {
@@ -289,13 +289,13 @@ main (int argc, char *argv[])
     
     //--------------------------------------------------
 
-    printf(ANSI_COLOR_GREEN "Done! \n \n" ANSI_COLOR_YELLOW);
+    pari_printf(ANSI_COLOR_GREEN "Done! \n \n" ANSI_COLOR_YELLOW);
 
     // Close pari
-    // printf(ANSI_COLOR_YELLOW "Time taken: %ld ms\n\n" ANSI_COLOR_RESET, timer_delay(&ti));
-    // timer_printf(&ti,  " ");
+    // pari_printf(ANSI_COLOR_YELLOW "Time taken: %ld ms\n\n" ANSI_COLOR_RESET, timer_delay(&ti));
+    // timer_pari_printf(&ti,  " ");
     
-    // printf(ANSI_COLOR_MAGENTA "\n-----------------------------------------\nClosing pari\n-----------------------------------------\n\n" ANSI_COLOR_RESET);
+    // pari_printf(ANSI_COLOR_MAGENTA "\n-----------------------------------------\nClosing pari\n-----------------------------------------\n\n" ANSI_COLOR_RESET);
     pari_close();
 
     //--------

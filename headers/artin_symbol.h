@@ -16,7 +16,7 @@ GEN my_find_generator(GEN Labs, GEN prime, GEN prinit) {
         check=1;
         // Increase this in case you get an error in the p Artin symbol
         min = (glength(div) < 50) ? glength(div) : 50;
-        printf("\n----------------------\n\nmin: %d\n\n----------------------\n\n", min);
+        pari_printf("\n----------------------\n\nmin: %d\n\n----------------------\n\n", min);
         for (j = 2; j < min; j++)
         {
             pow = nfpow(Labs, gel(zk, i), gel(div, j));
@@ -56,25 +56,25 @@ Since k(q)^x is cyclic, it is enough to check that sigma_p(g) = g^N(p) for a gen
 
 // see: cyclicrelfrob 
 GEN my_p_Artin_symbol(GEN Labs, GEN Lrel, GEN K, GEN K_factorization, GEN p, GEN Gal_rel, GEN p_exp, GEN sigma_0) {
-    printf("\n--------------------------------\nStart: my_p_artin_symbol\n--------------------------------\n\n");
+    pari_printf("\n--------------------------------\nStart: my_p_artin_symbol\n--------------------------------\n\n");
     pari_sp av = avma;
     GEN p_Artin_symbol, exp, sigma;
     
     //GEN y=pol_x(fetch_user_var("y"));
-    // printf("1\n");
+    // pari_printf("1\n");
     // Define the prime from factorization
     GEN prime = idealhnf0(K, gel(gel(gel(K_factorization, 1), 1), 1), gel(gel(gel(K_factorization, 1), 1), 2));
 
     // Lift the prime. This gives a fractional ideal.
     GEN prime_lift = rnfidealup0(Lrel, prime, 1);
-    // printf("2\n");
+    // pari_printf("2\n");
     // Factorize the fractional ideal
     GEN factorization = idealfactor(Labs, prime_lift);
     
     // Check if the prime is split
     if (glength(gel(factorization, 1))==itos(p))
     {
-        //printf(ANSI_COLOR_GREEN "Split\n\n" ANSI_COLOR_RESET);
+        //pari_printf(ANSI_COLOR_GREEN "Split\n\n" ANSI_COLOR_RESET);
         p_Artin_symbol = gen_0;
         return p_Artin_symbol;
     }
@@ -83,12 +83,12 @@ GEN my_p_Artin_symbol(GEN Labs, GEN Lrel, GEN K, GEN K_factorization, GEN p, GEN
         // Determine the size of the residue field: N(p)
         exp = idealnorm(K, prime); 
         
-        //printf(ANSI_COLOR_YELLOW "Inert\n\n" ANSI_COLOR_RESET);
+        //pari_printf(ANSI_COLOR_YELLOW "Inert\n\n" ANSI_COLOR_RESET);
     }
-    // printf("3\n");
+    // pari_printf("3\n");
     // Define the prime from the factorization
     GEN prime_lift_1 = idealhnf0(Labs, gel(gel(gel(factorization, 1), 1), 1), gel(gel(gel(factorization, 1), 1), 2));
-    // printf("4\n");
+    // pari_printf("4\n");
     // GEN inertia_index = gel(gel(gel(K_factorization, 1), 1), 4); // Always 1
     // pari_printf("Inertia: %Ps\n\n", inertia_index);
     
@@ -102,7 +102,7 @@ GEN my_p_Artin_symbol(GEN Labs, GEN Lrel, GEN K, GEN K_factorization, GEN p, GEN
 
     
     GEN prinit = nfmodprinit(Labs, gel(gel(idealfactor(Labs, prime_lift_1), 1), 1));
-    // printf("5\n");
+    // pari_printf("5\n");
     // Define the generator (lifting a primitive element from the residue field)
     generator = nfmodprlift(Labs,ffprimroot(nfmodpr(Labs,algtobasis(Labs, gpolvar(nf_get_pol(bnf_get_nf(Labs)))),prinit), NULL),prinit);
    
@@ -123,22 +123,22 @@ GEN my_p_Artin_symbol(GEN Labs, GEN Lrel, GEN K, GEN K_factorization, GEN p, GEN
         
         
         test_vec = nfsub(Labs,elem1,elem2);
-        // printf("test_vec before quot: ");
+        // pari_printf("test_vec before quot: ");
         // output(test_vec);
-        // printf("\n\n");
+        // pari_printf("\n\n");
 
         test_vec = nf_to_Fq(bnf_get_nf(Labs), test_vec, prinit);
        
         // pari_printf("elem1: %Ps\nelem2: %Ps\n\n", elem1, elem2);
-        // printf("test_vec: ");
+        // pari_printf("test_vec: ");
         // output(test_vec);
-        // printf("\n\n");
+        // pari_printf("\n\n");
 
         if (gequal0(test_vec))
         {
             // Gal_rel ordered as [sigma, sigma^2, ..., sigma^p=id]
             p_Artin_symbol = stoi(itos(p_exp)*i);
-            //printf("p_exp: %ld, i: %d\n\n", itos(p_exp), i);
+            //pari_printf("p_exp: %ld, i: %d\n\n", itos(p_exp), i);
             test = 1;
             break;
         } 
@@ -146,23 +146,23 @@ GEN my_p_Artin_symbol(GEN Labs, GEN Lrel, GEN K, GEN K_factorization, GEN p, GEN
     
     if (!test)
     {
-        printf(ANSI_COLOR_RED "ERROR - no galois elem for Artin \n\n" ANSI_COLOR_RESET);
+        pari_printf(ANSI_COLOR_RED "ERROR - no galois elem for Artin \n\n" ANSI_COLOR_RESET);
         pari_close();
         exit(111);
     }
     
-    printf("\n--------------------------------\nEnd: my_p_artin_symbol\n--------------------------------\n\n");
+    pari_printf("\n--------------------------------\nEnd: my_p_artin_symbol\n--------------------------------\n\n");
     return gerepilecopy(av, p_Artin_symbol);
 }
 
 GEN my_Artin_symbol (GEN Labs, GEN Lrel, GEN K, GEN I_K, int p, GEN sigma) {
-    printf("\n--------------------------------\nStart: my_artin_symbol\n--------------------------------\n\n");
+    pari_printf("\n--------------------------------\nStart: my_artin_symbol\n--------------------------------\n\n");
     pari_sp av = avma;
     
     setalldebug(1);
     if (my_QV_equal0(gel(bnfisprincipal0(K, I_K, 1),1)))
     {
-        //printf(ANSI_COLOR_YELLOW "Principal\n\n" ANSI_COLOR_RESET);
+        //pari_printf(ANSI_COLOR_YELLOW "Principal\n\n" ANSI_COLOR_RESET);
         return gen_0;
     }
     
@@ -197,26 +197,26 @@ GEN my_Artin_symbol (GEN Labs, GEN Lrel, GEN K, GEN I_K, int p, GEN sigma) {
         {
             
             p_Artin_symbol = 0;
-            // printf(ANSI_COLOR_YELLOW "%ld\n" ANSI_COLOR_RESET, itos(gel(e_vect, i)));
-            //printf(ANSI_COLOR_YELLOW "Trivial\n\n" ANSI_COLOR_RESET);
-            //printf("p_Artin_symbol: %d\n\n", 0);
+            // pari_printf(ANSI_COLOR_YELLOW "%ld\n" ANSI_COLOR_RESET, itos(gel(e_vect, i)));
+            //pari_printf(ANSI_COLOR_YELLOW "Trivial\n\n" ANSI_COLOR_RESET);
+            //pari_printf("p_Artin_symbol: %d\n\n", 0);
         }
         else {
-            // printf(ANSI_COLOR_YELLOW "%ld\n" ANSI_COLOR_RESET, itos(gel(e_vect, i)));
-            //printf(ANSI_COLOR_GREEN "Non-trivial\n\n" ANSI_COLOR_RESET);
+            // pari_printf(ANSI_COLOR_YELLOW "%ld\n" ANSI_COLOR_RESET, itos(gel(e_vect, i)));
+            //pari_printf(ANSI_COLOR_GREEN "Non-trivial\n\n" ANSI_COLOR_RESET);
 
             // Compute the Artin symbol for the prime 
             p_Artin_symbol = itos(my_p_Artin_symbol(Labs, Lrel, K, prime, stoi(p), Gal_rel, p_exp, sigma));
-            //printf("p_Artin_symbol: %d\n\n", p_Artin_symbol);
+            //pari_printf("p_Artin_symbol: %d\n\n", p_Artin_symbol);
             
         }
         Artin_symbol = (p_Artin_symbol+Artin_symbol);
-        // printf("Artin_symbol: %d\n\n", Artin_symbol);
+        // pari_printf("Artin_symbol: %d\n\n", Artin_symbol);
     }
     
     GEN ret = stoi(smodis(stoi(Artin_symbol), p));
     ret = gerepilecopy(av, ret);
-    printf("\n--------------------------------\nEnd: my_artin_symbol\n--------------------------------\n\n");
+    pari_printf("\n--------------------------------\nEnd: my_artin_symbol\n--------------------------------\n\n");
     return ret;
 }
 
