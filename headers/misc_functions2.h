@@ -1014,6 +1014,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GE
     
     for (i = 1; i <= r_rk; ++i)
     {
+        pari_sp av1 = avma;
         done = 0;
         a = gel(gel(Ja_vect, i), 1);
         iJ = rnfidealup0(Lrel, gel(gel(Ja_vect, i),2), 1);
@@ -1061,7 +1062,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GE
             
             for (j = 1; j <= f; j++)
             {
-                pari_sp av = avma;
+                pari_sp av2 = avma;
                 printf("\nSearching: %d/%d\n", j, f);
                 // idealfactorback(Labs, mkmat2(gtocol(bnf_get_gen(L)), gtocol(gel(ker_T, j))), NULL, 0);
                 // This is our I+I'' as explained above
@@ -1165,7 +1166,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GE
                     done = 1;
                     break;
                 }
-                I_vect = gerepilecopy(av, I_vect);
+                I_vect = gerepilecopy(av2, I_vect);
             }
         }
         // If some of the I's were never found, then we return -1 and another (slower) function will take over.  
@@ -1176,6 +1177,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GE
             // pari_close();
             // exit(111);
         }
+        I_vect = gerepilecopy(av1, I_vect);
     } 
     
     I_vect = gerepilecopy(av0, I_vect);
