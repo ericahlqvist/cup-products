@@ -268,24 +268,24 @@ main (int argc, char *argv[])
 
     //---------------------
     // Parallell version
-    int mat_rk = my_relations_par(K_ext, K, p, p_rk, Ja_vect, r_rk);
+    my_relations_par(K_ext, K, p, p_rk, Ja_vect, r_rk);
     //---------------------
 
-    printf("\n");
-    int rk_3_fold, rk_5_fold;
-    if ((mat_rk<3 && p_int>2) || (mat_rk==0 && p_int==2))
-    {
-        rk_3_fold = my_massey_matrix(K_ext, K, p, p_int, p_rk, Ja_vect, r_rk, 2);
-        if (rk_3_fold==0)
-        {
-            rk_5_fold = my_massey_matrix(K_ext, K, p, p_int, p_rk, Ja_vect, r_rk, 4);
-            if (rk_5_fold==0)
-            {
-                my_massey_matrix(K_ext, K, p, p_int, p_rk, Ja_vect, r_rk, 6);
-            }
-        }
+    // printf("\n");
+    // int rk_3_fold, rk_5_fold;
+    // if ((mat_rk<3 && p_int>2) || (mat_rk==0 && p_int==2))
+    // {
+    //     rk_3_fold = my_massey_matrix(K_ext, K, p, p_int, p_rk, Ja_vect, r_rk, 2);
+    //     if (rk_3_fold==0)
+    //     {
+    //         rk_5_fold = my_massey_matrix(K_ext, K, p, p_int, p_rk, Ja_vect, r_rk, 4);
+    //         if (rk_5_fold==0)
+    //         {
+    //             my_massey_matrix(K_ext, K, p, p_int, p_rk, Ja_vect, r_rk, 6);
+    //         }
+    //     }
         
-    }
+    // }
     
     //--------------------------------------------------
 
@@ -307,5 +307,5 @@ main (int argc, char *argv[])
 
     printf (ANSI_COLOR_YELLOW "Runtime: %d min, %d,%d sec\n\n" ANSI_COLOR_RESET, min, sec, msec);
     //-----------
-    return mat_rk;
+    return 0;
 }

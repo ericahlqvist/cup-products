@@ -127,7 +127,7 @@ GEN my_ext(GEN base, GEN base_clf, GEN s, GEN p, int p_rk, GEN D_prime_vect)
 {   
     pari_sp av = avma;
     printf("\n--------------------------\nStart: my_ext\n--------------------------\n\n");
-    GEN x, y, p1, q1, p1red, Lrel, Labs, s_lift_x, cx, sigma;
+    GEN x, y, p1, q1, p1red, Lrel, Labs, Lbnr, s_lift_x, cx, sigma;
 
     x = pol_x(fetch_user_var("x"));
     y = pol_x(fetch_user_var("y"));
@@ -148,10 +148,12 @@ GEN my_ext(GEN base, GEN base_clf, GEN s, GEN p, int p_rk, GEN D_prime_vect)
         // p1red = q1;
         printf("Reduced polynomial for relative extension found\n");
         Lrel = rnfinit(base, p1red);
+
         printf("Lrel found\n");
         pari_printf("Abs pol: %Ps\n", rnf_get_polabs(Lrel));
         
         Labs = Buchall(rnf_get_polabs(Lrel), nf_FORCE, DEFAULTPREC);
+        Lbnr = bnrinit0(Labs,gen_1, 1);
         
         // May change flag to nf_FORCE
         // Other precisions: MEDDEFAULTPREC, BIGDEFAULTPREC
@@ -186,7 +188,7 @@ GEN my_ext(GEN base, GEN base_clf, GEN s, GEN p, int p_rk, GEN D_prime_vect)
         //printf(ANSI_COLOR_CYAN "---> sigma <--- \n \n" ANSI_COLOR_RESET);
         
     
-        gel(base_ext, i) = mkvec3(Labs, Lrel, sigma);
+        gel(base_ext, i) = mkvec4(Labs, Lrel, sigma, Lbnr);
 
         // sprintf(filename, "/Users/eric/Documents/Matematik/cup-products/large-fields/test/ext_%d", i);
         // writebin(filename, gel(base_ext, i));
