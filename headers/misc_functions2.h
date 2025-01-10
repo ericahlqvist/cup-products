@@ -1301,12 +1301,10 @@ GEN my_H90_vect_2 (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, 
             {
                 pari_sp av2 = avma;
                 pari_printf("\nSearching: %d/%d\n", j, f);
-                // idealfactorback(Labs, mkmat2(gtocol(bnf_get_gen(L)), gtocol(gel(ker_T, j))), NULL, 0);
                 // This is our I+I'' as explained above
-                pari_printf("\ngtocol(gel(ker_T, j)): %Ps\ngel(F, 1): %Ps\n\n", gtocol(gel(ker_T, j)), gel(F, 1));
-                
                 I_fact = gadd(gel(F, 1), gtocol(gel(ker_T, j)));
                 
+                // There is most likely a built in function for this next step ...
                 for (int m = 1; m < lg(cyc); m++)
                 {
                     gel(I_fact, m) = modii(gel(I_fact, m), gel(cyc, m));
@@ -1323,7 +1321,7 @@ GEN my_H90_vect_2 (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, 
                 {
                     ideal = my_1MS_ideal(Labs, sigma, ideal);
                 }
-                pari_printf("\n------------------------------------------------------------------------START: bnfisprincipal0 to find t in compact form\n------------------------------------------------------------------------\n");
+                pari_printf("\n------------------------------------------------------------------------\nSTART: bnfisprincipal0 to find t in compact form\n------------------------------------------------------------------------\n");
                 if (n==1)
                 {
                     is_princ = bnfisprincipal0(Labs, idealdiv(Labs, iJ, ideal), nf_GENMAT);
