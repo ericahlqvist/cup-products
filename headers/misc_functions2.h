@@ -1,5 +1,26 @@
 
 
+void print_pari_type(GEN x) {
+    switch (typ(x)) {
+        case t_INT:    printf("Type: t_INT (integer)\n"); break;
+        case t_REAL:   printf("Type: t_REAL (real number)\n"); break;
+        case t_FRAC:   printf("Type: t_FRAC (fraction)\n"); break;
+        case t_COMPLEX: printf("Type: t_COMPLEX (complex number)\n"); break;
+        case t_VEC:    printf("Type: t_VEC (vector)\n"); break;
+        case t_COL:    printf("Type: t_COL (column vector)\n"); break;
+        case t_MAT:    printf("Type: t_MAT (matrix)\n"); break;
+        case t_POL:    printf("Type: t_POL (polynomial)\n"); break;
+        case t_SER:    printf("Type: t_SER (power series)\n"); break;
+        case t_QUAD:   printf("Type: t_QUAD (quadratic element)\n"); break;
+        case t_INTMOD: printf("Type: t_INTMOD (modular integer)\n"); break;
+        case t_FFELT:  printf("Type: t_FFELT (finite field element)\n"); break;
+        case t_PADIC:  printf("Type: t_PADIC (p-adic number)\n"); break;
+        case t_RFRAC:  printf("Type: t_RFRAC (rational fraction)\n"); break;
+        case t_STR:    printf("Type: t_STR (string)\n"); break;
+        default:       printf("Type: Unknown type\n"); break;
+    }
+}
+
 GEN concatenate_rows(GEN M1, GEN M2) {
     pari_sp av = avma;
 
@@ -376,42 +397,32 @@ GEN my_1MS_operator (GEN L, GEN sigma, int n) {
         gel(M, i) = col;
     }
     
-    pari_printf("my_1MS_operator: %Ps\n", M);
-      
+    pari_printf(ANSI_COLOR_YELLOW "my_1MS_operator: %Ps\n" ANSI_COLOR_RESET, M);
+    
     M = gerepilecopy(av0, M);
     pari_printf("\n------------------------\nEnd: my_1MS_operator\n------------------------\n\n");
     return M;
 }
 
+
+
 GEN my_1MS_operator_2 (GEN Labs, GEN Lbnr, GEN sigma, int n) {
     pari_printf("\n------------------------\nStart: my_1MS_operator_2\n------------------------\n\n");
     pari_sp av = avma;
-    GEN cyc = bnf_get_cyc(Labs), col; 
-    int l = glength(cyc);
-    GEN M = zeromatcopy(l,l);
-    int i;
+    GEN cyc = bnf_get_cyc(Labs); 
 
     // Compute how sigma acts on the generators of Cl(L)/pCl(L)
     GEN sigma_matrix = bnrgaloismatrix(Lbnr, sigma);
-
-    for (i = 1; i < l+1; i++)
-    {
-        pari_printf("i: %d\n", i);
-        // pari_sp av = avma;
-        
-        col = gneg(gel(sigma_matrix, i));
-        gel(col, i) = gadd(gen_1, gel(col, i));
-        col = ZV_ZV_mod(col, cyc);
-        pari_printf("ideal[%d] in basis: %Ps\n", i, col);
-
-        gel(M, i) = col;
-    }
-
+    GEN id_mat = matid(glength(sigma_matrix));
+    GEN M0 = ZM_sub(id_mat, sigma_matrix);
+    M0 = ZM_ZV_mod(M0, cyc);
+    GEN M = gcopy(M0);
+    
     // We have found the matrix M that represents the operator 1-sigma
     // Next compute the operator (1-sigma)^n
-    for (int k = 1; k < n; k++)
+    for (int k = 2; k < n+1; k++)
     {
-        M = ZM_mul(M, M);
+        M = ZM_mul(M0, M);
         M = ZM_ZV_mod(M, cyc);
     }
 
@@ -1260,8 +1271,9 @@ GEN my_H90_vect_2 (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, 
     pari_printf("\n--------------------------\nStart: my_H90_vect_2\n--------------------------\n\n");
     pari_sp av0 = avma;
     int r_rk = glength(Ja_vect), f, i,j, k, done = 0;
-    GEN I_vect = zerovec(r_rk), a, iJ, F, ker_T, ker_T_basis, F_ker_T, t_fact, Nt, diff, exp, is_princ, is_norm, Nt_a, ideal, norm_operator, oneMS_operator = my_1MS_operator(Labs, sigma, n), I_fact, cyc = shallowtrans(bnf_get_cyc(Labs));
-    
+    GEN I_vect = zerovec(r_rk), a, iJ, F, ker_T, ker_T_basis, F_ker_T, t_fact, Nt, diff, exp, is_princ, is_norm, Nt_a, ideal, norm_operator, I_fact, cyc = shallowtrans(bnf_get_cyc(Labs));
+    // GEN oneMS_operator = my_1MS_operator(Labs, sigma, n);
+    GEN oneMS_operator = my_1MS_operator_2(Labs, Lbnr, sigma, n);
     
     for (i = 1; i <= r_rk; ++i)
     {
