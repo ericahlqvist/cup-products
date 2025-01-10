@@ -602,7 +602,7 @@ int my_massey_matrix (GEN K_ext, GEN K, GEN p, int p_int, int p_rk, GEN Ja_vect,
                         Lrel_cup = gel(gel(K_ext, i), 2);
                         sigma_cup = gel(gel(K_ext, i), 3);
 
-                        I_prime_vect = my_H90_vect_2(Labs_cup, Lrel_cup, Lbnr_cup, K, sigma_cup, Ja_vect, stoi(p_int), n+4);
+                        I_prime_vect = my_H90_vect(Labs_cup, Lrel_cup, Lbnr_cup, K, sigma_cup, Ja_vect, stoi(p_int), n+4);
                         pari_printf("I'_vect found\n\n");
     
                         // take Artin symbol with resp. to k:th extension

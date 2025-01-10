@@ -274,12 +274,15 @@ main (int argc, char *argv[])
     int rk_3_fold, rk_5_fold;
     if ((mat_rk<3 && p_int>2) || (mat_rk==0 && p_int==2))
     {
+        pari_printf("\nSTART: 3-fold\n\n");
         rk_3_fold = my_massey_matrix(K_ext, K, p, p_int, p_rk, Ja_vect, r_rk, 2);
         if (rk_3_fold==0)
         {
+            pari_printf("\nSTART: 5-fold\n\n");
             rk_5_fold = my_massey_matrix(K_ext, K, p, p_int, p_rk, Ja_vect, r_rk, 4);
             if (rk_5_fold==0)
             {
+                pari_printf("\nSTART: 7-fold\n\n");
                 my_massey_matrix(K_ext, K, p, p_int, p_rk, Ja_vect, r_rk, 6);
             }
         }
