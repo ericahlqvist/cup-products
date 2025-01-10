@@ -787,6 +787,30 @@ GEN my_H90 (GEN L, GEN iJ, GEN oneMS_operator, int n) {
     return H90_ideal;
 }
 
+
+//------------------------------
+// Returns all ideals I (actually, one solution I_0 plus a matrix M s.t. all solutions can be obtained by adding a lin. comb. of the columns of the matrix to I_0) in Div(L) such that iJ = (1-sigma)I in Cl(L)
+//------------------------------ 
+GEN my_H90_2 (GEN L, GEN iJ, GEN oneMS_operator, int n) {
+    pari_printf("\n--------------------------\nStart: my_H90_2\n--------------------------\n\n");
+    pari_sp av = avma;
+    GEN B, E, D;
+
+
+    // Cycle type of Cl(L) as a column vector
+    D = shallowtrans(bnf_get_cyc(L));
+
+    // finding exponents for iJ when written as a products of ideals in gens
+    B = bnfisprincipal0(L, iJ, 0);
+    
+    // Gauss: Solving the system M*X = B (i.e., finding I s.t. (1-sigma)I = iJ)
+    E = matsolvemod(oneMS_operator,D,B,1);
+    
+    E = gerepilecopy(av, E);
+    pari_printf("\n--------------------------\nEnd: my_H90_2\n--------------------------\n\n");
+    return E;
+}
+
 GEN my_H90_exp (GEN L, GEN iJ, GEN sigma) {
     pari_printf("\nmy_H90_exp\n");
     pari_sp av = avma;
@@ -965,7 +989,7 @@ GEN my_find_Ja_vect(GEN K, GEN J_vect, GEN p, GEN units_mod_p) {
 
 
 GEN my_get_sums (GEN basis, int p) {
-    pari_printf("my_get_sums\n");
+    pari_printf("\n--------------------------\nStart: my_get_sums\n--------------------------\n\n");
     pari_sp av = avma;
     int l = glength(basis), i, ord = p;
     int n = pow(ord, l);
@@ -997,6 +1021,7 @@ GEN my_get_sums (GEN basis, int p) {
     // pari_printf(ANSI_COLOR_RED "Basis: %Ps\n" ANSI_COLOR_RESET, basis);
     // pari_printf(ANSI_COLOR_RED "Sums: %Ps\n" ANSI_COLOR_RESET, gp);
     gp = gerepilecopy(av, gp);
+    pari_printf("\n--------------------------\nEnd: my_get_sums\n--------------------------\n\n");
     return gp;
 }
 
@@ -1006,10 +1031,10 @@ GEN my_get_sums (GEN basis, int p) {
 // Returns: a vector of these I's 
 //-------------------------------------------------------------------------------------------------
 GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GEN p, int n) {
-    pari_printf("\n--------------------------\nStart: my_H90_vect\n--------------------------\n\n");
+    pari_printf("\n--------------------------\nStart: my_H90_vect_2\n--------------------------\n\n");
     pari_sp av0 = avma;
     int r_rk = glength(Ja_vect), f, i,j, k, done = 0;
-    GEN I_vect = zerovec(r_rk), a, iJ, F, ker_T, ker_T_basis, ker_sol, F_ker_T, t, t_fact, Nt, diff, exp, is_princ, is_norm, Nt_a, cyc, ideal, norm_operator, my_1MS_operator = my_1MS_operator_2(Labs, Lbnr, sigma, n);
+    GEN I_vect = zerovec(r_rk), a, iJ, F, ker_T, ker_T_basis, ker_sol, F_ker_T, I_fact, t, t_fact, Nt, diff, exp, is_princ, is_norm, Nt_a, cyc, ideal, norm_operator, my_1MS_operator = my_1MS_operator_2(Labs, Lbnr, sigma, n);
     cyc = shallowtrans(bnf_get_cyc(Labs));
     
     for (i = 1; i <= r_rk; ++i)
@@ -1037,6 +1062,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GE
         // ker_sol = matsolvemod(my_1MS_operator_2(Labs, Lrel, K, sigma, n), cyc, zerocol(glength(cyc)), 1);
         ker_sol = matsolvemod(my_1MS_operator, cyc, zerocol(glength(cyc)), 1);
         ker_T_basis = gtovec(gel(ker_sol, 2));
+        pari_printf("ker_T_basis: %Ps\n", ker_T_basis);
         // pari_printf(ANSI_COLOR_GREEN "------------------------\n\n\nker_T_basis size: %ld\n\n\n------------------------\n" ANSI_COLOR_RESET, glength(ker_T_basis));
         
         // If the kernel is trivial, then we are done. 
@@ -1066,7 +1092,18 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GE
                 pari_printf("\nSearching: %d/%d\n", j, f);
                 // idealfactorback(Labs, mkmat2(gtocol(bnf_get_gen(L)), gtocol(gel(ker_T, j))), NULL, 0);
                 // This is our I+I'' as explained above
-                F_ker_T = idealred0(Labs, idealmul(Labs, F, idealred0(Labs, idealfactorback(Labs, mkmat2(gtocol(bnf_get_gen(Labs)), gtocol(gel(ker_T, j))), NULL, 0), NULL)), NULL);
+                // F_ker_T = idealred0(Labs, idealmul(Labs, F, idealred0(Labs, idealfactorback(Labs, mkmat2(gtocol(bnf_get_gen(Labs)), gtocol(gel(ker_T, j))), NULL, 0), NULL)), NULL);
+                pari_printf("\ngtocol(gel(ker_T, j)): %Ps\ngel(bnfisprincipal0(Labs, F, 0), 1): %Ps\n\n", gtocol(gel(ker_T, j)), bnfisprincipal0(Labs, F, 0));
+                
+                I_fact = gadd(bnfisprincipal0(Labs, F, 0), gtocol(gel(ker_T, j)));
+                
+                for (int m = 1; m < lg(cyc); m++)
+                {
+                    gel(I_fact, m) = modii(gel(I_fact, m), gel(cyc, m));
+                    
+                }
+                F_ker_T = idealfactorback(Labs, mkmat2(gtocol(bnf_get_gen(Labs)), I_fact), NULL, 0);
+
 
                 // Now find the corresponding t
                 // flag nf_GENMAT: Return t in factored form (compact representation), as a small product of S-units for a small set of finite places S, possibly with huge exponents. This kind of result can be cheaply mapped to K^*/(K^*)^l or to C or Q_p to bounded accuracy and this is usually enough for applications.
@@ -1076,6 +1113,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GE
                 {
                     ideal = my_1MS_ideal(Labs, sigma, ideal);
                 }
+                pari_printf("\n------------------------------------------------------------------------START: bnfisprincipal0 to find t in compact form\n------------------------------------------------------------------------\n");
                 if (n==1)
                 {
                     is_princ = bnfisprincipal0(Labs, idealdiv(Labs, iJ, ideal), nf_GENMAT);
@@ -1083,9 +1121,10 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GE
                 else {
                     is_princ = bnfisprincipal0(Labs, idealmul(Labs, iJ, ideal), nf_GENMAT);
                 }
+                pari_printf("\n------------------------------------------------------------------------END: bnfisprincipal0 to find t in compact form\n------------------------------------------------------------------------\n");
 
                 // Sanity check
-                if (!my_QV_equal0(gel(is_princ, 1)))
+                if (!ZV_equal0(gel(is_princ, 1)))
                 {
                     pari_printf(ANSI_COLOR_RED "Problem in my_H90_vect\n" ANSI_COLOR_RESET);
                     pari_close();
@@ -1154,7 +1193,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GE
                 // Use ZV_equal0 or gequal0
 
                 // if N(t)*a = 1 or if N(t)*a is a norm
-                if (my_QV_equal0(exp) || !gequal0(is_norm))
+                if (ZV_equal0(exp) || !gequal0(is_norm))
                 {
                     //pari_printf(ANSI_COLOR_CYAN "Norm of elt with exp: %Ps\n" ANSI_COLOR_RESET, is_norm);
                     // w = gel(bnf_get_fu(Labs), 1);
@@ -1181,9 +1220,217 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GE
     } 
     
     I_vect = gerepilecopy(av0, I_vect);
-    pari_printf("\n--------------------------\nEnd: my_H90_vect\n--------------------------\n\n");
+    pari_printf("\n--------------------------\nEnd: my_H90_vect_2\n--------------------------\n\n");
     return I_vect;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//-------------------------------------------------------------------------------------------------
+// The function my_H90_vect finds for each (a, J) in Ja_vect, a fractional ideal I in Div(L) such that 
+// i(J) = (1-sigma)I + div(t), where t in L^x satisfies N(t)*a = 1.  
+// Returns: a vector of these I's 
+//-------------------------------------------------------------------------------------------------
+GEN my_H90_vect_2 (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GEN p, int n) {
+    pari_printf("\n--------------------------\nStart: my_H90_vect_2\n--------------------------\n\n");
+    pari_sp av0 = avma;
+    int r_rk = glength(Ja_vect), f, i,j, k, done = 0;
+    GEN I_vect = zerovec(r_rk), a, iJ, F, ker_T, ker_T_basis, F_ker_T, t, t_fact, Nt, diff, exp, is_princ, is_norm, Nt_a, ideal, norm_operator, my_1MS_operator = my_1MS_operator_2(Labs, Lbnr, sigma, n), I_fact, cyc = shallowtrans(bnf_get_cyc(Labs));
+    
+    
+    for (i = 1; i <= r_rk; ++i)
+    {
+        pari_sp av1 = avma;
+        done = 0;
+        a = gel(gel(Ja_vect, i), 1);
+        iJ = rnfidealup0(Lrel, gel(gel(Ja_vect, i),2), 1);
+
+        // Find [I, M] s.t. (1-sigma)I = iJ in Cl(L) and M is a matrix s.t. ...
+        if (n==1)
+        {
+            F = my_H90_2(Labs, iJ, my_1MS_operator, n);
+        }
+        else 
+        {
+            F = my_H90_2(Labs, idealinv(Labs, iJ), my_1MS_operator, n);
+        }
+        
+        // Then (1-sigma)I+div(t) = iJ for some t in L^x. However, it might be the case that N(t)*a is not 1. 
+        // We know from theory that there should be an I and a t s.t (1-sigma)I+div(t) = iJ and N(t)*a=1. 
+        // If I' and t' are such, then I-I' is in ker (1-sigma) so in order to find the correct I' we need to go through the kernel of (1-sigma) and for each I'' in there, take I+I'' and check f the corresponding t' satisfies N(t')*a = 1.   
+        
+        // Find generators for the kernel of (1-sigma)
+        ker_T_basis = gtovec(gel(F, 2));
+        pari_printf("F[1]: %Ps\nker_T_basis: %Ps\n\n", gel(F, 1), ker_T_basis);
+        // pari_printf(ANSI_COLOR_GREEN "------------------------\n\n\nker_T_basis size: %ld\n\n\n------------------------\n" ANSI_COLOR_RESET, glength(ker_T_basis));
+        
+        // If the kernel is trivial, then we are done. 
+        if (glength(ker_T_basis)==0)
+        {
+            gel(I_vect, i) = gel(F, 1);
+            done = 1;
+        }
+        else {
+            // Generate part of the kernel (or more precisely, the corresponding exponents)
+            ker_T = my_get_sums(ker_T_basis, itos(p));
+
+            // WARNING: The next line makes it faster but might not find the answer. Switch back to the above ker_T!
+            //ker_T = shallowconcat(mkvec(zerocol(glength(gel(ker_T_basis, 1)))), ker_T_basis);
+            
+            //pari_printf(ANSI_COLOR_CYAN "ker_T: %Ps\n" ANSI_COLOR_RESET, ker_T);
+            // pari_printf("ker_T[2]: %Ps\n", gel(ker_T, 2));
+            f = glength(ker_T);
+            pari_printf("Searching a chunk of ker (1-sigma) of size: %d\n", f);
+            /*
+                Find F_ker_T --------------------
+            */
+            
+            for (j = 1; j <= f; j++)
+            {
+                pari_sp av2 = avma;
+                pari_printf("\nSearching: %d/%d\n", j, f);
+                // idealfactorback(Labs, mkmat2(gtocol(bnf_get_gen(L)), gtocol(gel(ker_T, j))), NULL, 0);
+                // This is our I+I'' as explained above
+                pari_printf("\ngtocol(gel(ker_T, j)): %Ps\ngel(F, 1): %Ps\n\n", gtocol(gel(ker_T, j)), gel(F, 1));
+                
+                I_fact = gadd(gel(F, 1), gtocol(gel(ker_T, j)));
+                
+                for (int m = 1; m < lg(cyc); m++)
+                {
+                    gel(I_fact, m) = modii(gel(I_fact, m), gel(cyc, m));
+                    
+                }
+                F_ker_T = idealfactorback(Labs, mkmat2(gtocol(bnf_get_gen(Labs)), I_fact), NULL, 0);
+                
+               
+                // Now find the corresponding t
+                // flag nf_GENMAT: Return t in factored form (compact representation), as a small product of S-units for a small set of finite places S, possibly with huge exponents. This kind of result can be cheaply mapped to K^*/(K^*)^l or to C or Q_p to bounded accuracy and this is usually enough for applications.
+
+                ideal = F_ker_T;
+                for (k = 1; k <= n; k++)
+                {
+                    ideal = my_1MS_ideal(Labs, sigma, ideal);
+                }
+                pari_printf("\n------------------------------------------------------------------------START: bnfisprincipal0 to find t in compact form\n------------------------------------------------------------------------\n");
+                if (n==1)
+                {
+                    is_princ = bnfisprincipal0(Labs, idealdiv(Labs, iJ, ideal), nf_GENMAT);
+                }
+                else {
+                    is_princ = bnfisprincipal0(Labs, idealmul(Labs, iJ, ideal), nf_GENMAT);
+                }
+                pari_printf("\n------------------------------------------------------------------------END: bnfisprincipal0 to find t in compact form\n------------------------------------------------------------------------\n");
+
+                // Sanity check
+                if (!ZV_equal0(gel(is_princ, 1)))
+                {
+                    pari_printf(ANSI_COLOR_RED "Problem in my_H90_vect\n" ANSI_COLOR_RESET);
+                    pari_close();
+                    exit(111);
+                }
+
+                // The corresponding t
+                t_fact = gel(is_princ, 2);
+                t = t_fact;
+                
+                if (glength(t)==0)
+                {
+                    pari_printf("t has length zero: %Ps\n", t);
+                    continue;
+                    //return stoi(-1);
+                }
+                
+                // ------- Compact form  ----------------
+                Nt = my_rel_norm_compact(Labs, Lrel, K, t);
+                // pari_printf("Nt: %Ps\n", Nt);
+
+                // create [a, 1] 
+                Nt_a = cgetg(3, t_MAT);
+                gel(Nt_a, 1) = mkcol(a);
+                gel(Nt_a, 2) = mkcol(gen_1);
+
+                // N(t)*a
+                diff = concatenate_rows(Nt, Nt_a);
+                // --------------------------------------
+                
+                // --------------- Non-compact form ------
+                // // In relative coordinates
+                // t_rel = rnfeltabstorel(Lrel, t);
+
+                // // N(t)
+                // Nt = rnfeltnorm(Lrel, t_rel);
+
+                // // N(t)*a
+                // diff = nfmul(K, Nt, a);
+                //------------------------------------
+
+                // Since div(a)+pJ = 0 and div(N(t))-pJ = 0, we get that div(N(t)*a) = 0 and therefore N(t)*a must be a unit.
+                // Next we find its exponents in terms of the fixed generators of the unit group 
+                exp = bnfisunit0(K, diff, NULL);
+                if (glength(exp)==0)
+                {
+                    pari_printf(ANSI_COLOR_RED "PROBLEM in my_H90_vect: no exp???\n" ANSI_COLOR_RESET);
+                    pari_close();
+                    exit(111);
+                }
+                
+                pari_printf(ANSI_COLOR_MAGENTA "exp: %Ps\n" ANSI_COLOR_RESET, exp);
+
+                // Check if N(t)*a is the norm of a unit. If it is, we may modify t by this unit without effecting the equality 
+                // (1-sigma)I = iJ and hence we are done. Returns zero if not a norm (which should never happen).
+                norm_operator = my_norm_operator(Labs, Lrel, K, p);
+
+
+                pari_printf("Checking if N(t)*a is a norm\n");
+                
+                pari_printf("exp: %Ps\n", exp);
+                is_norm = matsolvemod(norm_operator, zerocol(glength(exp)), gtocol(exp), 0);
+
+                pari_printf(ANSI_COLOR_CYAN "is_norm: %Ps\n" ANSI_COLOR_RESET, is_norm);
+
+                // Use ZV_equal0 or gequal0
+
+                // if N(t)*a = 1 or if N(t)*a is a norm
+                if (ZV_equal0(exp) || !gequal0(is_norm))
+                {
+
+                    gel(I_vect, i) = F_ker_T;
+                    pari_printf(ANSI_COLOR_GREEN "\nI found\n\n" ANSI_COLOR_RESET);
+                    done = 1;
+                    break;
+                }
+                I_vect = gerepilecopy(av2, I_vect);
+            }
+        }
+        // If some of the I's were never found, then we return -1 and another (slower) function will take over.  
+        if (!done)
+        {
+            pari_printf(ANSI_COLOR_RED "my_H90_vect_2 ended with a problem \n" ANSI_COLOR_RESET);
+            return stoi(-1);
+            // pari_close();
+            // exit(111);
+        }
+        I_vect = gerepilecopy(av1, I_vect);
+    } 
+    
+    I_vect = gerepilecopy(av0, I_vect);
+    pari_printf("\n--------------------------\nEnd: my_H90_vect_2\n--------------------------\n\n");
+    return I_vect;
+}
+
+
 
 // GEN my_H90_12 (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN a, GEN J, GEN p, int n) {
 //     pari_printf(ANSI_COLOR_CYAN "\nmy_H90_vect\n" ANSI_COLOR_RESET);
@@ -1554,7 +1801,7 @@ GEN my_find_I_full (GEN Labs, GEN Lrel, GEN K, GEN sigma, GEN i_xJ, GEN a, GEN c
         Itest = idealdiv(Labs, i_xJ, my_1MS_ideal(Labs, sigma, current_I));
         test_vec = bnfisprincipal0(Labs, Itest, nf_GEN);
 
-        if (my_QV_equal0(gel(test_vec, 1)))
+        if (ZV_equal0(gel(test_vec, 1)))
         {
             // Compute again and this time force it to find the generator (may cause an overflow)
             is_princ = bnfisprincipal0(Labs, Itest, nf_GENMAT);

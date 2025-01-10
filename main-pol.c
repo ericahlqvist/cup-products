@@ -50,8 +50,6 @@ main (int argc, char *argv[])
 
 
 
-
-
     // timer_start(&ti);
     // pari_printf("Initial adress: %ld\n", avma);
     // pari_sp limit = stack_lim(avma, 1);
@@ -244,6 +242,7 @@ main (int argc, char *argv[])
     // GEN K_ext = mkvecn(p_rk, gp_read_file(exts[0]), gp_read_file(exts[1]), gp_read_file(exts[2]), gp_read_file(exts[3]), gp_read_file(exts[4]), gp_read_file(exts[5]), gp_read_file(exts[6]));
     // for (int i = 1; i < 8; i++)
     // {
+    //     gel(K_ext, i) = shallowconcat(gel(K_ext, i), mkvec(bnrinit0(gel(gel(K_ext, i), 1), gen_1, 1)));
     //     pari_printf("cyc[%d]: %Ps\n", i, bnf_get_cyc(gel(gel(K_ext, i), 1)));
     // }
 
@@ -296,6 +295,7 @@ main (int argc, char *argv[])
     // timer_pari_printf(&ti,  " ");
     
     // pari_printf(ANSI_COLOR_MAGENTA "\n-----------------------------------------\nClosing pari\n-----------------------------------------\n\n" ANSI_COLOR_RESET);
+   
     pari_close();
 
     //--------

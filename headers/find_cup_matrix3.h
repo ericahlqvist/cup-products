@@ -46,7 +46,7 @@ GEN compute_my_relations(long i, GEN args) {
     
     // Artin symbol test
     //my_test_artin_symbol(Labs_cup, Lrel_cup, K, itos(p), sigma_cup);
-    I_vect = my_H90_vect(Labs_cup, Lrel_cup, Lbnr_cup, K, sigma_cup, Ja_vect, p, 1);
+    I_vect = my_H90_vect_2(Labs_cup, Lrel_cup, Lbnr_cup, K, sigma_cup, Ja_vect, p, 1);
     if (gequal(I_vect, gen_m1)) {
         I_vect = my_find_I_vect_full(Labs_cup, Lrel_cup, K, sigma_cup, Ja_vect, itos(p));
     }
