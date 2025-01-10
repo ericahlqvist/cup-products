@@ -392,7 +392,7 @@ GEN my_1MS_operator_2 (GEN Labs, GEN Lbnr, GEN sigma, int n) {
     GEN cyc = bnf_get_cyc(Labs), col; 
     int l = glength(cyc);
     GEN M = zeromatcopy(l,l);
-    int i, j;
+    int i;
 
     // Compute how sigma acts on the generators of Cl(L)/pCl(L)
     GEN sigma_matrix = bnrgaloismatrix(Lbnr, sigma);
@@ -404,16 +404,19 @@ GEN my_1MS_operator_2 (GEN Labs, GEN Lbnr, GEN sigma, int n) {
         
         col = gneg(gel(sigma_matrix, i));
         gel(col, i) = gadd(gen_1, gel(col, i));
-
+        col = ZV_ZV_mod(col, cyc);
         pari_printf("ideal[%d] in basis: %Ps\n", i, col);
-        for (j = 1; j < l+1; j++)
-        {
-            gel(col, j) = modii(gel(col, j), gel(cyc, j));
-        }
 
         gel(M, i) = col;
     }
-    
+
+    // We have found the matrix M that represents the operator 1-sigma
+    // Next compute the operator (1-sigma)^n
+    for (int k = 1; k < n; k++)
+    {
+        M = ZM_mul(M, M);
+        M = ZM_ZV_mod(M, cyc);
+    }
 
     M = gerepilecopy(av, M);
     
@@ -1121,7 +1124,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GE
                 else {
                     is_princ = bnfisprincipal0(Labs, idealmul(Labs, iJ, ideal), nf_GENMAT);
                 }
-                pari_printf("\n------------------------------------------------------------------------END: bnfisprincipal0 to find t in compact form\n------------------------------------------------------------------------\n");
+                pari_printf("\n------------------------------------------------------------------------\nEND: bnfisprincipal0 to find t in compact form\n------------------------------------------------------------------------\n");
 
                 // Sanity check
                 if (!ZV_equal0(gel(is_princ, 1)))
@@ -1247,7 +1250,7 @@ GEN my_H90_vect_2 (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, 
     pari_printf("\n--------------------------\nStart: my_H90_vect_2\n--------------------------\n\n");
     pari_sp av0 = avma;
     int r_rk = glength(Ja_vect), f, i,j, k, done = 0;
-    GEN I_vect = zerovec(r_rk), a, iJ, F, ker_T, ker_T_basis, F_ker_T, t, t_fact, Nt, diff, exp, is_princ, is_norm, Nt_a, ideal, norm_operator, my_1MS_operator = my_1MS_operator_2(Labs, Lbnr, sigma, n), I_fact, cyc = shallowtrans(bnf_get_cyc(Labs));
+    GEN I_vect = zerovec(r_rk), a, iJ, F, ker_T, ker_T_basis, F_ker_T, t_fact, Nt, diff, exp, is_princ, is_norm, Nt_a, ideal, norm_operator, my_1MS_operator = my_1MS_operator_2(Labs, Lbnr, sigma, n), I_fact, cyc = shallowtrans(bnf_get_cyc(Labs));
     
     
     for (i = 1; i <= r_rk; ++i)
@@ -1284,13 +1287,9 @@ GEN my_H90_vect_2 (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, 
         }
         else {
             // Generate part of the kernel (or more precisely, the corresponding exponents)
+            // This can probably be improved ...
             ker_T = my_get_sums(ker_T_basis, itos(p));
-
-            // WARNING: The next line makes it faster but might not find the answer. Switch back to the above ker_T!
-            //ker_T = shallowconcat(mkvec(zerocol(glength(gel(ker_T_basis, 1)))), ker_T_basis);
             
-            //pari_printf(ANSI_COLOR_CYAN "ker_T: %Ps\n" ANSI_COLOR_RESET, ker_T);
-            // pari_printf("ker_T[2]: %Ps\n", gel(ker_T, 2));
             f = glength(ker_T);
             pari_printf("Searching a chunk of ker (1-sigma) of size: %d\n", f);
             /*
@@ -1301,19 +1300,14 @@ GEN my_H90_vect_2 (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, 
             {
                 pari_sp av2 = avma;
                 pari_printf("\nSearching: %d/%d\n", j, f);
-                // This is our I+I'' as explained above
-                I_fact = gadd(gel(F, 1), gtocol(gel(ker_T, j)));
                 
-                // There is most likely a built in function for this next step ...
-                for (int m = 1; m < lg(cyc); m++)
-                {
-                    gel(I_fact, m) = modii(gel(I_fact, m), gel(cyc, m));
-                    
-                }
+                //------------------------------------------------------------------------------------------------
+                // This is our I+I'' as explained above
+                I_fact = ZV_ZV_mod(gadd(gel(F, 1), gtocol(gel(ker_T, j))), cyc);
                 F_ker_T = idealfactorback(Labs, mkmat2(gtocol(bnf_get_gen(Labs)), I_fact), NULL, 0);
                 
-               
-                // Now find the corresponding t
+               //------------------------------------------------------------------------------------------------
+                // Now find the t satisfying (1-sigma)I+div(t) = iJ
                 // flag nf_GENMAT: Return t in factored form (compact representation), as a small product of S-units for a small set of finite places S, possibly with huge exponents. This kind of result can be cheaply mapped to K^*/(K^*)^l or to C or Q_p to bounded accuracy and this is usually enough for applications.
 
                 ideal = F_ker_T;
@@ -1329,7 +1323,7 @@ GEN my_H90_vect_2 (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, 
                 else {
                     is_princ = bnfisprincipal0(Labs, idealmul(Labs, iJ, ideal), nf_GENMAT);
                 }
-                pari_printf("\n------------------------------------------------------------------------END: bnfisprincipal0 to find t in compact form\n------------------------------------------------------------------------\n");
+                pari_printf("\n------------------------------------------------------------------------\nEND: bnfisprincipal0 to find t in compact form\n------------------------------------------------------------------------\n");
 
                 // Sanity check
                 if (!ZV_equal0(gel(is_princ, 1)))
@@ -1339,19 +1333,12 @@ GEN my_H90_vect_2 (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, 
                     exit(111);
                 }
 
-                // The corresponding t
+                // The corresponding t in compact/factored form
                 t_fact = gel(is_princ, 2);
-                t = t_fact;
                 
-                if (glength(t)==0)
-                {
-                    pari_printf("t has length zero: %Ps\n", t);
-                    continue;
-                    //return stoi(-1);
-                }
-                
-                // ------- Compact form  ----------------
-                Nt = my_rel_norm_compact(Labs, Lrel, K, t);
+                //------------------------------------------------------------------------------------------------
+                // The norm of t in compact/factored form
+                Nt = my_rel_norm_compact(Labs, Lrel, K, t_fact);
                 // pari_printf("Nt: %Ps\n", Nt);
 
                 // create [a, 1] 
@@ -1361,19 +1348,9 @@ GEN my_H90_vect_2 (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, 
 
                 // N(t)*a
                 diff = concatenate_rows(Nt, Nt_a);
-                // --------------------------------------
-                
-                // --------------- Non-compact form ------
-                // // In relative coordinates
-                // t_rel = rnfeltabstorel(Lrel, t);
+                //------------------------------------------------------------------------------------------------
 
-                // // N(t)
-                // Nt = rnfeltnorm(Lrel, t_rel);
-
-                // // N(t)*a
-                // diff = nfmul(K, Nt, a);
-                //------------------------------------
-
+                //------------------------------------------------------------------------------------------------
                 // Since div(a)+pJ = 0 and div(N(t))-pJ = 0, we get that div(N(t)*a) = 0 and therefore N(t)*a must be a unit.
                 // Next we find its exponents in terms of the fixed generators of the unit group 
                 exp = bnfisunit0(K, diff, NULL);
@@ -1385,23 +1362,30 @@ GEN my_H90_vect_2 (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, 
                 }
                 
                 pari_printf(ANSI_COLOR_MAGENTA "exp: %Ps\n" ANSI_COLOR_RESET, exp);
+                
+                //------------------------------------------------------------------------------------------------
+                // Check if N(t)*a = 1
+                if (ZV_equal0(exp))
+                {
 
+                    gel(I_vect, i) = F_ker_T;
+                    pari_printf(ANSI_COLOR_GREEN "\nI found\n\n" ANSI_COLOR_RESET);
+                    done = 1;
+                    break;
+                }
+                //------------------------------------------------------------------------------------------------
+
+
+                //------------------------------------------------------------------------------------------------
                 // Check if N(t)*a is the norm of a unit. If it is, we may modify t by this unit without effecting the equality 
                 // (1-sigma)I = iJ and hence we are done. Returns zero if not a norm (which should never happen).
                 norm_operator = my_norm_operator(Labs, Lrel, K, p);
-
-
                 pari_printf("Checking if N(t)*a is a norm\n");
-                
-                pari_printf("exp: %Ps\n", exp);
                 is_norm = matsolvemod(norm_operator, zerocol(glength(exp)), gtocol(exp), 0);
-
                 pari_printf(ANSI_COLOR_CYAN "is_norm: %Ps\n" ANSI_COLOR_RESET, is_norm);
 
-                // Use ZV_equal0 or gequal0
-
-                // if N(t)*a = 1 or if N(t)*a is a norm
-                if (ZV_equal0(exp) || !gequal0(is_norm))
+                // if N(t)*a is a norm
+                if (!gequal0(is_norm))
                 {
 
                     gel(I_vect, i) = F_ker_T;
@@ -1410,6 +1394,7 @@ GEN my_H90_vect_2 (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, 
                     break;
                 }
                 I_vect = gerepilecopy(av2, I_vect);
+                //------------------------------------------------------------------------------------------------
             }
         }
         // If some of the I's were never found, then we return -1 and another (slower) function will take over.  
