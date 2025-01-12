@@ -46,7 +46,7 @@ main (int argc, char *argv[])
     pari_add_function(&ep); /* add Cworker function to gp */
     pari_mt_init(); /* ... THEN initialize parallelism */
     paristack_setsize(1L<<30, 1L<<33);
-    sd_threadsizemax("8589934592", 0);
+    sd_threadsizemax("2147483648", 0);
 
 
 

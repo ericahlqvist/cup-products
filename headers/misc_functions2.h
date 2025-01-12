@@ -417,7 +417,7 @@ GEN my_1MS_operator_2 (GEN Labs, GEN Lbnr, GEN sigma, int n) {
     GEN M0 = ZM_sub(id_mat, sigma_matrix);
     M0 = ZM_ZV_mod(M0, cyc);
     GEN M = gcopy(M0);
-    
+
     // We have found the matrix M that represents the operator 1-sigma
     // Next compute the operator (1-sigma)^n
     for (int k = 2; k < n+1; k++)
@@ -1137,7 +1137,7 @@ GEN my_H90_vect (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, GE
                 {
                     ideal = my_1MS_ideal(Labs, sigma, ideal);
                 }
-                pari_printf("\n------------------------------------------------------------------------START: bnfisprincipal0 to find t in compact form\n------------------------------------------------------------------------\n");
+                pari_printf("\n------------------------------------------------------------------------\nSTART: bnfisprincipal0 to find t in compact form\n------------------------------------------------------------------------\n");
                 if (n==1)
                 {
                     is_princ = bnfisprincipal0(Labs, idealdiv(Labs, iJ, ideal), nf_GENMAT);
@@ -1292,8 +1292,6 @@ GEN my_H90_vect_2 (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, 
             F = my_H90_2(Labs, idealinv(Labs, iJ), oneMS_operator, n);
         }
 
-        pari_printf("(1-sigma)-operator: %Ps\nF: %Ps\niJ: %Ps\n", oneMS_operator, F, iJ);
-        
         // Then (1-sigma)I+div(t) = iJ for some t in L^x. However, it might be the case that N(t)*a is not 1. 
         // We know from theory that there should be an I and a t s.t (1-sigma)I+div(t) = iJ and N(t)*a=1. 
         // If I' and t' are such, then I-I' is in ker (1-sigma) so in order to find the correct I' we need to go through the kernel of (1-sigma) and for each I'' in there, take I+I'' and check f the corresponding t' satisfies N(t')*a = 1.   
@@ -1347,7 +1345,7 @@ GEN my_H90_vect_2 (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, 
                 // Sanity check
                 if (!ZV_equal0(gel(is_princ, 1)))
                 {
-                    pari_printf(ANSI_COLOR_RED "Problem in my_H90_vect\n" ANSI_COLOR_RESET);
+                    pari_printf(ANSI_COLOR_RED "Problem in my_H90_vect_2\n" ANSI_COLOR_RESET);
                     pari_close();
                     exit(111);
                 }
@@ -1375,7 +1373,7 @@ GEN my_H90_vect_2 (GEN Labs, GEN Lrel, GEN Lbnr, GEN K, GEN sigma, GEN Ja_vect, 
                 exp = bnfisunit0(K, diff, NULL);
                 if (glength(exp)==0)
                 {
-                    pari_printf(ANSI_COLOR_RED "PROBLEM in my_H90_vect: no exp???\n" ANSI_COLOR_RESET);
+                    pari_printf(ANSI_COLOR_RED "PROBLEM in my_H90_vect_2: no exp???\n" ANSI_COLOR_RESET);
                     pari_close();
                     exit(111);
                 }

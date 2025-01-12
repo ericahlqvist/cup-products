@@ -1,0 +1,30 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Debug main-pol",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "${workspaceFolder}/main-pol",
+        "args": ["2", "s^2+5460"],
+        "stopAtEntry": false,
+        "cwd": "${workspaceFolder}",
+        "environment": [],
+        "externalConsole": false,
+        "MIMode": "lldb",  // Use lldb (default on macOS). Change to gdb if you prefer gdb.
+        "setupCommands": [
+          {
+            "description": "Enable pretty-printing for gdb",
+            "text": "-enable-pretty-printing",
+            "ignoreFailures": true
+          }
+        ],
+        "preLaunchTask": "Build main-pol",
+        "logging": {
+          "engineLogging": false,
+          "traceResponse": false,
+          "trace": false
+        }
+      }
+    ]
+  }

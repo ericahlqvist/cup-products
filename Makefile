@@ -88,7 +88,7 @@ CC = clang
 
 # Compiler flags. /Users/eric/Documents/Matematik/pari/GPDIR/include /Users/eric/Documents/Matematik/pari/GPDIR/lib
 CPPFLAGS   = -I. -I/usr/local/include -I/Users/eric/Documents/Matematik/pari/GPDIR/include #-I/opt/homebrew/Cellar/pari/2.17.1/include
-CFLAGS = -O3 -Wall -fno-strict-aliasing -fomit-frame-pointer -pipe -flto=thin -march=native
+CFLAGS = -O3 -Wall -fno-strict-aliasing -fomit-frame-pointer -pipe -flto=thin -march=native -g
 LDFLAGS = -Wl,-O3 
 LIBS = -lm -L/Users/eric/Documents/Matematik/pari/GPDIR/lib -lpari  #-L/opt/homebrew/Cellar/pari/2.17.1/lib -lpari 
 #STATIC = -static
